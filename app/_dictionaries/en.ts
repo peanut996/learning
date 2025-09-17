@@ -21,5 +21,6 @@ export default {
   typescript: 'TypeScript Ready',
   remoteLocal: 'Remote + Local',
   editPage: 'Edit this page on GitHub',
-  by: 'by'
+  by: 'by',
+  feedbackContent: 'Question? Give us feedback'
 }

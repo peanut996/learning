@@ -13,7 +13,6 @@ import { getPageMap } from 'nextra/page-map'
 import type { FC, ReactNode } from 'react'
 import { getDictionary, getDirection } from '../_dictionaries/get-dictionary'
 import './styles.css'
-import { link } from 'fs'
 
 export const metadata: Metadata = {
   description:
@@ -97,7 +96,7 @@ const RootLayout: FC<LayoutProps> = async ({ children, params }) => {
           }}
           editLink={dictionary.editPage}
           pageMap={pageMap}
-          nextThemes={{ defaultTheme: 'dark' }}
+          nextThemes={{ defaultTheme: 'light' }}
           lastUpdated={<LastUpdated>{dictionary.lastUpdated}</LastUpdated>}
           themeSwitch={{
             dark: dictionary.dark,
@@ -105,7 +104,10 @@ const RootLayout: FC<LayoutProps> = async ({ children, params }) => {
             system: dictionary.system
           }}
           docsRepositoryBase='https://github.com/peanut996/llm-learning/blob/master'
-          feedback={{ link: "https://github.com/peanut996/llm-learning/issues/new?title=Feedback%20for%20%E2%80%9CTheme%20Configuration%E2%80%9D&labels=feedback"}}
+          feedback={{ 
+            content: dictionary.feedbackContent,
+            link: "https://github.com/peanut996/llm-learning/issues/new?title=Feedback%20for%20%E2%80%9CTheme%20Configuration%E2%80%9D&labels=feedback"
+          }}
         >
           {children}
         </Layout>

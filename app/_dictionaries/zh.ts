@@ -23,5 +23,6 @@ export default {
   typescript: 'TypeScript 就绪',
   remoteLocal: '远程 + 本地',
   editPage: '在 GitHub 上编辑此页面',
-  by: '由'
+  by: '由',
+  feedbackContent: '有问题？给我们反馈'
 } satisfies Dictionary
