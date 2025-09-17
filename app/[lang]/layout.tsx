@@ -13,6 +13,7 @@ import { getPageMap } from 'nextra/page-map'
 import type { FC, ReactNode } from 'react'
 import { getDictionary, getDirection } from '../_dictionaries/get-dictionary'
 import './styles.css'
+import { link } from 'fs'
 
 export const metadata: Metadata = {
   description:
@@ -103,6 +104,8 @@ const RootLayout: FC<LayoutProps> = async ({ children, params }) => {
             light: dictionary.light,
             system: dictionary.system
           }}
+          docsRepositoryBase='https://github.com/peanut996/llm-learning/blob/master'
+          feedback={{ link: "https://github.com/peanut996/llm-learning/issues/new?title=Feedback%20for%20%E2%80%9CTheme%20Configuration%E2%80%9D&labels=feedback"}}
         >
           {children}
         </Layout>
