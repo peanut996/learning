@@ -1,20 +1,17 @@
 /* eslint-env node */
-import { SwrIcon, VercelIcon } from '@app/_icons'
+import { SwrIcon } from '@app/_icons'
 import type { Metadata } from 'next'
 import {
   Footer,
   LastUpdated,
   Layout,
-  Link,
   LocaleSwitch,
   Navbar
 } from 'nextra-theme-docs'
-import { Banner, Head } from 'nextra/components'
+import {  Head } from 'nextra/components'
 import { getPageMap } from 'nextra/page-map'
 import type { FC, ReactNode } from 'react'
 import { getDictionary, getDirection } from '../_dictionaries/get-dictionary'
-import { pageMap as graphqlEslintPageMap } from './graphql-eslint/[[...slug]]/page'
-import { pageMap as graphqlYogaPageMap } from './remote/graphql-yoga/[[...slug]]/page'
 import './styles.css'
 
 export const metadata: Metadata = {
@@ -81,16 +78,7 @@ const RootLayout: FC<LayoutProps> = async ({ children, params }) => {
   )
   return (
     <html lang={lang} dir={getDirection(lang)} suppressHydrationWarning>
-      <Head
-        backgroundColor={{
-          dark: 'rgb(15,23,42)',
-          light: 'rgb(254, 252, 232)'
-        }}
-        color={{
-          hue: { dark: 120, light: 0 },
-          saturation: { dark: 100, light: 100 }
-        }}
-      />
+      <Head/>
       <body>
         <Layout
           navbar={navbar}

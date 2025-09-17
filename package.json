@@ -1,7 +1,7 @@
 {
-  "name": "swr-site",
+  "name": "llm-learning",
   "type": "module",
-  "author": "Shu Ding",
+  "author": "peanut996",
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
@@ -10,8 +10,6 @@
     "debug": "NODE_OPTIONS='--inspect' next dev",
     "dev": "next --turbopack",
     "postbuild": "pagefind --site .next/server/app --output-path public/_pagefind",
-    "prebuild": "node nextra-remote-filepaths/fetch.js",
-    "predev": "pnpm prebuild",
     "start": "next start",
     "types:check": "tsc --noEmit"
   },
