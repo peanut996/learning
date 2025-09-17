@@ -3,7 +3,10 @@
     "allow": [
       "Bash(tree:*)",
       "Bash(git config:*)",
-      "Bash(git filter-branch:*)"
+      "Bash(git filter-branch:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npx create-nextra-app:*)"
     ],
     "deny": [],
     "ask": []

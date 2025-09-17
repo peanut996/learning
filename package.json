@@ -1,0 +1,30 @@
+{
+  "name": "llm-learning",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "这是一个全面的大语言模型(LLM)学习资料库，包含中英文双语版本。",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/peanut996/llm-learning.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/peanut996/llm-learning/issues"
+  },
+  "homepage": "https://github.com/peanut996/llm-learning#readme",
+  "dependencies": {
+    "next": "^15.5.3",
+    "nextra": "^4.4.0",
+    "nextra-theme-docs": "^4.4.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  }
+}
