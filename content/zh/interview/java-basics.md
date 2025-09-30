@@ -2003,6 +2003,222 @@ String s7 = sb.toString();        // 在堆中
 
 ### 13. String str = "hello" 和 String str = new String("hello") 的区别？
 
+这两种创建字符串的方式在**内存分配、对象创建数量、性能**等方面存在显著差异。
+
+#### 核心区别
+
+<svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+  <text x="400" y="30" font-size="20" font-weight="bold" text-anchor="middle" fill="#333">两种创建方式的内存分布</text>
+  <rect x="50" y="70" width="330" height="320" fill="#E8F5E9" stroke="#4CAF50" stroke-width="3" rx="8"/>
+  <text x="215" y="105" font-size="16" font-weight="bold" text-anchor="middle" fill="#2E7D32">方式 1：字面量</text>
+  <text x="215" y="135" font-size="13" text-anchor="middle" fill="#333">String s = "hello";</text>
+  <rect x="80" y="160" width="260" height="80" fill="#C8E6C9" stroke="#66BB6A" stroke-width="2" rx="5"/>
+  <text x="210" y="185" font-size="12" font-weight="bold" text-anchor="middle" fill="#1B5E20">字符串常量池</text>
+  <rect x="100" y="200" width="220" height="30" fill="#81C784" stroke="#388E3C" stroke-width="2"/>
+  <text x="210" y="220" font-size="11" text-anchor="middle" fill="white">"hello" (0x1000)</text>
+  <rect x="100" y="270" width="220" height="60" fill="#A5D6A7" stroke="#66BB6A" stroke-width="1" rx="3"/>
+  <text x="210" y="295" font-size="11" font-weight="bold" text-anchor="middle" fill="#1B5E20">变量 s</text>
+  <text x="210" y="315" font-size="10" text-anchor="middle" fill="#333">引用 → 0x1000</text>
+  <rect x="420" y="70" width="330" height="320" fill="#FFEBEE" stroke="#F44336" stroke-width="3" rx="8"/>
+  <text x="585" y="105" font-size="16" font-weight="bold" text-anchor="middle" fill="#C62828">方式 2：new</text>
+  <text x="585" y="135" font-size="13" text-anchor="middle" fill="#333">String s = new String("hello");</text>
+  <rect x="450" y="160" width="260" height="80" fill="#FFCDD2" stroke="#EF5350" stroke-width="2" rx="5"/>
+  <text x="580" y="185" font-size="12" font-weight="bold" text-anchor="middle" fill="#B71C1C">字符串常量池</text>
+  <rect x="470" y="200" width="220" height="30" fill="#E57373" stroke="#D32F2F" stroke-width="2"/>
+  <text x="580" y="220" font-size="11" text-anchor="middle" fill="white">"hello" (0x1000)</text>
+  <rect x="450" y="260" width="260" height="60" fill="#FFF3E0" stroke="#FF9800" stroke-width="2" rx="5"/>
+  <text x="580" y="285" font-size="12" font-weight="bold" text-anchor="middle" fill="#E65100">堆内存</text>
+  <rect x="470" y="295" width="220" height="15" fill="#FFB74D" stroke="#F57C00" stroke-width="1"/>
+  <text x="580" y="306" font-size="9" text-anchor="middle" fill="white">new String (0x2000)</text>
+  <rect x="470" y="330" width="220" height="50" fill="#FFCCBC" stroke="#FF5722" stroke-width="1" rx="3"/>
+  <text x="580" y="352" font-size="11" font-weight="bold" text-anchor="middle" fill="#BF360C">变量 s</text>
+  <text x="580" y="370" font-size="10" text-anchor="middle" fill="#333">引用 → 0x2000</text>
+  <rect x="50" y="410" width="330" height="80" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2" rx="5"/>
+  <text x="60" y="430" font-size="11" text-anchor="start" fill="#2E7D32">✓ 创建 1 个对象</text>
+  <text x="60" y="450" font-size="11" text-anchor="start" fill="#2E7D32">✓ 在常量池，可复用</text>
+  <text x="60" y="470" font-size="11" text-anchor="start" fill="#2E7D32">✓ 性能高，内存占用小</text>
+  <rect x="420" y="410" width="330" height="80" fill="#FFEBEE" stroke="#F44336" stroke-width="2" rx="5"/>
+  <text x="430" y="430" font-size="11" text-anchor="start" fill="#C62828">✗ 创建 2 个对象</text>
+  <text x="430" y="450" font-size="11" text-anchor="start" fill="#C62828">✗ 一个在常量池，一个在堆</text>
+  <text x="430" y="470" font-size="11" text-anchor="start" fill="#C62828">✗ 性能低，浪费内存</text>
+</svg>
+
+#### 详细对比
+
+| 对比维度 | String s = "hello" | String s = new String("hello") |
+|---------|-------------------|--------------------------------|
+| **创建对象数** | 1 个（常量池） | 2 个（常量池 + 堆） |
+| **内存位置** | 字符串常量池 | 堆内存 |
+| **引用指向** | 指向常量池对象 | 指向堆中对象 |
+| **可复用性** | 自动复用 | 不会自动复用 |
+| **== 比较** | 相同字面量 == 返回 true | 返回 false（不同对象） |
+| **性能** | 快（直接引用） | 慢（需要创建对象） |
+| **内存占用** | 小 | 大（多一个对象） |
+| **推荐程度** | ✓ 推荐 | ✗ 不推荐 |
+
+#### new String() 创建几个对象？
+
+**关键问题**：`new String("hello")` 到底创建了几个对象？
+
+<svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg">
+  <text x="400" y="30" font-size="18" font-weight="bold" text-anchor="middle" fill="#333">new String("hello") 对象创建过程</text>
+  <rect x="50" y="70" width="250" height="180" fill="#E3F2FD" stroke="#2196F3" stroke-width="2" rx="5"/>
+  <text x="175" y="100" font-size="13" font-weight="bold" text-anchor="middle" fill="#1565C0">步骤 1：编译期</text>
+  <text x="70" y="130" font-size="11" text-anchor="start" fill="#333">字面量 "hello" 进入常量池</text>
+  <rect x="80" y="145" width="180" height="30" fill="#90CAF9" stroke="#1976D2" stroke-width="2"/>
+  <text x="170" y="165" font-size="11" text-anchor="middle" fill="#0D47A1">常量池："hello"</text>
+  <text x="70" y="200" font-size="10" text-anchor="start" fill="#666">如果常量池已有 "hello"</text>
+  <text x="70" y="220" font-size="10" text-anchor="start" fill="#666">则不创建新对象（0 个）</text>
+  <path d="M 300 150 L 370 150" stroke="#4CAF50" stroke-width="2" marker-end="url(#arrow14)"/>
+  <rect x="370" y="70" width="250" height="180" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2" rx="5"/>
+  <text x="495" y="100" font-size="13" font-weight="bold" text-anchor="middle" fill="#2E7D32">步骤 2：运行期</text>
+  <text x="390" y="130" font-size="11" text-anchor="start" fill="#333">new 关键字在堆中创建对象</text>
+  <rect x="400" y="145" width="180" height="30" fill="#81C784" stroke="#388E3C" stroke-width="2"/>
+  <text x="490" y="165" font-size="11" text-anchor="middle" fill="white">堆：new String</text>
+  <text x="390" y="200" font-size="10" text-anchor="start" fill="#2E7D32">✓ 必定创建 1 个对象</text>
+  <text x="390" y="220" font-size="10" text-anchor="start" fill="#2E7D32">✓ 复制常量池字符串内容</text>
+  <rect x="650" y="70" width="130" height="180" fill="#FFF9E6" stroke="#FFC107" stroke-width="2" rx="5"/>
+  <text x="715" y="100" font-size="12" font-weight="bold" text-anchor="middle" fill="#F57C00">结论</text>
+  <text x="660" y="130" font-size="11" text-anchor="start" fill="#333">常量池已存在：</text>
+  <text x="670" y="150" font-size="11" font-weight="bold" text-anchor="start" fill="#E65100">1 个对象</text>
+  <text x="660" y="180" font-size="11" text-anchor="start" fill="#333">常量池不存在：</text>
+  <text x="670" y="200" font-size="11" font-weight="bold" text-anchor="start" fill="#E65100">2 个对象</text>
+  <defs>
+    <marker id="arrow14" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L0,8 L8,4 z" fill="#4CAF50"/></marker>
+  </defs>
+</svg>
+
+**答案**：
+- **常量池中已有**该字符串：创建 **1 个对象**（堆中）
+- **常量池中没有**该字符串：创建 **2 个对象**（常量池 + 堆）
+
+#### 实际场景对比
+
+**场景 1：多次使用相同字符串**
+```java
+// 字面量方式：复用同一对象
+String s1 = "hello";
+String s2 = "hello";
+String s3 = "hello";
+System.out.println(s1 == s2);  // true
+System.out.println(s1 == s3);  // true
+// 内存：1 个对象 + 3 个引用
+
+// new 方式：每次创建新对象
+String s4 = new String("hello");
+String s5 = new String("hello");
+String s6 = new String("hello");
+System.out.println(s4 == s5);  // false
+System.out.println(s4 == s6);  // false
+// 内存：4 个对象（1 个常量池 + 3 个堆）
+```
+
+**场景 2：性能差异**
+```java
+// 字面量：快速引用
+long start = System.nanoTime();
+for (int i = 0; i < 10000; i++) {
+    String s = "hello";
+}
+long end = System.nanoTime();
+// 耗时：约 0.1ms（几乎无开销）
+
+// new：每次创建对象
+start = System.nanoTime();
+for (int i = 0; i < 10000; i++) {
+    String s = new String("hello");
+}
+end = System.nanoTime();
+// 耗时：约 5ms（有对象创建开销）
+```
+
+#### 常见误区
+
+**误区 1：认为 new 总是创建 2 个对象**
+```java
+// 如果常量池已有 "hello"（如前面用过字面量）
+String s1 = "hello";          // 常量池已有
+String s2 = new String("hello");  // 只创建 1 个对象（堆中）
+```
+
+**误区 2：认为 new 方式更安全**
+```java
+// ❌ 错误理解：担心字面量被修改
+String s = new String("hello");  // 毫无必要
+
+// ✓ String 不可变，字面量完全安全
+String s = "hello";  // 推荐
+```
+
+**误区 3：使用 new 避免常量池**
+```java
+// ❌ 即使用 new，字面量仍会进常量池
+String s = new String("hello");  // "hello" 仍在常量池
+
+// ✓ 如果真的想避免常量池
+char[] chars = {'h', 'e', 'l', 'l', 'o'};
+String s = new String(chars);  // 不会产生常量池字符串
+```
+
+#### 何时使用 new String()？
+
+**几乎不需要使用 new String("...")**，极少数场景：
+
+1. **需要独立对象**（非常罕见）
+```java
+// 某些老旧 API 可能需要不同对象实例
+String s1 = new String("data");
+String s2 = new String("data");
+// s1 和 s2 是不同对象，intern() 前 s1 != s2
+```
+
+2. **字符数组构造**（这是合理用法）
+```java
+char[] chars = getCharArrayFromSomewhere();
+String s = new String(chars);  // 合理：从字符数组创建
+```
+
+3. **解码字节数组**（这是合理用法）
+```java
+byte[] bytes = readBytesFromFile();
+String s = new String(bytes, StandardCharsets.UTF_8);  // 合理
+```
+
+**推荐做法**：
+```java
+// ✓ 99.9% 的情况使用字面量
+String s = "hello";
+
+// ✓ 动态构建用 StringBuilder
+String s = new StringBuilder().append("hel").append("lo").toString();
+
+// ✗ 避免 new String("字面量")
+String s = new String("hello");  // 不推荐！
+```
+
+#### 关键要点
+
+1. **对象创建数量**
+   - 字面量：1 个（常量池）
+   - new：1~2 个（取决于常量池是否已存在）
+
+2. **内存位置**
+   - 字面量：直接在常量池
+   - new：堆中新对象，引用常量池内容
+
+3. **性能差异**
+   - 字面量：快，无对象创建开销
+   - new：慢，需要分配堆内存
+
+4. **复用性**
+   - 字面量：自动复用，节省内存
+   - new：每次创建新对象，浪费内存
+
+5. **最佳实践**
+   - **优先使用字面量**：`String s = "hello"`
+   - **避免 new String("字面量")**：毫无必要
+   - **new 用于构造**：`new String(char[])` 或 `new String(byte[])`
+
 ### 14. 如何判断两个字符串是否相等？
 
 ### 15. String 的常用方法有哪些？
