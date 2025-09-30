@@ -9,5 +9,7 @@ export default {
   redis: 'Redis',
   rocketmq: 'RocketMQ',
   spring: 'Spring',
-  mybatis: 'MyBatis'
+  mybatis: 'MyBatis',
+  network: '计算机网络',
+  'design-patterns': '设计模式'
 }

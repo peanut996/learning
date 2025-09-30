@@ -4,5 +4,7 @@ export default {
   'java-concurrency': 'Java Concurrency',
   'java-multithreading': 'Java Multithreading',
   jvm: 'JVM',
-  jmm: 'JMM'
+  jmm: 'JMM',
+  network: 'Computer Network',
+  'design-patterns': 'Design Patterns'
 }
