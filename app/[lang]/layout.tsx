@@ -1,5 +1,4 @@
 /* eslint-env node */
-import { SwrIcon } from '@app/_icons'
 import type { Metadata } from 'next'
 import {
   Footer,
@@ -16,21 +15,14 @@ import './styles.css'
 
 export const metadata: Metadata = {
   description:
-    'SWR is a React Hooks library for data fetching. SWR first returns the data from cache (stale), then sends the fetch request (revalidate), and finally comes with the up-to-date data again.',
+    'Personal learning hub for technical knowledge, including LLM, deep learning, and more.',
   title: {
     absolute: '',
-    template: '%s | SWR'
+    template: '%s | Learning Hub'
   },
-  metadataBase: new URL('https://swr.vercel.app'),
-  openGraph: {
-    images:
-      'https://assets.vercel.com/image/upload/v1572282926/swr/twitter-card.jpg'
-  },
-  twitter: {
-    site: '@vercel'
-  },
+  metadataBase: new URL('https://learning.peanut996.dev'),
   appleWebApp: {
-    title: 'SWR'
+    title: 'Learning Hub'
   },
   other: {
     'msapplication-TileColor': '#fff'
@@ -57,14 +49,9 @@ const RootLayout: FC<LayoutProps> = async ({ children, params }) => {
   const navbar = (
     <Navbar
       logo={
-        <>
-          <SwrIcon height="12" />
-          <span
-            className="ms-2 select-none font-extrabold max-md:hidden"
-          >
-            Learning Hub
-          </span>
-        </>
+        <span className="select-none font-extrabold">
+          Learning Hub
+        </span>
       }
       projectLink="https://github.com/peanut996/learning"
 
