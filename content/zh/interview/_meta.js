@@ -4,5 +4,10 @@ export default {
   'java-concurrency': 'Java 并发',
   'java-multithreading': 'Java 多线程',
   jvm: 'JVM',
-  jmm: 'JMM'
+  jmm: 'JMM',
+  mysql: 'MySQL',
+  redis: 'Redis',
+  rocketmq: 'RocketMQ',
+  spring: 'Spring',
+  mybatis: 'MyBatis'
 }
