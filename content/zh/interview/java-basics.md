@@ -1459,26 +1459,26 @@ a.equals(b)      // true（正确方式）
 
 #### 性能差异示意
 
-<svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg">
   <text x="400" y="30" font-size="18" font-weight="bold" text-anchor="middle" fill="#333">字符串拼接性能对比（10000次循环）</text>
-  <rect x="50" y="70" width="200" height="180" fill="#FFEBEE" stroke="#F44336" stroke-width="2" rx="5"/>
+  <rect x="50" y="70" width="200" height="220" fill="#FFEBEE" stroke="#F44336" stroke-width="2" rx="5"/>
   <text x="150" y="95" font-size="13" font-weight="bold" text-anchor="middle" fill="#C62828">String</text>
-  <rect x="70" y="110" width="160" height="120" fill="#EF5350" stroke="#C62828" stroke-width="2"/>
-  <text x="150" y="175" font-size="16" font-weight="bold" text-anchor="middle" fill="white">~1000ms</text>
-  <text x="150" y="210" font-size="11" text-anchor="middle" fill="#333">创建 10000 个对象</text>
-  <text x="150" y="230" font-size="11" text-anchor="middle" fill="#666">❌ 性能最差</text>
-  <rect x="300" y="70" width="200" height="180" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2" rx="5"/>
+  <rect x="70" y="110" width="160" height="170" fill="#EF5350" stroke="#C62828" stroke-width="2"/>
+  <text x="150" y="195" font-size="16" font-weight="bold" text-anchor="middle" fill="white">~1000ms</text>
+  <text x="150" y="250" font-size="11" text-anchor="middle" fill="#333">创建 10000 个对象</text>
+  <text x="150" y="270" font-size="11" text-anchor="middle" fill="#333">❌ 性能最差</text>
+  <rect x="300" y="70" width="200" height="220" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2" rx="5"/>
   <text x="400" y="95" font-size="13" font-weight="bold" text-anchor="middle" fill="#2E7D32">StringBuilder</text>
-  <rect x="320" y="190" width="160" height="40" fill="#66BB6A" stroke="#388E3C" stroke-width="2"/>
-  <text x="400" y="215" font-size="16" font-weight="bold" text-anchor="middle" fill="white">~1ms</text>
-  <text x="400" y="250" font-size="11" text-anchor="middle" fill="#333">单个对象原地修改</text>
-  <text x="400" y="270" font-size="11" text-anchor="middle" fill="#2E7D32">✓ 性能最优</text>
-  <rect x="550" y="70" width="200" height="180" fill="#E3F2FD" stroke="#2196F3" stroke-width="2" rx="5"/>
+  <text x="400" y="225" font-size="11" text-anchor="middle" fill="#333">单个对象原地修改</text>
+  <text x="400" y="242" font-size="11" text-anchor="middle" fill="#2E7D32">✓ 性能最优</text>
+  <rect x="320" y="250" width="160" height="20" fill="#66BB6A" stroke="#388E3C" stroke-width="2"/>
+  <text x="400" y="265" font-size="16" font-weight="bold" text-anchor="middle" fill="white">~1ms</text>
+  <rect x="550" y="70" width="200" height="220" fill="#E3F2FD" stroke="#2196F3" stroke-width="2" rx="5"/>
   <text x="650" y="95" font-size="13" font-weight="bold" text-anchor="middle" fill="#1565C0">StringBuffer</text>
-  <rect x="570" y="180" width="160" height="50" fill="#42A5F5" stroke="#1976D2" stroke-width="2"/>
-  <text x="650" y="210" font-size="16" font-weight="bold" text-anchor="middle" fill="white">~2ms</text>
-  <text x="650" y="250" font-size="11" text-anchor="middle" fill="#333">同步有轻微开销</text>
-  <text x="650" y="270" font-size="11" text-anchor="middle" fill="#1976D2">△ 性能略低</text>
+  <text x="650" y="225" font-size="11" text-anchor="middle" fill="#333">同步有轻微开销</text>
+  <text x="650" y="242" font-size="11" text-anchor="middle" fill="#1976D2">△ 性能略低</text>
+  <rect x="570" y="248" width="160" height="22" fill="#42A5F5" stroke="#1976D2" stroke-width="2"/>
+  <text x="650" y="263" font-size="16" font-weight="bold" text-anchor="middle" fill="white">~2ms</text>
 </svg>
 
 #### 底层实现原理
@@ -1627,8 +1627,8 @@ String s = a + b;  // 运行期使用 StringBuilder
   <text x="165" y="292" font-size="10" text-anchor="middle" fill="#1B5E20">存在</text>
   <rect x="230" y="275" width="90" height="25" fill="#FFCDD2" stroke="#EF5350" stroke-width="1"/>
   <text x="275" y="292" font-size="10" text-anchor="middle" fill="#B71C1C">不存在</text>
-  <path d="M 165 300 L 480 340" stroke="#4CAF50" stroke-width="2" marker-end="url(#arrow9)"/>
-  <path d="M 275 300 L 480 220" stroke="#F44336" stroke-width="2" marker-end="url(#arrow10)"/>
+  <path d="M 210 287 L 450 280" stroke="#4CAF50" stroke-width="2" marker-end="url(#arrow9)"/>
+  <path d="M 320 287 L 450 140" stroke="#F44336" stroke-width="2" marker-end="url(#arrow10)"/>
   <rect x="450" y="100" width="250" height="80" fill="#FFEBEE" stroke="#F44336" stroke-width="2" rx="5"/>
   <text x="575" y="125" font-size="12" font-weight="bold" text-anchor="middle" fill="#C62828">情况 A：不存在</text>
   <text x="460" y="145" font-size="10" text-anchor="start" fill="#333">1. 将字符串对象放入常量池</text>
@@ -1817,6 +1817,189 @@ s.intern();  // ❌ 错误：未使用返回值
    - 结合 == 比较提升性能
 
 ### 12. 字符串常量池是什么？
+
+字符串常量池（String Pool/String Constant Pool）是 JVM 为了优化字符串存储而设计的一块**特殊内存区域**，用于存储字符串字面量，实现字符串的**共享和复用**。
+
+#### 字符串常量池的位置
+
+<svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+  <text x="400" y="30" font-size="20" font-weight="bold" text-anchor="middle" fill="#333">字符串常量池在 JVM 中的位置演变</text>
+  <rect x="50" y="70" width="330" height="300" fill="#FFEBEE" stroke="#F44336" stroke-width="2" rx="5"/>
+  <text x="215" y="100" font-size="15" font-weight="bold" text-anchor="middle" fill="#C62828">JDK 6 及之前</text>
+  <rect x="80" y="120" width="260" height="100" fill="#E3F2FD" stroke="#2196F3" stroke-width="2" rx="5"/>
+  <text x="210" y="145" font-size="13" font-weight="bold" text-anchor="middle" fill="#1565C0">永久代 (PermGen)</text>
+  <rect x="100" y="160" width="220" height="45" fill="#90CAF9" stroke="#1976D2" stroke-width="1"/>
+  <text x="210" y="188" font-size="12" text-anchor="middle" fill="#0D47A1">字符串常量池</text>
+  <text x="90" y="240" font-size="11" text-anchor="start" fill="#666">❌ 空间有限（默认 64MB）</text>
+  <text x="90" y="260" font-size="11" text-anchor="start" fill="#666">❌ 容易 PermGen OOM</text>
+  <text x="90" y="280" font-size="11" text-anchor="start" fill="#666">❌ Full GC 才回收</text>
+  <rect x="80" y="300" width="260" height="50" fill="#FFF3E0" stroke="#FF9800" stroke-width="2" rx="5"/>
+  <text x="210" y="330" font-size="11" text-anchor="middle" fill="#E65100">-XX:PermSize / MaxPermSize</text>
+  <rect x="420" y="70" width="330" height="300" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2" rx="5"/>
+  <text x="585" y="100" font-size="15" font-weight="bold" text-anchor="middle" fill="#2E7D32">JDK 7+</text>
+  <rect x="450" y="120" width="260" height="180" fill="#E3F2FD" stroke="#2196F3" stroke-width="2" rx="5"/>
+  <text x="580" y="145" font-size="13" font-weight="bold" text-anchor="middle" fill="#1565C0">堆内存 (Heap)</text>
+  <rect x="470" y="160" width="220" height="45" fill="#81C784" stroke="#388E3C" stroke-width="2"/>
+  <text x="580" y="188" font-size="12" text-anchor="middle" fill="white">字符串常量池</text>
+  <rect x="470" y="220" width="220" height="65" fill="#A5D6A7" stroke="#66BB6A" stroke-width="1"/>
+  <text x="580" y="245" font-size="11" text-anchor="middle" fill="#1B5E20">其他对象</text>
+  <text x="580" y="265" font-size="10" text-anchor="middle" fill="#2E7D32">new String(...)</text>
+  <text x="460" y="320" font-size="11" text-anchor="start" fill="#2E7D32">✓ 空间更大（堆内存）</text>
+  <text x="460" y="340" font-size="11" text-anchor="start" fill="#2E7D32">✓ 可被 GC 回收</text>
+  <text x="460" y="360" font-size="11" text-anchor="start" fill="#2E7D32">✓ 更灵活安全</text>
+</svg>
+
+#### 常量池的工作机制
+
+<svg viewBox="0 0 800 350" xmlns="http://www.w3.org/2000/svg">
+  <text x="400" y="30" font-size="18" font-weight="bold" text-anchor="middle" fill="#333">字符串常量池工作机制</text>
+  <rect x="50" y="70" width="700" height="250" fill="#FFF9E6" stroke="#FFC107" stroke-width="2" rx="5"/>
+  <rect x="80" y="100" width="180" height="180" fill="#E3F2FD" stroke="#2196F3" stroke-width="2" rx="5"/>
+  <text x="170" y="125" font-size="13" font-weight="bold" text-anchor="middle" fill="#1565C0">代码</text>
+  <text x="90" y="155" font-size="11" text-anchor="start" fill="#333">String s1 = "hello";</text>
+  <text x="90" y="175" font-size="11" text-anchor="start" fill="#333">String s2 = "hello";</text>
+  <text x="90" y="195" font-size="11" text-anchor="start" fill="#333">String s3 = "world";</text>
+  <text x="90" y="225" font-size="10" text-anchor="start" fill="#666">字面量自动进入常量池</text>
+  <text x="90" y="245" font-size="10" text-anchor="start" fill="#666">相同内容共享对象</text>
+  <path d="M 260 150 L 340 150" stroke="#4CAF50" stroke-width="2" marker-end="url(#arrow12)"/>
+  <rect x="340" y="100" width="180" height="180" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2" rx="5"/>
+  <text x="430" y="125" font-size="13" font-weight="bold" text-anchor="middle" fill="#2E7D32">字符串常量池</text>
+  <rect x="360" y="140" width="140" height="35" fill="#81C784" stroke="#388E3C" stroke-width="2" rx="3"/>
+  <text x="430" y="163" font-size="11" text-anchor="middle" fill="white">"hello" (0x1000)</text>
+  <rect x="360" y="190" width="140" height="35" fill="#81C784" stroke="#388E3C" stroke-width="2" rx="3"/>
+  <text x="430" y="213" font-size="11" text-anchor="middle" fill="white">"world" (0x2000)</text>
+  <text x="350" y="250" font-size="10" text-anchor="start" fill="#2E7D32">✓ 只存一份 "hello"</text>
+  <text x="350" y="265" font-size="10" text-anchor="start" fill="#2E7D32">✓ s1 和 s2 指向同一对象</text>
+  <path d="M 520 160 L 570 160" stroke="#FF9800" stroke-width="2" marker-end="url(#arrow13)"/>
+  <rect x="570" y="100" width="150" height="180" fill="#FFF3E0" stroke="#FF9800" stroke-width="2" rx="5"/>
+  <text x="645" y="125" font-size="13" font-weight="bold" text-anchor="middle" fill="#E65100">引用关系</text>
+  <text x="580" y="155" font-size="10" text-anchor="start" fill="#333">s1 → 0x1000</text>
+  <text x="580" y="175" font-size="10" text-anchor="start" fill="#333">s2 → 0x1000</text>
+  <text x="580" y="195" font-size="10" text-anchor="start" fill="#333">s3 → 0x2000</text>
+  <text x="580" y="225" font-size="10" text-anchor="start" fill="#F57C00">s1 == s2 ✓</text>
+  <text x="580" y="245" font-size="10" text-anchor="start" fill="#F57C00">s1 == s3 ✗</text>
+  <defs>
+    <marker id="arrow12" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L0,8 L8,4 z" fill="#4CAF50"/></marker>
+    <marker id="arrow13" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L0,8 L8,4 z" fill="#FF9800"/></marker>
+  </defs>
+</svg>
+
+#### 进入常量池的方式
+
+**1. 字符串字面量（编译期）**
+```java
+String s1 = "hello";  // 编译期进入常量池
+```
+
+**2. 编译期常量表达式**
+```java
+String s2 = "hel" + "lo";  // 编译期优化为 "hello"
+final String prefix = "hel";
+String s3 = prefix + "lo";  // 编译期优化为 "hello"
+```
+
+**3. 显式调用 intern()（运行期）**
+```java
+String s4 = new String("hello").intern();  // 运行期放入常量池
+```
+
+**不会进入常量池的情况：**
+```java
+String s5 = new String("hello");  // 在堆中创建新对象
+String s6 = s1 + s2;              // 运行期拼接，在堆中
+StringBuilder sb = new StringBuilder("hello");
+String s7 = sb.toString();        // 在堆中
+```
+
+#### 常量池的特点
+
+| 特性 | 说明 |
+|------|------|
+| **存储内容** | 字符串字面量和运行时 intern() 的字符串 |
+| **去重机制** | 相同内容只存一份 |
+| **查找方式** | 哈希表（快速查找） |
+| **内存节省** | 避免重复对象 |
+| **线程安全** | JVM 保证线程安全 |
+| **GC 回收** | JDK 7+ 可被垃圾回收 |
+
+#### 常量池的优势
+
+**1. 节省内存**
+```java
+// 假设程序中有 1000 个地方使用 "SUCCESS"
+// 没有常量池：1000 个对象，每个约 50 字节 = 50KB
+// 有常量池：1 个对象 50 字节 + 1000 个引用 8KB = 约 8KB
+```
+
+**2. 提高性能**
+- 字符串比较可以用 == （引用比较）
+- 避免重复创建对象的开销
+
+**3. 字符串共享**
+- 多处使用相同字符串时自动共享
+
+#### 常量池大小调整
+
+**查看和调整常量池大小：**
+```bash
+# JDK 7+：常量池在堆中，由堆大小控制
+-Xms512m -Xmx1024m
+
+# 调整字符串常量池表大小（哈希表桶数）
+-XX:StringTableSize=100003  # 默认 60013（JDK 8）
+
+# 打印字符串常量池统计信息
+-XX:+PrintStringTableStatistics
+```
+
+#### 与 new String() 的对比
+
+<svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg">
+  <text x="400" y="30" font-size="18" font-weight="bold" text-anchor="middle" fill="#333">字符串创建方式对比</text>
+  <rect x="50" y="70" width="330" height="200" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2" rx="5"/>
+  <text x="215" y="100" font-size="14" font-weight="bold" text-anchor="middle" fill="#2E7D32">字面量方式</text>
+  <text x="70" y="130" font-size="12" text-anchor="start" fill="#333">String s = "hello";</text>
+  <text x="70" y="160" font-size="11" text-anchor="start" fill="#2E7D32">✓ 在常量池中</text>
+  <text x="70" y="180" font-size="11" text-anchor="start" fill="#2E7D32">✓ 自动共享复用</text>
+  <text x="70" y="200" font-size="11" text-anchor="start" fill="#2E7D32">✓ 内存占用小</text>
+  <text x="70" y="220" font-size="11" text-anchor="start" fill="#2E7D32">✓ 性能最优</text>
+  <text x="70" y="250" font-size="11" font-weight="bold" text-anchor="start" fill="#1B5E20">推荐使用</text>
+  <rect x="420" y="70" width="330" height="200" fill="#FFEBEE" stroke="#F44336" stroke-width="2" rx="5"/>
+  <text x="585" y="100" font-size="14" font-weight="bold" text-anchor="middle" fill="#C62828">new 方式</text>
+  <text x="440" y="130" font-size="12" text-anchor="start" fill="#333">String s = new String("hello");</text>
+  <text x="440" y="160" font-size="11" text-anchor="start" fill="#C62828">✗ 在堆中创建新对象</text>
+  <text x="440" y="180" font-size="11" text-anchor="start" fill="#C62828">✗ 不会自动共享</text>
+  <text x="440" y="200" font-size="11" text-anchor="start" fill="#C62828">✗ 浪费内存</text>
+  <text x="440" y="220" font-size="11" text-anchor="start" fill="#C62828">✗ 性能较差</text>
+  <text x="440" y="250" font-size="11" font-weight="bold" text-anchor="start" fill="#B71C1C">避免使用</text>
+</svg>
+
+#### 关键要点
+
+1. **本质**
+   - JVM 维护的特殊内存区域
+   - 存储字符串字面量
+   - 实现字符串去重和共享
+
+2. **位置变迁**
+   - JDK 6：永久代（PermGen），空间有限
+   - JDK 7+：堆内存，空间更大更灵活
+
+3. **进入方式**
+   - 字面量自动进入（编译期）
+   - intern() 方法主动放入（运行期）
+   - new 创建的不会自动进入
+
+4. **优势**
+   - 节省内存（避免重复对象）
+   - 提高性能（== 比较、避免创建开销）
+   - 线程安全（JVM 管理）
+
+5. **最佳实践**
+   - 优先使用字面量创建字符串
+   - 避免不必要的 new String()
+   - 大量重复字符串考虑 intern()
+   - 注意 JDK 6 中 PermGen 溢出风险
 
 ### 13. String str = "hello" 和 String str = new String("hello") 的区别？
 
