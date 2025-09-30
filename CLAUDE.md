@@ -94,14 +94,18 @@ When answering interview questions, follow these best practices:
 
 2. **Visual Aids**: Add diagrams and visualizations whenever possible
    - Use SVG diagrams to illustrate concepts (e.g., network protocols, data structures, design patterns)
+   - **SVG should be embedded directly in markdown without code block wrapping** (write `<svg>...</svg>` directly, not inside ` ```svg ` blocks)
+   - **SVG should be compact without unnecessary comments or extra line breaks** (keep it clean and minimal)
    - Include flowcharts for processes and algorithms
    - Add architecture diagrams for system design questions
    - Use sequence diagrams for interactions between components
 
-3. **Code Examples**: Provide practical code snippets when relevant
-   - Keep examples concise and focused
+3. **Code Examples**: Only provide code examples when absolutely necessary
+   - Prioritize conceptual explanations and visualizations over code
+   - Use code examples only when they significantly aid understanding
+   - When included, keep examples concise and focused
    - Add comments to explain key points
-   - Use real-world scenarios
+   - Prefer pseudo-code or simplified examples when possible
 
 4. **Structure**: Organize answers clearly
    - Start with a concise definition
