@@ -1,5 +1,3 @@
-import type { Dictionary } from './i18n-config'
-
 export default {
   dark: '暗黑',
   light: '明亮',
@@ -13,4 +11,4 @@ export default {
   editPage: '在 GitHub 上编辑此页面',
   by: '由',
   feedbackContent: '有问题？给我们反馈'
-} satisfies Dictionary
+}
