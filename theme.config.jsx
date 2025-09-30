@@ -4,9 +4,9 @@ import { DocsThemeConfig } from 'nextra-theme-docs'
 const config = {
   logo: <span>Learning Hub</span>,
   project: {
-    link: 'https://github.com/peanut996/llm-learning',
+    link: 'https://github.com/peanut996/learning',
   },
-  docsRepositoryBase: 'https://github.com/peanut996/llm-learning',
+  docsRepositoryBase: 'https://github.com/peanut996/learning',
   footer: {
     text: 'Learning Hub Documentation',
   },

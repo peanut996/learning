@@ -12,7 +12,8 @@
       "WebFetch(domain:docs.dify.ai)",
       "WebFetch(domain:docs.n8n.io)",
       "Bash(mkdir:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\n重构文档结构：将 LLM 内容迁移至子目录\n\n- 创建 llm 子目录用于组织 LLM 相关内容\n- 移动所有 chapter 文件到 llm 目录\n- 移动 llm-checkpoint 和 n8n-dify-research 到 llm 目录\n- 简化首页内容，突出学习中心定位\n- 更新网站标题为 \"Learning Hub\"\n- 为未来扩展其他主题（如面试）预留结构\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

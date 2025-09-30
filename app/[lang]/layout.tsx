@@ -62,11 +62,11 @@ const RootLayout: FC<LayoutProps> = async ({ children, params }) => {
           <span
             className="ms-2 select-none font-extrabold max-md:hidden"
           >
-            LLM Learning Hub
+            Learning Hub
           </span>
         </>
       }
-      projectLink="https://github.com/peanut996/llm-learning"
+      projectLink="https://github.com/peanut996/learning"
 
     >
       <LocaleSwitch lite />
@@ -103,10 +103,10 @@ const RootLayout: FC<LayoutProps> = async ({ children, params }) => {
             light: dictionary.light,
             system: dictionary.system
           }}
-          docsRepositoryBase='https://github.com/peanut996/llm-learning/blob/master'
-          feedback={{ 
+          docsRepositoryBase='https://github.com/peanut996/learning/blob/master'
+          feedback={{
             content: dictionary.feedbackContent,
-            link: "https://github.com/peanut996/llm-learning/issues/new?title=Feedback%20for%20%E2%80%9CTheme%20Configuration%E2%80%9D&labels=feedback"
+            link: "https://github.com/peanut996/learning/issues/new?title=Feedback%20for%20%E2%80%9CTheme%20Configuration%E2%80%9D&labels=feedback"
           }}
         >
           {children}
