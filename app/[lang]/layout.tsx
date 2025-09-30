@@ -49,7 +49,8 @@ const RootLayout: FC<LayoutProps> = async ({ children, params }) => {
   const navbar = (
     <Navbar
       logo={
-        <span className="select-none font-extrabold">
+        <span className="select-none font-extrabold flex items-center gap-2">
+          <img src="/icon.svg" alt="Learning Hub" className="w-6 h-6" />
           Learning Hub
         </span>
       }
