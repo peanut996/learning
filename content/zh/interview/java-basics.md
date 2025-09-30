@@ -2221,7 +2221,340 @@ String s = new String("hello");  // 不推荐！
 
 ### 14. 如何判断两个字符串是否相等？
 
+判断字符串相等有多种方法，但**推荐使用 `equals()` 方法**。不同方法的适用场景和注意事项各不相同。
+
+#### 核心方法对比
+
+<svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+  <text x="400" y="30" font-size="20" font-weight="bold" text-anchor="middle" fill="#333">字符串比较方法</text>
+  <rect x="50" y="70" width="220" height="140" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2" rx="5"/>
+  <text x="160" y="95" font-size="14" font-weight="bold" text-anchor="middle" fill="#2E7D32">equals()</text>
+  <text x="60" y="120" font-size="11" text-anchor="start" fill="#333">str1.equals(str2)</text>
+  <text x="60" y="145" font-size="10" text-anchor="start" fill="#2E7D32">✓ 比较内容</text>
+  <text x="60" y="165" font-size="10" text-anchor="start" fill="#2E7D32">✓ 最常用</text>
+  <text x="60" y="185" font-size="10" text-anchor="start" fill="#C62828">✗ 需判空</text>
+  <rect x="290" y="70" width="220" height="140" fill="#E3F2FD" stroke="#2196F3" stroke-width="2" rx="5"/>
+  <text x="400" y="95" font-size="14" font-weight="bold" text-anchor="middle" fill="#1565C0">equalsIgnoreCase()</text>
+  <text x="300" y="120" font-size="11" text-anchor="start" fill="#333">str1.equalsIgnoreCase(str2)</text>
+  <text x="300" y="145" font-size="10" text-anchor="start" fill="#1565C0">✓ 忽略大小写</text>
+  <text x="300" y="165" font-size="10" text-anchor="start" fill="#1565C0">✓ 适合用户输入</text>
+  <text x="300" y="185" font-size="10" text-anchor="start" fill="#C62828">✗ 需判空</text>
+  <rect x="530" y="70" width="220" height="140" fill="#FFF3E0" stroke="#FF9800" stroke-width="2" rx="5"/>
+  <text x="640" y="95" font-size="14" font-weight="bold" text-anchor="middle" fill="#E65100">Objects.equals()</text>
+  <text x="540" y="120" font-size="11" text-anchor="start" fill="#333">Objects.equals(str1, str2)</text>
+  <text x="540" y="145" font-size="10" text-anchor="start" fill="#E65100">✓ 自动处理 null</text>
+  <text x="540" y="165" font-size="10" text-anchor="start" fill="#E65100">✓ 最安全</text>
+  <text x="540" y="185" font-size="10" text-anchor="start" fill="#2E7D32">✓ 推荐使用</text>
+  <rect x="50" y="230" width="220" height="140" fill="#FFEBEE" stroke="#F44336" stroke-width="2" rx="5"/>
+  <text x="160" y="255" font-size="14" font-weight="bold" text-anchor="middle" fill="#C62828">== 运算符</text>
+  <text x="60" y="280" font-size="11" text-anchor="start" fill="#333">str1 == str2</text>
+  <text x="60" y="305" font-size="10" text-anchor="start" fill="#C62828">✗ 比较引用</text>
+  <text x="60" y="325" font-size="10" text-anchor="start" fill="#C62828">✗ 不比较内容</text>
+  <text x="60" y="345" font-size="10" text-anchor="start" fill="#C62828">✗ 避免使用</text>
+  <rect x="290" y="230" width="220" height="140" fill="#F3E5F5" stroke="#9C27B0" stroke-width="2" rx="5"/>
+  <text x="400" y="255" font-size="14" font-weight="bold" text-anchor="middle" fill="#6A1B9A">compareTo()</text>
+  <text x="300" y="280" font-size="11" text-anchor="start" fill="#333">str1.compareTo(str2)</text>
+  <text x="300" y="305" font-size="10" text-anchor="start" fill="#6A1B9A">✓ 字典序比较</text>
+  <text x="300" y="325" font-size="10" text-anchor="start" fill="#6A1B9A">✓ 排序场景</text>
+  <text x="300" y="345" font-size="10" text-anchor="start" fill="#666">返回 int 值</text>
+  <rect x="530" y="230" width="220" height="140" fill="#E0F2F1" stroke="#009688" stroke-width="2" rx="5"/>
+  <text x="640" y="255" font-size="14" font-weight="bold" text-anchor="middle" fill="#00695C">contentEquals()</text>
+  <text x="540" y="280" font-size="11" text-anchor="start" fill="#333">str1.contentEquals(str2)</text>
+  <text x="540" y="305" font-size="10" text-anchor="start" fill="#00695C">✓ 比较 CharSequence</text>
+  <text x="540" y="325" font-size="10" text-anchor="start" fill="#00695C">✓ 灵活性高</text>
+  <text x="540" y="345" font-size="10" text-anchor="start" fill="#666">少用</text>
+</svg>
+
+#### 详细说明
+
+**1. equals() - 标准比较方法**
+
+最常用的字符串内容比较方法：
+
+```java
+String s1 = "hello";
+String s2 = "hello";
+String s3 = new String("hello");
+
+s1.equals(s2);  // true
+s1.equals(s3);  // true
+```
+
+**注意事项**：
+- 调用方可能为 null，导致 NullPointerException
+- 区分大小写
+- 推荐常量在前：`"expected".equals(actual)` 避免空指针
+
+**2. equalsIgnoreCase() - 忽略大小写**
+
+适合用户输入、配置项等不区分大小写的场景：
+
+```java
+String s1 = "Hello";
+String s2 = "hello";
+
+s1.equals(s2);              // false
+s1.equalsIgnoreCase(s2);    // true
+```
+
+**3. Objects.equals() - 最安全（推荐）**
+
+JDK 7 引入，自动处理 null 情况：
+
+```java
+String s1 = null;
+String s2 = "hello";
+
+// s1.equals(s2);           // NullPointerException!
+Objects.equals(s1, s2);     // false，安全
+
+Objects.equals(null, null); // true
+Objects.equals("a", "a");   // true
+```
+
+**源码实现**：
+```java
+public static boolean equals(Object a, Object b) {
+    return (a == b) || (a != null && a.equals(b));
+}
+```
+
+**4. == 运算符 - 比较引用（避免）**
+
+比较的是对象引用，不是内容：
+
+```java
+String s1 = new String("hello");
+String s2 = new String("hello");
+
+s1 == s2;        // false（不同对象）
+s1.equals(s2);   // true（内容相同）
+```
+
+**唯一适用场景**：检查是否为同一对象实例（很少需要）
+
+**5. compareTo() - 字典序比较**
+
+返回 int 值，用于排序：
+
+```java
+String s1 = "abc";
+String s2 = "abd";
+
+s1.compareTo(s2);  // 负数（s1 < s2）
+s2.compareTo(s1);  // 正数（s2 > s1）
+s1.compareTo("abc"); // 0（相等）
+```
+
+**6. contentEquals() - 比较 CharSequence**
+
+可以比较 String、StringBuilder、StringBuffer 等：
+
+```java
+String s = "hello";
+StringBuilder sb = new StringBuilder("hello");
+
+s.contentEquals(sb);  // true
+```
+
+#### 最佳实践
+
+<svg viewBox="0 0 800 350" xmlns="http://www.w3.org/2000/svg">
+  <text x="400" y="30" font-size="18" font-weight="bold" text-anchor="middle" fill="#333">字符串比较最佳实践</text>
+  <rect x="50" y="60" width="700" height="80" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2" rx="5"/>
+  <text x="70" y="85" font-size="13" font-weight="bold" text-anchor="start" fill="#2E7D32">✓ 推荐做法</text>
+  <text x="70" y="105" font-size="11" text-anchor="start" fill="#333">1. 优先使用 Objects.equals(str1, str2) - 最安全</text>
+  <text x="70" y="125" font-size="11" text-anchor="start" fill="#333">2. 常量在前：'expected'.equals(variable) - 避免 NPE</text>
+  <rect x="50" y="150" width="700" height="100" fill="#FFEBEE" stroke="#F44336" stroke-width="2" rx="5"/>
+  <text x="70" y="175" font-size="13" font-weight="bold" text-anchor="start" fill="#C62828">✗ 避免做法</text>
+  <text x="70" y="195" font-size="11" text-anchor="start" fill="#333">1. 不要用 == 比较字符串内容</text>
+  <text x="70" y="215" font-size="11" text-anchor="start" fill="#333">2. 不要忘记判空：if (str != null && str.equals(...))</text>
+  <text x="70" y="235" font-size="11" text-anchor="start" fill="#333">3. 注意大小写：根据业务需求选择 equals() 或 equalsIgnoreCase()</text>
+  <rect x="50" y="260" width="700" height="80" fill="#FFF9E6" stroke="#FFC107" stroke-width="2" rx="5"/>
+  <text x="70" y="285" font-size="13" font-weight="bold" text-anchor="start" fill="#F57C00">💡 特殊场景</text>
+  <text x="70" y="305" font-size="11" text-anchor="start" fill="#333">• 排序场景：使用 compareTo() 或 Comparator</text>
+  <text x="70" y="325" font-size="11" text-anchor="start" fill="#333">• 性能要求极高：先用 == 快速判断，再用 equals()</text>
+</svg>
+
+#### 关键要点
+
+1. **标准比较**
+   - 首选 `Objects.equals()`（自动处理 null）
+   - 或使用常量在前的 `"constant".equals(variable)`
+
+2. **null 安全**
+   - `Objects.equals()` 最安全
+   - 避免 `variable.equals("constant")`（可能 NPE）
+
+3. **大小写处理**
+   - 区分大小写：`equals()`
+   - 不区分大小写：`equalsIgnoreCase()`
+
+4. **避免误区**
+   - 永远不要用 `==` 比较字符串内容
+   - 记住 String 是对象，不是基本类型
+
+5. **性能优化**
+   - `equals()` 内部已优化（先比较引用，再比较内容）
+   - 大量比较考虑先用 `==` 快速过滤
+
 ### 15. String 的常用方法有哪些？
+
+String 类提供了丰富的方法用于字符串操作，可以分为**长度与检查、查找与判断、截取与拆分、转换与替换、比较与其他**五大类。
+
+#### 方法分类总览
+
+<svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+  <text x="400" y="30" font-size="20" font-weight="bold" text-anchor="middle" fill="#333">String 常用方法分类</text>
+  <circle cx="400" cy="225" r="60" fill="#FFF9E6" stroke="#FFC107" stroke-width="3"/>
+  <text x="400" y="220" font-size="13" font-weight="bold" text-anchor="middle" fill="#F57C00">String</text>
+  <text x="400" y="240" font-size="11" text-anchor="middle" fill="#F57C00">常用方法</text>
+  <rect x="50" y="80" width="180" height="120" fill="#E3F2FD" stroke="#2196F3" stroke-width="2" rx="5"/>
+  <text x="140" y="105" font-size="13" font-weight="bold" text-anchor="middle" fill="#1565C0">长度与检查</text>
+  <text x="60" y="130" font-size="10" text-anchor="start" fill="#333">• length()</text>
+  <text x="60" y="150" font-size="10" text-anchor="start" fill="#333">• isEmpty()</text>
+  <text x="60" y="170" font-size="10" text-anchor="start" fill="#333">• isBlank()</text>
+  <text x="60" y="190" font-size="10" text-anchor="start" fill="#333">• charAt()</text>
+  <path d="M 230 140 L 350 200" stroke="#2196F3" stroke-width="2" marker-end="url(#arrow15)"/>
+  <rect x="570" y="80" width="180" height="120" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2" rx="5"/>
+  <text x="660" y="105" font-size="13" font-weight="bold" text-anchor="middle" fill="#2E7D32">查找与判断</text>
+  <text x="580" y="130" font-size="10" text-anchor="start" fill="#333">• indexOf()</text>
+  <text x="580" y="150" font-size="10" text-anchor="start" fill="#333">• lastIndexOf()</text>
+  <text x="580" y="170" font-size="10" text-anchor="start" fill="#333">• contains()</text>
+  <text x="580" y="190" font-size="10" text-anchor="start" fill="#333">• startsWith() / endsWith()</text>
+  <path d="M 570 140 L 450 200" stroke="#4CAF50" stroke-width="2" marker-end="url(#arrow16)"/>
+  <rect x="50" y="250" width="180" height="120" fill="#FFF3E0" stroke="#FF9800" stroke-width="2" rx="5"/>
+  <text x="140" y="275" font-size="13" font-weight="bold" text-anchor="middle" fill="#E65100">截取与拆分</text>
+  <text x="60" y="300" font-size="10" text-anchor="start" fill="#333">• substring()</text>
+  <text x="60" y="320" font-size="10" text-anchor="start" fill="#333">• split()</text>
+  <text x="60" y="340" font-size="10" text-anchor="start" fill="#333">• trim() / strip()</text>
+  <path d="M 230 310 L 350 270" stroke="#FF9800" stroke-width="2" marker-end="url(#arrow17)"/>
+  <rect x="310" y="270" width="180" height="120" fill="#F3E5F5" stroke="#9C27B0" stroke-width="2" rx="5"/>
+  <text x="400" y="295" font-size="13" font-weight="bold" text-anchor="middle" fill="#6A1B9A">转换与替换</text>
+  <text x="320" y="320" font-size="10" text-anchor="start" fill="#333">• toUpperCase() / toLowerCase()</text>
+  <text x="320" y="340" font-size="10" text-anchor="start" fill="#333">• replace() / replaceAll()</text>
+  <text x="320" y="360" font-size="10" text-anchor="start" fill="#333">• concat() / join()</text>
+  <rect x="570" y="250" width="180" height="120" fill="#FFEBEE" stroke="#F44336" stroke-width="2" rx="5"/>
+  <text x="660" y="275" font-size="13" font-weight="bold" text-anchor="middle" fill="#C62828">比较与其他</text>
+  <text x="580" y="300" font-size="10" text-anchor="start" fill="#333">• equals() / equalsIgnoreCase()</text>
+  <text x="580" y="320" font-size="10" text-anchor="start" fill="#333">• compareTo()</text>
+  <text x="580" y="340" font-size="10" text-anchor="start" fill="#333">• matches() / format()</text>
+  <path d="M 570 310 L 450 250" stroke="#F44336" stroke-width="2" marker-end="url(#arrow18)"/>
+  <defs>
+    <marker id="arrow15" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L0,8 L8,4 z" fill="#2196F3"/></marker>
+    <marker id="arrow16" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L0,8 L8,4 z" fill="#4CAF50"/></marker>
+    <marker id="arrow17" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L0,8 L8,4 z" fill="#FF9800"/></marker>
+    <marker id="arrow18" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L0,8 L8,4 z" fill="#F44336"/></marker>
+  </defs>
+</svg>
+
+#### 详细方法说明
+
+**1. 长度与检查**
+
+| 方法 | 说明 | 示例 |
+|------|------|------|
+| `length()` | 返回字符串长度 | `"hello".length()` → 5 |
+| `isEmpty()` | 判断是否为空串（长度为0） | `"".isEmpty()` → true |
+| `isBlank()` | 判断是否为空白（JDK 11+） | `"  ".isBlank()` → true |
+| `charAt(int)` | 获取指定位置字符 | `"hello".charAt(1)` → 'e' |
+
+**2. 查找与判断**
+
+| 方法 | 说明 | 示例 |
+|------|------|------|
+| `indexOf(String)` | 查找子串首次出现位置 | `"hello".indexOf("l")` → 2 |
+| `lastIndexOf(String)` | 查找子串最后出现位置 | `"hello".lastIndexOf("l")` → 3 |
+| `contains(String)` | 判断是否包含子串 | `"hello".contains("ell")` → true |
+| `startsWith(String)` | 判断是否以指定前缀开始 | `"hello".startsWith("he")` → true |
+| `endsWith(String)` | 判断是否以指定后缀结束 | `"hello".endsWith("lo")` → true |
+
+**3. 截取与拆分**
+
+| 方法 | 说明 | 示例 |
+|------|------|------|
+| `substring(int)` | 从指定位置截取到末尾 | `"hello".substring(2)` → "llo" |
+| `substring(int, int)` | 截取指定范围 | `"hello".substring(1, 4)` → "ell" |
+| `split(String)` | 按正则拆分为数组 | `"a,b,c".split(",")` → ["a","b","c"] |
+| `trim()` | 去除首尾空格 | `" hello ".trim()` → "hello" |
+| `strip()` | 去除首尾空白（JDK 11+） | `" hello ".strip()` → "hello" |
+
+**4. 转换与替换**
+
+| 方法 | 说明 | 示例 |
+|------|------|------|
+| `toUpperCase()` | 转大写 | `"hello".toUpperCase()` → "HELLO" |
+| `toLowerCase()` | 转小写 | `"HELLO".toLowerCase()` → "hello" |
+| `replace(char, char)` | 替换字符 | `"hello".replace('l', 'r')` → "herro" |
+| `replace(String, String)` | 替换子串 | `"hello".replace("ll", "rr")` → "herro" |
+| `replaceAll(String, String)` | 正则替换 | `"a1b2".replaceAll("\\d", "")` → "ab" |
+| `concat(String)` | 拼接字符串 | `"hello".concat(" world")` → "hello world" |
+| `join(CharSequence, CharSequence...)` | 静态方法，连接多个字符串 | `String.join("-", "a", "b")` → "a-b" |
+
+**5. 比较与其他**
+
+| 方法 | 说明 | 示例 |
+|------|------|------|
+| `equals(Object)` | 比较内容是否相等 | `"a".equals("a")` → true |
+| `equalsIgnoreCase(String)` | 忽略大小写比较 | `"A".equalsIgnoreCase("a")` → true |
+| `compareTo(String)` | 字典序比较 | `"a".compareTo("b")` → -1 |
+| `matches(String)` | 正则匹配 | `"123".matches("\\d+")` → true |
+| `format(String, Object...)` | 格式化字符串 | `String.format("%s-%d", "id", 1)` → "id-1" |
+| `valueOf(...)` | 静态方法，转换为字符串 | `String.valueOf(123)` → "123" |
+
+#### 常见使用场景
+
+<svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+  <text x="400" y="30" font-size="18" font-weight="bold" text-anchor="middle" fill="#333">String 方法使用场景</text>
+  <rect x="50" y="60" width="340" height="150" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2" rx="5"/>
+  <text x="220" y="85" font-size="13" font-weight="bold" text-anchor="middle" fill="#2E7D32">字符串验证</text>
+  <text x="60" y="110" font-size="11" text-anchor="start" fill="#333">• 判空：isEmpty() / isBlank()</text>
+  <text x="60" y="130" font-size="11" text-anchor="start" fill="#333">• 格式检查：matches(正则)</text>
+  <text x="60" y="150" font-size="11" text-anchor="start" fill="#333">• 前后缀验证：startsWith() / endsWith()</text>
+  <text x="60" y="170" font-size="11" text-anchor="start" fill="#333">• 包含关系：contains()</text>
+  <text x="60" y="190" font-size="11" text-anchor="start" fill="#333">示例：邮箱、手机号、URL 验证</text>
+  <rect x="410" y="60" width="340" height="150" fill="#E3F2FD" stroke="#2196F3" stroke-width="2" rx="5"/>
+  <text x="580" y="85" font-size="13" font-weight="bold" text-anchor="middle" fill="#1565C0">数据处理</text>
+  <text x="420" y="110" font-size="11" text-anchor="start" fill="#333">• 解析分隔数据：split()</text>
+  <text x="420" y="130" font-size="11" text-anchor="start" fill="#333">• 提取子串：substring()</text>
+  <text x="420" y="150" font-size="11" text-anchor="start" fill="#333">• 去除空白：trim() / strip()</text>
+  <text x="420" y="170" font-size="11" text-anchor="start" fill="#333">• 大小写转换：toUpperCase() / toLowerCase()</text>
+  <text x="420" y="190" font-size="11" text-anchor="start" fill="#333">示例：CSV 解析、日志处理</text>
+  <rect x="50" y="230" width="340" height="150" fill="#FFF3E0" stroke="#FF9800" stroke-width="2" rx="5"/>
+  <text x="220" y="255" font-size="13" font-weight="bold" text-anchor="middle" fill="#E65100">文本替换</text>
+  <text x="60" y="280" font-size="11" text-anchor="start" fill="#333">• 简单替换：replace()</text>
+  <text x="60" y="300" font-size="11" text-anchor="start" fill="#333">• 正则替换：replaceAll() / replaceFirst()</text>
+  <text x="60" y="320" font-size="11" text-anchor="start" fill="#333">• 字符串拼接：concat() / join()</text>
+  <text x="60" y="340" font-size="11" text-anchor="start" fill="#333">示例：敏感词过滤、模板替换</text>
+  <rect x="410" y="230" width="340" height="150" fill="#F3E5F5" stroke="#9C27B0" stroke-width="2" rx="5"/>
+  <text x="580" y="255" font-size="13" font-weight="bold" text-anchor="middle" fill="#6A1B9A">搜索定位</text>
+  <text x="420" y="280" font-size="11" text-anchor="start" fill="#333">• 查找位置：indexOf() / lastIndexOf()</text>
+  <text x="420" y="300" font-size="11" text-anchor="start" fill="#333">• 获取字符：charAt()</text>
+  <text x="420" y="320" font-size="11" text-anchor="start" fill="#333">• 比较排序：compareTo()</text>
+  <text x="420" y="340" font-size="11" text-anchor="start" fill="#333">示例：关键词搜索、排序算法</text>
+</svg>
+
+#### 关键要点
+
+1. **字符串不可变**
+   - 所有方法都返回新字符串，不修改原字符串
+   - 频繁修改使用 StringBuilder
+
+2. **索引从 0 开始**
+   - `charAt(0)` 获取第一个字符
+   - `substring(0, 3)` 截取前 3 个字符（不含索引 3）
+
+3. **null 安全**
+   - 方法调用前需判空
+   - 或使用 `Objects.equals()` / `Optional`
+
+4. **性能考虑**
+   - `split()` 使用正则，性能较低
+   - 大量拼接避免使用 `+` 或 `concat()`
+
+5. **JDK 版本差异**
+   - `isBlank()`, `strip()` 等方法需 JDK 11+
+   - `repeat()`, `lines()` 等方法需 JDK 11+
 
 ## 面向对象
 
