@@ -83,6 +83,32 @@ Pagefind generates a static search index post-build from `.next/server/app` to `
 3. Use Nextra's MDX features: LaTeX math, code highlighting, callouts
 4. For bilingual content, maintain parallel structure in both `zh/` and `en/`
 
+## Interview Questions Guidelines
+
+When answering interview questions, follow these best practices:
+
+1. **Memorable Answers**: Provide answers that are easy to remember and understand
+   - Use clear explanations with practical examples
+   - Include mnemonic devices or mental models when helpful
+   - Break down complex concepts into digestible parts
+
+2. **Visual Aids**: Add diagrams and visualizations whenever possible
+   - Use SVG diagrams to illustrate concepts (e.g., network protocols, data structures, design patterns)
+   - Include flowcharts for processes and algorithms
+   - Add architecture diagrams for system design questions
+   - Use sequence diagrams for interactions between components
+
+3. **Code Examples**: Provide practical code snippets when relevant
+   - Keep examples concise and focused
+   - Add comments to explain key points
+   - Use real-world scenarios
+
+4. **Structure**: Organize answers clearly
+   - Start with a concise definition
+   - Follow with detailed explanation
+   - Include examples and use cases
+   - End with key takeaways or common pitfalls
+
 ## Important Notes
 
 - ESLint errors are ignored during builds (`ignoreDuringBuilds: true`)
