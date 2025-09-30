@@ -8,7 +8,7 @@ This site documents my notes, research, and thoughts during my technical learnin
 
 ## Learning Content
 
-### [LLM Learning](/llm)
+### [LLM](/llm)
 Systematic learning of Large Language Models from fundamentals to advanced applications, including:
 - Core concepts and mathematical principles
 - Transformer architecture deep dive
