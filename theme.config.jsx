@@ -2,13 +2,13 @@ import React from 'react'
 import { DocsThemeConfig } from 'nextra-theme-docs'
 
 const config = {
-  logo: <span>LLM Learning</span>,
+  logo: <span>Learning Hub</span>,
   project: {
     link: 'https://github.com/peanut996/llm-learning',
   },
   docsRepositoryBase: 'https://github.com/peanut996/llm-learning',
   footer: {
-    text: 'LLM Learning Documentation',
+    text: 'Learning Hub Documentation',
   },
   i18n: [
     { locale: 'zh', text: '中文' },

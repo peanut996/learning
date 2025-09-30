@@ -6,7 +6,13 @@
       "Bash(git filter-branch:*)",
       "Bash(npm install:*)",
       "Bash(npm run dev:*)",
-      "Bash(npx create-nextra-app:*)"
+      "Bash(npx create-nextra-app:*)",
+      "WebSearch",
+      "WebFetch(domain:n8n.io)",
+      "WebFetch(domain:docs.dify.ai)",
+      "WebFetch(domain:docs.n8n.io)",
+      "Bash(mkdir:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
