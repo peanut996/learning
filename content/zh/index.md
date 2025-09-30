@@ -24,6 +24,11 @@
 - [LLM Checkpoint](/llm/llm-checkpoint)
 - [N8N & Dify 研究](/llm/n8n-dify-research)
 
+### 面试准备
+技术面试高频题目和解答：
+
+- [Java 面试题](/interview/java)
+
 ---
 
 开始探索吧！ 🚀

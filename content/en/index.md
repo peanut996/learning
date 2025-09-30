@@ -24,6 +24,11 @@ Systematic learning of Large Language Models from fundamentals to advanced appli
 - [LLM Checkpoint](/llm/llm-checkpoint)
 - [N8N & Dify Research](/llm/n8n-dify-research)
 
+### Interview Preparation
+High-frequency technical interview questions and answers:
+
+- [Java Interview Questions](/interview/java)
+
 ---
 
 Start exploring! 🚀
