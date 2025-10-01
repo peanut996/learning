@@ -4364,24 +4364,14 @@ UPDATE user_stats SET login_count = login_count + 1 WHERE user_id = ?;
 - 批量异步:提升写入
 - 定期维:表维护
 
-### 32. 如何优化分页查询?
-
-### 33. 什么是子查询?什么情况下用 JOIN 替代子查询?
-
-## 日志
-
-## 高可用与性能
-
-## 其他
-
 ### 31. 如何优化 INSERT 语句?
 
-### 核心答案
+#### 核心答案
 批量插入、禁用索引检查、使用事务、优化表结构。
 
-### 详细说明
+#### 详细说明
 
-#### 1. 批量插入数据
+1. 批量插入数据
 - **使用多值插入**
   ```sql
   -- 不推荐:每次插入一条
@@ -4402,7 +4392,7 @@ UPDATE user_stats SET login_count = login_count + 1 WHERE user_id = ?;
   LINES TERMINATED BY '\n';
   ```
 
-#### 2. 关闭自动提交,使用事务
+2. 关闭自动提交,使用事务
 ```sql
 SET autocommit = 0;
 BEGIN;
@@ -4413,11 +4403,11 @@ COMMIT;
 SET autocommit = 1;
 ```
 
-#### 3. 主键顺序插入
+3. 主键顺序插入
 - 使用自增主键避免页分裂
 - 顺序插入比随机插入快
 
-#### 4. 临时禁用索引和约束检查
+4. 临时禁用索引和约束检查
 ```sql
 -- 禁用唯一性检查
 SET unique_checks = 0;
@@ -4432,7 +4422,7 @@ SET unique_checks = 1;
 SET foreign_key_checks = 1;
 ```
 
-#### 5. 调整参数
+5. 调整参数
 - `innodb_buffer_pool_size`:增大缓冲池
 - `innodb_log_file_size`:增大日志文件
 - `bulk_insert_buffer_size`:调整批量插入缓冲区
@@ -4478,14 +4468,14 @@ SET foreign_key_checks = 1;
 </defs>
 </svg>
 
-### 关键要点
+#### 关键要点
 1. **批量插入**:减少网络开销和SQL解析
 2. **使用事务**:减少磁盘刷新次数
 3. **顺序插入**:利用聚簇索引特性
 4. **禁用检查**:大批量导入时临时禁用
 5. **调整参数**:根据业务调整MySQL参数
 
-### 记忆口诀
+#### 记忆口诀
 **"批事顺禁调"**
 - **批**:批量插入
 - **事**:使用事务
@@ -4493,276 +4483,19 @@ SET foreign_key_checks = 1;
 - **禁**:禁用检查
 - **调**:调整参数
 
-32. 如何优化分页查询？
 
-### 核心答案
-使用延迟关联、子查询优化、基于游标的分页、避免大偏移量。
+### 32. 如何优化分页查询?
 
-### 详细说明
-
-#### 1. 深度分页问题
-```sql
--- 问题:越往后翻页越慢
-SELECT * FROM users ORDER BY id LIMIT 1000000, 10;
--- MySQL需要扫描1000010行,丢弃前1000000行
-```
-
-#### 2. 优化方案
-
-**方案一:延迟关联(覆盖索引)**
-```sql
--- 原始慢查询
-SELECT * FROM users ORDER BY id LIMIT 1000000, 10;
-
--- 优化:先查ID,再关联
-SELECT u.* FROM users u
-INNER JOIN (
-  SELECT id FROM users ORDER BY id LIMIT 1000000, 10
-) AS t ON u.id = t.id;
--- 子查询只需要扫描索引,不需要回表
-```
-
-**方案二:基于游标(记录上次位置)**
-```sql
--- 第一页
-SELECT * FROM users WHERE id > 0 ORDER BY id LIMIT 10;
--- 返回最后一条id=10
-
--- 第二页(基于上一页最后一条记录)
-SELECT * FROM users WHERE id > 10 ORDER BY id LIMIT 10;
--- 无需OFFSET,性能稳定
-```
-
-**方案三:使用BETWEEN**
-```sql
--- 如果能计算出ID范围
-SELECT * FROM users WHERE id BETWEEN 1000000 AND 1000010 ORDER BY id;
-```
-
-#### 3. 业务层优化
-- **限制最大页码**:如只允许查看前100页
-- **使用ES等搜索引擎**:深度分页场景
-- **缓存热点数据**:前几页数据
-
-<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
-<rect x="50" y="20" width="700" height="60" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
-<text x="400" y="55" text-anchor="middle" font-size="18" font-weight="bold" fill="#1976d2">分页查询性能对比</text>
-<rect x="80" y="100" width="320" height="220" fill="#ffebee" stroke="#c62828" stroke-width="2" rx="5"/>
-<text x="240" y="130" text-anchor="middle" font-size="16" font-weight="bold" fill="#c62828">❌ 传统LIMIT分页</text>
-<text x="110" y="160" font-size="13" fill="#333" font-weight="bold">查询方式:</text>
-<text x="110" y="185" font-size="12" fill="#555">SELECT * FROM users</text>
-<text x="110" y="205" font-size="12" fill="#555">ORDER BY id</text>
-<text x="110" y="225" font-size="12" fill="#555">LIMIT 1000000, 10;</text>
-<text x="110" y="255" font-size="13" fill="#333" font-weight="bold">性能表现:</text>
-<text x="120" y="280" font-size="11" fill="#d32f2f">• 扫描:1000010 行</text>
-<text x="120" y="300" font-size="11" fill="#d32f2f">• 耗时:随偏移量线性增长</text>
-<rect x="420" y="100" width="340" height="220" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2" rx="5"/>
-<text x="590" y="130" text-anchor="middle" font-size="16" font-weight="bold" fill="#2e7d32">✓ 延迟关联优化</text>
-<text x="450" y="160" font-size="13" fill="#333" font-weight="bold">查询方式:</text>
-<text x="450" y="185" font-size="12" fill="#555">SELECT u.* FROM users u JOIN (</text>
-<text x="460" y="205" font-size="12" fill="#555">SELECT id FROM users</text>
-<text x="460" y="225" font-size="12" fill="#555">ORDER BY id LIMIT 1000000,10</text>
-<text x="450" y="245" font-size="12" fill="#555">) t ON u.id = t.id;</text>
-<text x="450" y="275" font-size="13" fill="#333" font-weight="bold">性能表现:</text>
-<text x="460" y="300" font-size="11" fill="#2e7d32">• 扫描:1000010 索引(无回表)</text>
-<text x="460" y="320" font-size="11" fill="#2e7d32">• 耗时:减少60%-80%</text>
-<rect x="80" y="340" width="320" height="220" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="5"/>
-<text x="240" y="370" text-anchor="middle" font-size="16" font-weight="bold" fill="#f57c00">⚡ 游标分页(最佳)</text>
-<text x="110" y="400" font-size="13" fill="#333" font-weight="bold">查询方式:</text>
-<text x="110" y="425" font-size="12" fill="#555">SELECT * FROM users</text>
-<text x="110" y="445" font-size="12" fill="#555">WHERE id > last_id</text>
-<text x="110" y="465" font-size="12" fill="#555">ORDER BY id LIMIT 10;</text>
-<text x="110" y="495" font-size="13" fill="#333" font-weight="bold">性能表现:</text>
-<text x="120" y="520" font-size="11" fill="#e65100">• 扫描:仅10行</text>
-<text x="120" y="540" font-size="11" fill="#e65100">• 耗时:恒定(不随页数增长)</text>
-<rect x="420" y="340" width="340" height="220" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="2" rx="5"/>
-<text x="590" y="370" text-anchor="middle" font-size="16" font-weight="bold" fill="#7b1fa2">性能数据对比</text>
-<line x1="450" y1="390" x2="730" y2="390" stroke="#7b1fa2" stroke-width="1"/>
-<text x="460" y="415" font-size="12" fill="#333" font-weight="bold">第1页(LIMIT 0,10):</text>
-<text x="470" y="435" font-size="11" fill="#555">传统:0.01s | 优化:0.01s</text>
-<text x="460" y="460" font-size="12" fill="#333" font-weight="bold">第100页(LIMIT 1000,10):</text>
-<text x="470" y="480" font-size="11" fill="#555">传统:0.05s | 优化:0.02s</text>
-<text x="460" y="505" font-size="12" fill="#333" font-weight="bold">第10万页(LIMIT 1000000,10):</text>
-<text x="470" y="525" font-size="11" fill="#d32f2f">传统:5.2s | </text>
-<text x="570" y="525" font-size="11" fill="#2e7d32">优化:1.5s | </text>
-<text x="470" y="545" font-size="11" fill="#e65100">游标:0.01s</text>
-</svg>
-
-### 关键要点
-1. **延迟关联**:利用覆盖索引减少回表
-2. **游标分页**:WHERE id > last_id,性能最优
-3. **限制深度**:业务上限制最大页码
-4. **使用索引**:ORDER BY字段必须有索引
-5. **ES替代**:深度分页用搜索引擎
-
-### 记忆口诀
-**"延游限索引"**
-- **延**:延迟关联
-- **游**:游标分页
-- **限**:限制深度
-- **索**:索引优化
-- **引**:引入ES
-
-33. 什么是子查询？什么情况下用 JOIN 替代子查询？
-
-### 核心答案
-子查询是嵌套在其他SQL语句中的SELECT查询。当子查询返回大量数据或被多次执行时,应该用JOIN替代以提升性能。
-
-### 详细说明
-
-#### 1. 什么是子查询
-子查询是嵌套在主查询中的查询语句,可以出现在SELECT、FROM、WHERE等子句中。
-
-**分类:**
-- **标量子查询**:返回单个值
-- **列子查询**:返回一列值
-- **行子查询**:返回一行值
-- **表子查询**:返回临时表
-
-```sql
--- WHERE子查询
-SELECT * FROM users WHERE dept_id IN (
-  SELECT id FROM departments WHERE name = 'IT'
-);
-
--- FROM子查询
-SELECT * FROM (
-  SELECT name, age FROM users WHERE age > 18
-) AS adults;
-
--- SELECT子查询
-SELECT name, (SELECT COUNT(*) FROM orders WHERE user_id = u.id) AS order_count
-FROM users u;
-```
-
-#### 2. JOIN vs 子查询
-
-**性能对比:**
-
-```sql
--- 子查询(可能性能差)
-SELECT * FROM orders WHERE user_id IN (
-  SELECT id FROM users WHERE city = 'Beijing'
-);
-
--- JOIN替代(通常更快)
-SELECT o.* FROM orders o
-INNER JOIN users u ON o.user_id = u.id
-WHERE u.city = 'Beijing';
-```
-
-#### 3. 何时用JOIN替代子查询
-
-**应该用JOIN的场景:**
-
-1. **IN子查询返回大量数据**
-   ```sql
-   -- ❌ 子查询返回百万级数据
-   SELECT * FROM orders WHERE user_id IN (
-     SELECT id FROM users WHERE status = 'active'
-   );
-
-   -- ✓ 用JOIN替代
-   SELECT o.* FROM orders o
-   INNER JOIN users u ON o.user_id = u.id
-   WHERE u.status = 'active';
-   ```
-
-2. **相关子查询(会被执行多次)**
-   ```sql
-   -- ❌ 每行都执行一次子查询
-   SELECT name, (
-     SELECT COUNT(*) FROM orders WHERE user_id = u.id
-   ) AS order_count FROM users u;
-
-   -- ✓ 用LEFT JOIN + GROUP BY
-   SELECT u.name, COUNT(o.id) AS order_count
-   FROM users u
-   LEFT JOIN orders o ON u.id = o.user_id
-   GROUP BY u.id;
-   ```
-
-3. **需要关联多个表**
-
-**可以保留子查询的场景:**
-
-1. **EXISTS/NOT EXISTS**(通常比JOIN快)
-   ```sql
-   -- ✓ EXISTS性能好
-   SELECT * FROM users u WHERE EXISTS (
-     SELECT 1 FROM orders o WHERE o.user_id = u.id
-   );
-   ```
-
-2. **聚合函数结果作为过滤条件**
-   ```sql
-   -- ✓ 子查询更清晰
-   SELECT * FROM users WHERE age > (
-     SELECT AVG(age) FROM users
-   );
-   ```
-
-<svg viewBox="0 0 800 550" xmlns="http://www.w3.org/2000/svg">
-<rect x="50" y="20" width="700" height="60" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
-<text x="400" y="55" text-anchor="middle" font-size="18" font-weight="bold" fill="#1976d2">子查询 vs JOIN 性能对比</text>
-<rect x="80" y="100" width="320" height="200" fill="#ffebee" stroke="#c62828" stroke-width="2" rx="5"/>
-<text x="240" y="130" text-anchor="middle" font-size="16" font-weight="bold" fill="#c62828">❌ IN子查询(慢)</text>
-<text x="110" y="160" font-size="12" fill="#333" font-weight="bold">执行过程:</text>
-<text x="120" y="185" font-size="11" fill="#555">1. 执行子查询,返回100万ID</text>
-<text x="120" y="205" font-size="11" fill="#555">2. 主查询逐行比对IN列表</text>
-<text x="120" y="225" font-size="11" fill="#555">3. 临时表存储中间结果</text>
-<text x="110" y="255" font-size="12" fill="#333" font-weight="bold">性能问题:</text>
-<text x="120" y="280" font-size="11" fill="#d32f2f">• 内存占用大</text>
-<text x="240" y="280" font-size="11" fill="#d32f2f">• 比对效率低</text>
-<rect x="420" y="100" width="340" height="200" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2" rx="5"/>
-<text x="590" y="130" text-anchor="middle" font-size="16" font-weight="bold" fill="#2e7d32">✓ INNER JOIN(快)</text>
-<text x="450" y="160" font-size="12" fill="#333" font-weight="bold">执行过程:</text>
-<text x="460" y="185" font-size="11" fill="#555">1. 优化器选择驱动表</text>
-<text x="460" y="205" font-size="11" fill="#555">2. 使用索引快速关联</text>
-<text x="460" y="225" font-size="11" fill="#555">3. 流式处理,无需临时表</text>
-<text x="450" y="255" font-size="12" fill="#333" font-weight="bold">性能优势:</text>
-<text x="460" y="280" font-size="11" fill="#2e7d32">• 利用索引 • 流式处理 • 优化器智能</text>
-<rect x="80" y="320" width="320" height="200" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="5"/>
-<text x="240" y="350" text-anchor="middle" font-size="16" font-weight="bold" fill="#f57c00">⚡ EXISTS子查询(推荐)</text>
-<text x="110" y="380" font-size="12" fill="#333" font-weight="bold">特点:</text>
-<text x="120" y="405" font-size="11" fill="#555">• 找到第一个匹配即停止</text>
-<text x="120" y="425" font-size="11" fill="#555">• 不返回数据,只返回TRUE/FALSE</text>
-<text x="120" y="445" font-size="11" fill="#555">• 适合判断存在性</text>
-<text x="110" y="475" font-size="12" fill="#333" font-weight="bold">使用场景:</text>
-<text x="120" y="500" font-size="11" fill="#e65100">检查关联数据是否存在</text>
-<rect x="420" y="320" width="340" height="200" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="2" rx="5"/>
-<text x="590" y="350" text-anchor="middle" font-size="16" font-weight="bold" fill="#7b1fa2">选择建议</text>
-<text x="450" y="380" font-size="12" fill="#333" font-weight="bold">用JOIN的场景:</text>
-<text x="460" y="400" font-size="11" fill="#555">• IN子查询返回大量数据</text>
-<text x="460" y="420" font-size="11" fill="#555">• 相关子查询(每行执行一次)</text>
-<text x="460" y="440" font-size="11" fill="#555">• 需要关联查询结果集</text>
-<text x="450" y="470" font-size="12" fill="#333" font-weight="bold">用子查询的场景:</text>
-<text x="460" y="490" font-size="11" fill="#555">• EXISTS/NOT EXISTS判断</text>
-<text x="460" y="510" font-size="11" fill="#555">• 聚合函数作为过滤条件</text>
-</svg>
-
-### 关键要点
-1. **IN子查询**:大量数据时用JOIN替代
-2. **相关子查询**:每行都执行,用JOIN优化
-3. **EXISTS**:判断存在性时优于JOIN
-4. **聚合过滤**:子查询更清晰
-5. **优化器**:现代MySQL优化器会自动优化部分子查询
-
-### 记忆口诀
-**"大量相关用JOIN,存在聚合用子查"**
-- **大量**:IN返回大量数据用JOIN
-- **相关**:相关子查询用JOIN
-- **存在**:EXISTS判断保留
-- **聚合**:聚合过滤保留
+### 33. 什么是子查询?什么情况下用 JOIN 替代子查询?
 
 ## 日志
 
 ### 34. MySQL 有哪些日志文件?
 
-### 核心答案
+#### 核心答案
 MySQL主要有四类日志:错误日志、二进制日志(binlog)、查询日志、慢查询日志,以及InnoDB特有的redo log和undo log。
 
-### 详细说明
+#### 详细说明
 
 #### 1. 错误日志(Error Log)
 - **作用**:记录MySQL启动、运行、停止过程中的错误信息
@@ -4850,14 +4583,14 @@ MySQL主要有四类日志:错误日志、二进制日志(binlog)、查询日志
 <text x="400" y="573" text-anchor="middle" font-size="12" fill="#333">💡 记忆:Server层负责通用功能,InnoDB层负责事务和崩溃恢复</text>
 </svg>
 
-### 关键要点
+#### 关键要点
 1. **Server层**:错误、binlog、查询、慢查询
 2. **InnoDB层**:redo log(持久性)、undo log(原子性+MVCC)
 3. **binlog vs redo log**:一个在Server层,一个在引擎层
 4. **慢查询日志**:性能优化的关键工具
 5. **Redo Log**:循环写,固定大小;Undo Log:随事务增长
 
-### 记忆口诀
+#### 记忆口诀
 **"错二查慢,重回持原"**
 - **错**:错误日志
 - **二**:二进制日志(binlog)
@@ -4870,10 +4603,10 @@ MySQL主要有四类日志:错误日志、二进制日志(binlog)、查询日志
 
 ### 35. 什么是 binlog?有什么作用?
 
-### 核心答案
+#### 核心答案
 binlog(Binary Log)是MySQL Server层的二进制日志,记录所有修改数据的SQL语句,主要用于主从复制和数据恢复。
 
-### 详细说明
+#### 详细说明
 
 #### 1. binlog基本概念
 - **层级**:MySQL Server层(所有存储引擎都有)
@@ -4999,14 +4732,14 @@ sync_binlog = 1  -- 每次提交都刷盘(最安全)
 </defs>
 </svg>
 
-### 关键要点
+#### 关键要点
 1. **位置**:Server层,所有引擎共享
 2. **格式**:STATEMENT、ROW(推荐)、MIXED
 3. **用途**:主从复制、数据恢复、审计
 4. **安全性**:`sync_binlog=1`每次提交都刷盘
 5. **与redo log配合**:两阶段提交保证一致性
 
-### 记忆口诀
+#### 记忆口诀
 **"服务复恢审,行格最安全"**
 - **服务**:Server层
 - **复**:复制
@@ -5017,11 +4750,11 @@ sync_binlog = 1  -- 每次提交都刷盘(最安全)
 
 ### 36. 什么是 redo log 和 undo log?
 
-### 核心答案
+#### 核心答案
 - **Redo Log**:InnoDB重做日志,记录物理数据页的修改,用于崩溃恢复,保证持久性(D)
 - **Undo Log**:InnoDB回滚日志,记录逻辑相反操作,用于事务回滚和MVCC,保证原子性(A)
 
-### 详细说明
+#### 详细说明
 
 #### 1. Redo Log(重做日志)
 
@@ -5136,14 +4869,14 @@ UPDATE users SET name = 'Bob' WHERE id = 1;
 <text x="580" y="625" font-size="9" fill="#666" font-style="italic">(逻辑层面的相反操作)</text>
 </svg>
 
-### 关键要点
+#### 关键要点
 1. **Redo Log**:崩溃恢复,物理日志,循环写,保证持久性
 2. **Undo Log**:事务回滚,逻辑日志,MVCC,保证原子性
 3. **WAL机制**:先写redo log,后写数据页
 4. **协同工作**:Redo保证不丢,Undo保证可回滚
 5. **配置关键**:`innodb_flush_log_at_trx_commit=1`保证安全
 
-### 记忆口诀
+#### 记忆口诀
 **"重做持久物循环,回滚原子逻版本"**
 - **重做**:Redo Log
 - **持久**:持久性
@@ -5156,10 +4889,10 @@ UPDATE users SET name = 'Bob' WHERE id = 1;
 
 ### 37. binlog 和 redo log 的区别是什么?
 
-### 核心答案
+#### 核心答案
 binlog是MySQL Server层的逻辑日志,用于复制和恢复;redo log是InnoDB引擎层的物理日志,用于崩溃恢复。两者通过两阶段提交保证一致性。
 
-### 详细说明
+#### 详细说明
 
 #### 主要区别对比
 
@@ -5250,14 +4983,14 @@ innodb_flush_log_at_trx_commit = 2  -- 写OS cache,每秒刷盘(折中)
 <text x="480" y="590" font-size="10" fill="#666">log_at_trx_commit=1</text>
 </svg>
 
-### 关键要点
+#### 关键要点
 1. **层级不同**:binlog在Server层,redo log在InnoDB层
 2. **用途不同**:binlog用于复制恢复,redo log用于崩溃恢复
 3. **格式不同**:binlog是逻辑日志,redo log是物理日志
 4. **写入不同**:binlog追加写,redo log循环写
 5. **配合使用**:两阶段提交保证一致性
 
-### 记忆口诀
+#### 记忆口诀
 **"服逻追复,引物循崩"**
 - **服**:Server层(binlog)
 - **逻**:逻辑日志(binlog)
@@ -5270,10 +5003,10 @@ innodb_flush_log_at_trx_commit = 2  -- 写OS cache,每秒刷盘(折中)
 
 ### 38. 什么是两阶段提交?
 
-### 核心答案
+#### 核心答案
 两阶段提交(Two-Phase Commit)是MySQL为保证binlog和redo log一致性而采用的提交协议,分为prepare和commit两个阶段。
 
-### 详细说明
+#### 详细说明
 
 #### 1. 为什么需要两阶段提交?
 
@@ -5339,14 +5072,14 @@ MySQL重启后的恢复策略:
 - **STATEMENT格式**:查看是否有完整的COMMIT语句
 - **ROW格式**:查看是否有XID_EVENT事件(事务ID)
 
-### 关键要点
+#### 关键要点
 1. **目的**:保证binlog和redo log的一致性
 2. **阶段**:Prepare(写redo log) → Write Binlog → Commit
 3. **恢复**:根据binlog是否完整决定提交或回滚
 4. **代价**:多一次fsync,但保证了一致性
 5. **配置**:两个参数都设为1最安全
 
-### 记忆口诀
+#### 记忆口诀
 **"准写提,日志双保险"**
 - **准**:Prepare阶段
 - **写**:Write Binlog
@@ -5357,10 +5090,10 @@ MySQL重启后的恢复策略:
 
 ### 39. 什么是主从复制？如何实现？
 
-### 核心答案
+#### 核心答案
 主从复制是MySQL通过binlog将主库数据变更同步到从库的机制,实现数据备份和读写分离。流程:主库写binlog → 从库IO线程读取 → 写入relay log → SQL线程重放。
 
-### 详细说明
+#### 详细说明
 
 #### 1. 主从复制原理
 
@@ -5455,14 +5188,14 @@ SHOW SLAVE STATUS\G
 </defs>
 </svg>
 
-### 关键要点
+#### 关键要点
 1. **binlog是核心**:主从复制依赖binlog
 2. **三线程模型**:dump、IO、SQL线程
 3. **异步复制**:主库不等从库,有延迟
 4. **server-id唯一**:每个MySQL实例需不同ID
 5. **监控指标**:Seconds_Behind_Master(延迟时间)
 
-### 记忆口诀
+#### 记忆口诀
 **"主写从读,三线日志"**
 - **主写**:主库写binlog
 - **从读**:从库读binlog
