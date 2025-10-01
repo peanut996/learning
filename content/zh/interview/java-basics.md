@@ -2560,170 +2560,2785 @@ String 类提供了丰富的方法用于字符串操作，可以分为**长度�
 
 ### 16. 面向对象的三大特性？
 
+面向对象编程（Object-Oriented Programming, OOP）的三大基本特性是**封装（Encapsulation）**、**继承（Inheritance）**和**多态（Polymorphism）**。这三者共同构成了 OOP 的基石。
+
+#### 三大特性概览
+
+<svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg">
+  <text x="400" y="30" font-size="20" font-weight="bold" text-anchor="middle" fill="#333">面向对象三大特性</text>
+  <rect x="50" y="70" width="220" height="200" fill="#E3F2FD" stroke="#2196F3" stroke-width="2" rx="8"/>
+  <text x="160" y="100" font-size="16" font-weight="bold" text-anchor="middle" fill="#1565C0">封装</text>
+  <text x="160" y="125" font-size="12" text-anchor="middle" fill="#1976D2">(Encapsulation)</text>
+  <path d="M 110 140 L 110 180 L 150 180 L 150 140 Z" fill="#BBDEFB" stroke="#1976D2"/>
+  <text x="130" y="165" font-size="11" fill="#0D47A1">数据</text>
+  <path d="M 160 140 L 210 160 L 160 180 Z" fill="#90CAF9" stroke="#1976D2"/>
+  <text x="180" y="165" font-size="11" fill="#0D47A1">方法</text>
+  <text x="160" y="210" font-size="11" text-anchor="middle" fill="#333">隐藏内部，暴露接口</text>
+  <text x="160" y="230" font-size="11" text-anchor="middle" fill="#333">保证安全，简化使用</text>
+
+  <rect x="290" y="70" width="220" height="200" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2" rx="8"/>
+  <text x="400" y="100" font-size="16" font-weight="bold" text-anchor="middle" fill="#2E7D32">继承</text>
+  <text x="400" y="125" font-size="12" text-anchor="middle" fill="#388E3C">(Inheritance)</text>
+  <rect x="350" y="140" width="100" height="30" fill="#A5D6A7" stroke="#388E3C"/>
+  <text x="400" y="160" font-size="11" text-anchor="middle" fill="#1B5E20">父类</text>
+  <path d="M 400 170 L 370 200" stroke="#4CAF50" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <path d="M 400 170 L 430 200" stroke="#4CAF50" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <rect x="330" y="200" width="80" height="30" fill="#C8E6C9" stroke="#388E3C"/>
+  <text x="370" y="220" font-size="11" text-anchor="middle" fill="#1B5E20">子类A</text>
+  <rect x="390" y="200" width="80" height="30" fill="#C8E6C9" stroke="#388E3C"/>
+  <text x="430" y="220" font-size="11" text-anchor="middle" fill="#1B5E20">子类B</text>
+  <text x="400" y="250" font-size="11" text-anchor="middle" fill="#333">代码复用，扩展功能</text>
+
+  <rect x="530" y="70" width="220" height="200" fill="#FFF3E0" stroke="#FF9800" stroke-width="2" rx="8"/>
+  <text x="640" y="100" font-size="16" font-weight="bold" text-anchor="middle" fill="#E65100">多态</text>
+  <text x="640" y="125" font-size="12" text-anchor="middle" fill="#F57C00">(Polymorphism)</text>
+  <text x="640" y="150" font-size="11" text-anchor="middle" fill="#333">父类引用 ref;</text>
+  <text x="640" y="170" font-size="11" text-anchor="middle" fill="#333">ref = new 子类A();</text>
+  <text x="640" y="190" font-size="11" text-anchor="middle" fill="#333">ref = new 子类B();</text>
+  <text x="640" y="210" font-size="11" text-anchor="middle" fill="#333">ref.method();</text>
+  <text x="640" y="240" font-size="11" text-anchor="middle" fill="#333">同一接口，多种实现</text>
+  <text x="640" y="260" font-size="11" text-anchor="middle" fill="#333">提高灵活性和可扩展性</text>
+  <defs>
+    <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L0,8 L8,4 z" fill="#4CAF50"/></marker>
+  </defs>
+</svg>
+
+---
+
+### 1. 封装 (Encapsulation)
+
+**定义**：将对象的**数据（属性）**和**行为（方法）**捆绑在一起，并对数据的访问进行限制，只通过公共的接口（方法）暴露给外部。简单来说，就是**隐藏内部细节，对外提供公共访问方式**。
+
+**生活比喻**：就像一台自动售货机。你只需要知道按哪个按钮（公共接口），就能得到想要的饮料（结果），而不需要关心机器内部复杂的制冷、存储、掉落机制（内部细节）。
+
+<svg viewBox="0 0 500 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>.text{font-family:sans-serif;}.title{font-size:18px;font-weight:bold;text-anchor:middle;}.subtitle{font-size:14px;font-weight:bold;text-anchor:middle;}.label{font-size:12px;text-anchor:middle;}.small-label{font-size:10px;text-anchor:middle;}</style>
+  </defs>
+  <rect x="1" y="1" width="498" height="298" fill="#F7F9FA" stroke="#D0D7DE" stroke-width="1" rx="15" />
+
+  <!-- Main Capsule -->
+  <rect x="20" y="50" width="400" height="200" fill="#E3F2FD" stroke="#2196F3" stroke-width="2" rx="20"/>
+  <text x="250" y="35" class="title" fill="#1565C0">封装 (Encapsulation)</text>
+
+  <!-- Inner Data Core -->
+  <rect x="150" y="80" width="200" height="140" fill="#BBDEFB" stroke="#1976D2" stroke-width="1.5" rx="10"/>
+  <text x="250" y="100" class="subtitle" fill="#0D47A1">内部数据 (Private)</text>
+  <text x="250" y="130" class="label" fill="#333">- String name</text>
+  <text x="250" y="150" class="label" fill="#333">- int age</text>
+  <text x="250" y="170" class="label" fill="#333">- double balance</text>
+  <text x="250" y="200" class="small-label" fill="#666">(外界无法直接访问)</text>
+
+  <!-- Public Methods (Gates) -->
+  <g>
+    <rect x="50" y="90" width="80" height="30" fill="#FFFFFF" stroke="#4CAF50" stroke-width="2" rx="5"/>
+    <text x="90" y="110" class="label" fill="#2E7D32">+ getName()</text>
+    <path d="M130 105 L 150 105" stroke="#4CAF50" stroke-width="2" marker-end="url(#arrow)"/>
+  </g>
+  <g>
+    <rect x="50" y="140" width="80" height="30" fill="#FFFFFF" stroke="#4CAF50" stroke-width="2" rx="5"/>
+    <text x="90" y="160" class="label" fill="#2E7D32">+ setAge()</text>
+    <path d="M130 155 L 150 155" stroke="#4CAF50" stroke-width="2" marker-end="url(#arrow)"/>
+  </g>
+  <g>
+    <rect x="50" y="190" width="80" height="30" fill="#FFFFFF" stroke="#4CAF50" stroke-width="2" rx="5"/>
+    <text x="90" y="210" class="label" fill="#2E7D32">+ deposit()</text>
+    <path d="M130 205 L 150 205" stroke="#4CAF50" stroke-width="2" marker-end="url(#arrow)"/>
+  </g>
+  <text x="90" y="75" class="subtitle" fill="#2E7D32">公共接口 (Public)</text>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#4CAF50" />
+    </marker>
+  </defs>
+</svg>
+
+**代码示例**：
+```java
+public class Person {
+    // 1. 私有化属性，隐藏内部数据
+    private String name;
+    private int age;
+
+    // 2. 提供公共的 getter/setter 方法作为访问接口
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    // 3. 在方法中可以加入控制逻辑，保证数据安全
+    public void setAge(int age) {
+        if (age > 0 && age < 150) {
+            this.age = age;
+        } else {
+            System.out.println("年龄不合法！");
+        }
+    }
+}
+```
+
+**优点**：
+- **安全性**：保护内部数据不被外部随意修改。
+- **简化使用**：调用者只需关心公共接口，无需了解复杂实现。
+- **高内聚，低耦合**：内部修改不影响外部调用者。
+
+---
+
+### 2. 继承 (Inheritance)
+
+**定义**：允许一个类（子类）**继承**另一个类（父类）的属性和方法。子类可以复用父类的代码，并可以添加自己独有的特性或重写父类的方法。
+
+**生活比喻**：就像生物界的“遗传”。“猫”和“狗”都继承自“动物”类。“动物”有“吃”、“睡”等通用行为，而“猫”有独特的“抓老鼠”行为，“狗”有独特的“看家”行为。
+
+<svg viewBox="0 0 400 250" xmlns="http://www.w3.org/2000/svg">
+  <rect x="100" y="30" width="200" height="50" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2" rx="5"/>
+  <text x="200" y="50" font-size="14" font-weight="bold" text-anchor="middle" fill="#2E7D32">父类：Animal</text>
+  <text x="200" y="70" font-size="11" text-anchor="middle" fill="#388E3C">+ eat()</text>
+  <path d="M 200 80 L 150 130" stroke="#4CAF50" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <path d="M 200 80 L 250 130" stroke="#4CAF50" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <rect x="80" y="130" width="140" height="70" fill="#C8E6C9" stroke="#66BB6A" stroke-width="2" rx="5"/>
+  <text x="150" y="150" font-size="13" font-weight="bold" text-anchor="middle" fill="#1B5E20">子类：Dog</text>
+  <text x="150" y="170" font-size="11" text-anchor="middle" fill="#333">（继承 eat()）</text>
+  <text x="150" y="190" font-size="11" text-anchor="middle" fill="#1B5E20">+ bark()</text>
+  <rect x="230" y="130" width="140" height="70" fill="#C8E6C9" stroke="#66BB6A" stroke-width="2" rx="5"/>
+  <text x="300" y="150" font-size="13" font-weight="bold" text-anchor="middle" fill="#1B5E20">子类：Cat</text>
+  <text x="300" y="170" font-size="11" text-anchor="middle" fill="#333">（继承 eat()）</text>
+  <text x="300" y="190" font-size="11" text-anchor="middle" fill="#1B5E20">+ catchMouse()</text>
+</svg>
+
+**代码示例**：
+```java
+// 父类
+class Animal {
+    public void eat() {
+        System.out.println("动物在吃东西...");
+    }
+}
+
+// 子类 Dog 继承 Animal
+class Dog extends Animal {
+    public void bark() {
+        System.out.println("狗在汪汪叫...");
+    }
+}
+
+// 子类 Cat 继承 Animal
+class Cat extends Animal {
+    public void catchMouse() {
+        System.out.println("猫在抓老鼠...");
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        Dog dog = new Dog();
+        dog.eat();  // 调用从父类继承的方法
+        dog.bark(); // 调用自己的方法
+    }
+}
+```
+
+**优点**：
+- **代码复用**：减少重复代码，提高开发效率。
+- **易于扩展**：可以在不修改父类的情况下，扩展新的功能。
+- **构建层次结构**：形成清晰的类层次关系，符合人类认知。
+
+---
+
+### 3. 多态 (Polymorphism)
+
+**定义**：指**同一行为**，作用于**不同对象**上时，会产生**不同效果**。多态的前提是**继承**和**方法重写**，以及**父类引用指向子类对象**。
+
+**生活比喻**：按下“开”按钮（同一行为），对于电视机（对象1），是打开屏幕；对于收音机（对象2），是开始播放声音。同一个“开”的行为，产生了不同的结果。
+
+<svg viewBox="0 0 400 250" xmlns="http://www.w3.org/2000/svg">
+  <text x="200" y="30" font-size="14" font-weight="bold" text-anchor="middle" fill="#333">Animal ref = ?</text>
+  <path d="M 200 40 L 120 80" stroke="#FF9800" stroke-width="2" marker-end="url(#arrowOrange)"/>
+  <path d="M 200 40 L 280 80" stroke="#FF9800" stroke-width="2" marker-end="url(#arrowOrange)"/>
+  <rect x="70" y="80" width="100" height="50" fill="#FFF3E0" stroke="#FFB74D" stroke-width="2" rx="5"/>
+  <text x="120" y="100" font-size="12" font-weight="bold" text-anchor="middle" fill="#E65100">new Dog()</text>
+  <text x="120" y="120" font-size="11" text-anchor="middle" fill="#333">汪汪叫</text>
+  <rect x="230" y="80" width="100" height="50" fill="#FFF3E0" stroke="#FFB74D" stroke-width="2" rx="5"/>
+  <text x="280" y="100" font-size="12" font-weight="bold" text-anchor="middle" fill="#E65100">new Cat()</text>
+  <text x="280" y="120" font-size="11" text-anchor="middle" fill="#333">喵喵叫</text>
+  <text x="200" y="170" font-size="14" font-weight="bold" text-anchor="middle" fill="#333">ref.makeSound();</text>
+  <text x="200" y="200" font-size="12" text-anchor="middle" fill="#F57C00">编译时：调用 Animal 的方法</text>
+  <text x="200" y="220" font-size="12" text-anchor="middle" fill="#F57C00">运行时：执行具体子类的方法</text>
+  <defs>
+    <marker id="arrowOrange" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L0,8 L8,4 z" fill="#FF9800"/></marker>
+  </defs>
+</svg>
+
+**代码示例**：
+```java
+// 父类
+class Animal {
+    public void makeSound() {
+        System.out.println("动物发出声音...");
+    }
+}
+
+// 子类 Dog 重写方法
+class Dog extends Animal {
+    @Override
+    public void makeSound() {
+        System.out.println("汪汪汪！");
+    }
+}
+
+// 子类 Cat 重写方法
+class Cat extends Animal {
+    @Override
+    public void makeSound() {
+        System.out.println("喵喵喵！");
+    }
+}
+
+public class Test {
+    public static void main(String[] args) {
+        // 父类引用指向子类对象
+        Animal myDog = new Dog();
+        Animal myCat = new Cat();
+
+        // 调用同样的方法，表现出不同行为
+        myDog.makeSound(); // 输出: 汪汪汪！
+        myCat.makeSound(); // 输出: 喵喵喵！
+    }
+}
+```
+
+**优点**：
+- **灵活性**：允许将子类对象视为父类类型，屏蔽了不同子类之间的差异。
+- **可扩展性**：增加新的子类无需修改现有代码，符合“开闭原则”。
+- **可维护性**：代码更简洁，逻辑更清晰。
+
+#### 总结对比
+
+| 特性 | 核心思想 | 目的 | 关键字 |
+|---|---|---|---|
+| **封装** | 隐藏细节 | 保护数据、简化使用 | `private` |
+| **继承** | 代码复用 | 扩展功能、构建层次 | `extends` |
+| **多态** | 同一接口，多种实现 | 提高灵活性和可扩展性 | `implements`, `@Override` |
+
 ### 17. 重载（Overload）和重写（Override）的区别？
+
+重载和重写是 Java 多态性中两个非常重要且容易混淆的概念。它们在定义、规则和作用上都有本质的区别。
+
+#### 核心区别图示
+
+<svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+  <text x="400" y="30" font-size="20" font-weight="bold" text-anchor="middle" fill="#333">重载 (Overload) vs 重写 (Override)</text>
+
+  <!-- Overload Panel -->
+  <rect x="50" y="70" width="330" height="360" fill="#E3F2FD" stroke="#2196F3" stroke-width="2" rx="8"/>
+  <text x="215" y="100" font-size="18" font-weight="bold" text-anchor="middle" fill="#1565C0">重载 (Overload)</text>
+  <text x="215" y="125" font-size="12" text-anchor="middle" fill="#1976D2">编译时多态</text>
+  <rect x="80" y="150" width="270" height="200" fill="#BBDEFB" stroke="#1976D2" stroke-width="1.5" rx="5"/>
+  <text x="215" y="170" font-size="13" font-weight="bold" text-anchor="middle" fill="#0D47A1">同一个类 (e.g., Calculator)</text>
+  <text x="90" y="200" font-size="12" text-anchor="start" fill="#333">+ add(int a, int b)</text>
+  <text x="90" y="230" font-size="12" text-anchor="start" fill="#333">+ add(int a, int b, int c)</text>
+  <text x="90" y="260" font-size="12" text-anchor="start" fill="#333">+ add(double a, double b)</text>
+  <text x="215" y="300" font-size="11" font-weight="bold" text-anchor="middle" fill="#0D47A1">方法名相同，参数列表不同</text>
+  <text x="215" y="320" font-size="11" text-anchor="middle" fill="#666">(类型、数量、顺序不同)</text>
+  <text x="215" y="380" font-size="12" font-weight="bold" text-anchor="middle" fill="#1565C0">“同名不同参，方法在同类”</text>
+
+  <!-- Override Panel -->
+  <rect x="420" y="70" width="330" height="360" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2" rx="8"/>
+  <text x="585" y="100" font-size="18" font-weight="bold" text-anchor="middle" fill="#2E7D32">重写 (Override)</text>
+  <text x="585" y="125" font-size="12" text-anchor="middle" fill="#388E3C">运行时多态</text>
+  <rect x="450" y="150" width="270" height="80" fill="#C8E6C9" stroke="#66BB6A" stroke-width="1.5" rx="5"/>
+  <text x="585" y="170" font-size="13" font-weight="bold" text-anchor="middle" fill="#1B5E20">父类 (Animal)</text>
+  <text x="460" y="200" font-size="12" text-anchor="start" fill="#333">+ makeSound()</text>
+  <path d="M 585 230 L 585 250" stroke="#4CAF50" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <rect x="450" y="250" width="270" height="80" fill="#A5D6A7" stroke="#66BB6A" stroke-width="1.5" rx="5"/>
+  <text x="585" y="270" font-size="13" font-weight="bold" text-anchor="middle" fill="#1B5E20">子类 (Dog)</text>
+  <text x="460" y="300" font-size="12" text-anchor="start" fill="#333">+ makeSound()  <tspan fill="#FF9800">@Override</tspan></text>
+  <text x="585" y="380" font-size="12" font-weight="bold" text-anchor="middle" fill="#2E7D32">“同名同参，方法在子类”</text>
+
+  <defs>
+    <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="4" refY="7" orient="auto"><path d="M0,4 L8,4 L4,8 z" fill="#4CAF50"/></marker>
+  </defs>
+</svg>
+
+#### 详细对比表
+
+| 对比维度 | 重载 (Overload) | 重写 (Override) |
+|---|---|---|
+| **发生位置** | 同一个类中 | 父子类之间 |
+| **方法签名** | **方法名必须相同，参数列表必须不同**（类型、数量、顺序） | **方法名和参数列表必须完全相同** |
+| **返回类型** | 可以不同，但仅返回类型不同不足以构成重载 | 必须相同或是父类返回类型的子类（协变返回类型） |
+| **访问修饰符** | 无要求 | 子类方法的访问权限**不能严于**父类（只能更宽松或相同） |
+| **抛出异常** | 无要求 | 子类方法抛出的异常**不能比**父类更宽泛（可以是父类异常的子类或不抛出） |
+| **多态性** | **编译时多态**（静态绑定） | **运行时多态**（动态绑定） |
+| **英文** | Overload | Override |
+| **关系** | 无继承关系 | 必须有继承或实现关系 |
+
+#### 代码示例
+
+**重载 (Overload) 示例：**
+```java
+class Calculator {
+    // 重载 add 方法
+    public int add(int a, int b) {
+        System.out.println("调用 add(int, int)");
+        return a + b;
+    }
+
+    public int add(int a, int b, int c) {
+        System.out.println("调用 add(int, int, int)");
+        return a + b + c;
+    }
+
+    public double add(double a, double b) {
+        System.out.println("调用 add(double, double)");
+        return a + b;
+    }\n}
+
+public class OverloadTest {
+    public static void main(String[] args) {
+        Calculator calc = new Calculator();
+        calc.add(1, 2);       // 编译时确定调用第一个 add
+        calc.add(1, 2, 3);    // 编译时确定调用第二个 add
+        calc.add(1.0, 2.0);   // 编译时确定调用第三个 add
+    }
+}
+```
+
+**重写 (Override) 示例：**
+```java
+class Animal {
+    public void makeSound() {
+        System.out.println("动物发出声音");
+    }
+}
+
+class Dog extends Animal {
+    // 重写父类的 makeSound 方法
+    @Override
+    public void makeSound() {
+        System.out.println("汪汪汪！");
+    }
+}
+
+public class OverrideTest {
+    public static void main(String[] args) {
+        Animal animal = new Animal();
+        Animal dog = new Dog(); // 父类引用指向子类对象
+
+        animal.makeSound(); // 运行时调用 Animal 的方法
+        dog.makeSound();    // 运行时确定调用 Dog 的方法
+    }
+}
+```
+
+#### 关键要点
+
+1.  **“两同两小一大”原则（重写）**
+    *   **两同**：方法名相同，参数列表相同。
+    *   **两小**：子类返回类型小于等于父类；子类抛出异常小于等于父类。
+    *   **一大**：子类访问修饰符大于等于父类。
+
+2.  **绑定时机不同**
+    *   **重载**是**静态绑定**或**编译时绑定**。编译器根据方法的参数列表在编译时就能确定调用哪个方法。
+    *   **重写**是**动态绑定**或**运行时绑定**。运行时JVM根据对象的实际类型来确定调用哪个方法。
+
+3.  **目的不同**
+    *   **重载**是为了提供功能相似但参数不同的多个方法，方便调用者。
+    *   **重写**是为了让子类根据需要实现自己独特的行为，实现多态。
+
+4.  **记忆口诀**
+    *   **重载**：“同名不同参，方法在同类”。
+    *   **重写**：“同名同参，方法在子类”。
 
 ### 18. 抽象类和接口的区别？
 
+抽象类和接口是 Java 中实现抽象的两种核心机制，它们都用于定义规范，但设计理念和使用场景有很大不同。
+
+#### 核心区别图示
+
+<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+  <text x="400" y="30" font-size="20" font-weight="bold" text-anchor="middle" fill="#333">抽象类 (Abstract Class) vs 接口 (Interface)</text>
+
+  <!-- Abstract Class Panel -->
+  <rect x="50" y="70" width="330" height="330" fill="#E3F2FD" stroke="#2196F3" stroke-width="2" rx="8"/>
+  <text x="215" y="100" font-size="18" font-weight="bold" text-anchor="middle" fill="#1565C0">抽象类</text>
+  <text x="215" y="125" font-size="12" text-anchor="middle" fill="#1976D2">“is-a” 关系 (是一个...)</text>
+  <rect x="80" y="150" width="270" height="150" fill="#BBDEFB" stroke="#1976D2" stroke-width="1.5" rx="5" stroke-dasharray="4"/>
+  <text x="215" y="170" font-size="13" font-weight="bold" text-anchor="middle" fill="#0D47A1">abstract class Shape</text>
+  <text x="90" y="200" font-size="12" text-anchor="start" fill="#333">+ String color;</text>
+  <text x="90" y="220" font-size="12" text-anchor="start" fill="#333">+ getColor(); // 普通方法</text>
+  <text x="90" y="240" font-size="12" text-anchor="start" fill="#333">+ abstract draw(); // 抽象方法</text>
+  <path d="M 215 300 L 215 320" stroke="#2196F3" stroke-width="2" marker-end="url(#arrowBlue)"/>
+  <text x="215" y="315" font-size="11" text-anchor="middle" fill="#1976D2">extends</text>
+  <rect x="140" y="320" width="150" height="50" fill="#FFFFFF" stroke="#1976D2" stroke-width="1.5" rx="5"/>
+  <text x="215" y="340" font-size="13" font-weight="bold" text-anchor="middle" fill="#0D47A1">Circle</text>
+  <text x="215" y="360" font-size="11" text-anchor="middle" fill="#666">“圆形是一个形状”</text>
+
+  <!-- Interface Panel -->
+  <rect x="420" y="70" width="330" height="330" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2" rx="8"/>
+  <text x="585" y="100" font-size="18" font-weight="bold" text-anchor="middle" fill="#2E7D32">接口</text>
+  <text x="585" y="125" font-size="12" text-anchor="middle" fill="#388E3C">“can-do” 关系 (能做...)</text>
+  <rect x="450" y="150" width="270" height="80" fill="#C8E6C9" stroke="#66BB6A" stroke-width="1.5" rx="5"/>
+  <text x="585" y="170" font-size="13" font-weight="bold" text-anchor="middle" fill="#1B5E20">interface Flyable</text>
+  <text x="460" y="200" font-size="12" text-anchor="start" fill="#333">+ fly(); // 默认 public abstract</text>
+  <path d="M 515 230 L 515 250" stroke="#4CAF50" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <path d="M 655 230 L 655 250" stroke="#4CAF50" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <text x="515" y="245" font-size="11" text-anchor="middle" fill="#388E3C">implements</text>
+  <text x="655" y="245" font-size="11" text-anchor="middle" fill="#388E3C">implements</text>
+  <rect x="450" y="250" width="130" height="50" fill="#FFFFFF" stroke="#388E3C" stroke-width="1.5" rx="5"/>
+  <text x="515" y="270" font-size="13" font-weight="bold" text-anchor="middle" fill="#1B5E20">Bird</text>
+  <text x="515" y="290" font-size="11" text-anchor="middle" fill="#666">“鸟能飞”</text>
+  <rect x="590" y="250" width="130" height="50" fill="#FFFFFF" stroke="#388E3C" stroke-width="1.5" rx="5"/>
+  <text x="655" y="270" font-size="13" font-weight="bold" text-anchor="middle" fill="#1B5E20">Airplane</text>
+  <text x="655" y="290" font-size="11" text-anchor="middle" fill="#666">“飞机能飞”</text>
+
+  <defs>
+    <marker id="arrowBlue" markerWidth="8" markerHeight="8" refX="4" refY="7" orient="auto"><path d="M0,4 L8,4 L4,8 z" fill="#2196F3"/></marker>
+    <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="4" refY="7" orient="auto"><path d="M0,4 L8,4 L4,8 z" fill="#4CAF50"/></marker>
+  </defs>
+</svg>
+
+#### 详细对比表
+
+| 对比维度 | 抽象类 (Abstract Class) | 接口 (Interface) |
+|---|---|---|
+| **关键字** | `abstract class` | `interface` |
+| **继承/实现** | **单继承** (`extends`) | **多实现** (`implements`) |
+| **设计理念** | **is-a** (是什么)，体现继承关系，强调“属于...类” | **can-do** (能做什么)，体现能力，强调“具备...能力” |
+| **构造方法** | **有** (用于子类初始化) | **没有** |
+| **成员变量** | 可以是各种类型 (普通变量、常量) | 默认 `public static final` (常量) |
+| **成员方法** | 可包含**抽象方法**和**普通方法** | JDK 8 前只能有**抽象方法**<br>JDK 8+ 可有 `default` 和 `static` 方法<br>JDK 9+ 可有 `private` 方法 |
+| **方法访问权限** | `public`, `protected`, `default` | 默认 `public` (JDK 9+ `private` 除外) |
+| **代码共享** | 适合共享**代码和状态** (成员变量) | 适合共享**行为规范** (JDK 8+ 可共享默认实现) |
+
+#### 代码示例
+
+**抽象类示例：**
+```java
+// 抽象类：定义了“形状”的通用属性和行为
+abstract class Shape {
+    protected String color; // 共享状态
+
+    public Shape(String color) { // 构造方法
+        this.color = color;
+    }
+
+    public String getColor() { // 普通方法，共享代码
+        return color;
+    }
+
+    public abstract double getArea(); // 抽象方法，由子类实现
+}
+
+// 子类：圆形是一个形状
+class Circle extends Shape {
+    private double radius;
+
+    public Circle(String color, double radius) {
+        super(color); // 调用父类构造
+        this.radius = radius;
+    }
+
+    @Override
+    public double getArea() {
+        return Math.PI * radius * radius;
+    }
+}
+```
+
+**接口示例：**
+```java
+// 接口：定义了“可飞行的”能力
+interface Flyable {
+    void fly(); // 行为规范
+
+    // JDK 8+ 默认方法
+    default void takeOff() {
+        System.out.println("正在起飞...");
+    }
+}
+
+// 实现类：鸟能飞
+class Bird implements Flyable {
+    @Override
+    public void fly() {
+        System.out.println("鸟在扇动翅膀飞行...");
+    }
+}
+
+// 实现类：飞机也能飞
+class Airplane implements Flyable {
+    @Override
+    public void fly() {
+        System.out.println("飞机依靠引擎飞行...");
+    }
+}
+```
+
+#### 如何选择？
+
+- **优先使用接口**：接口更加灵活，因为它允许一个类实现多个接口，解耦性更好。
+
+- **使用抽象类的场景**：
+    1.  **共享代码**：当多个子类有共同的代码或成员变量时。
+    2.  **定义模板**：使用模板方法设计模式，定义一个算法的骨架，而将一些步骤延迟到子类中实现。
+    3.  **强烈的 `is-a` 关系**：当子类和父类之间存在明显的“是一个”关系时。
+    4.  **需要非 `public` 方法**：当需要定义 `protected` 或 `default` 的抽象方法时。
+
+#### 关键要点
+
+1.  **继承限制**：类只能单继承抽象类，但可以多实现接口。这是最核心的区别。
+2.  **设计目的**：抽象类用于**抽象事物**（is-a），接口用于**定义能力**（can-do）。
+3.  **成员类型**：抽象类可以有状态（成员变量）和构造方法，接口不能。
+4.  **JDK 8+ 的变化**：接口引入了 `default` 和 `static` 方法，使其也能包含具体实现，缩小了与抽象类的部分差距，但设计理念的根本区别依然存在。
+
 ### 19. 什么是构造方法？构造方法的特点是什么？
+
+**构造方法**（Constructor）是一种特殊的成员方法，它的核心作用是在创建对象时**初始化对象的状态**（即为成员变量赋初始值）。
+
+#### 构造方法的核心特点
+
+<svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+  <text x="400" y="30" font-size="20" font-weight="bold" text-anchor="middle" fill="#333">构造方法的特点</text>
+
+  <rect x="50" y="60" width="700" height="320" fill="#F7F9FA" stroke="#D0D7DE" stroke-width="1" rx="10"/>
+
+  <!-- Code Block -->
+  <g>
+    <text x="80" y="90" font-family="monospace" font-size="12">public class <tspan font-weight="bold" fill="#2196F3">Person</tspan> {</text>
+    <text x="100" y="110" font-family="monospace" font-size="12">private String name;</text>
+    <text x="100" y="130" font-family="monospace" font-size="12">private int age;</text>
+    <text x="80" y="150" font-family="monospace" font-size="12"></text>
+    <text x="100" y="170" font-family="monospace" font-size="12">public <tspan font-weight="bold" fill="#2196F3">Person</tspan>(String name, int age) {</text>
+    <text x="120" y="190" font-family="monospace" font-size="12">this.name = name;</text>
+    <text x="120" y="210" font-family="monospace" font-size="12">this.age = age;</text>
+    <text x="100" y="230" font-family="monospace" font-size="12">}</text>
+    <text x="80" y="250" font-family="monospace" font-size="12">}</text>
+  </g>
+
+  <!-- Annotations -->
+  <g fill="#C62828" font-size="12" font-family="sans-serif">
+    <path d="M 320 170 L 360 170" stroke="#C62828" stroke-width="2" marker-end="url(#arrowRed)"/>
+    <text x="365" y="165">1. 方法名与类名完全相同</text>
+    <path d="M 200 160 L 200 140 L 360 110" stroke="#C62828" stroke-width="2" marker-end="url(#arrowRed)"/>
+    <text x="365" y="105">2. 没有任何返回类型 (连 void 都没有)</text>
+  </g>
+
+  <!-- Invocation -->
+  <g>
+    <text x="80" y="300" font-family="monospace" font-size="12"><tspan fill="#2196F3">Person</tspan> p = <tspan fill="#E65100">new</tspan> <tspan fill="#2196F3">Person</tspan>("张三", 25);</text>
+    <path d="M 200 285 Q 250 260, 290 240" stroke="#4CAF50" stroke-width="2" stroke-dasharray="4" marker-end="url(#arrowGreen)"/>
+    <text x="150" y="270" fill="#2E7D32" font-size="12">3. 使用 new 关键字自动调用</text>
+  </g>
+
+  <!-- Other Characteristics -->
+  <g x="450" y="200" fill="#0D47A1" font-size="12" font-family="sans-serif">
+    <text y="0">4. 主要作用是初始化成员变量。</text>
+    <text y="20">5. 每个类都有构造方法，如果没有显式定义，</text>
+    <text y="35" x="10">编译器会提供一个无参的默认构造方法。</text>
+    <text y="55">6. 一旦定义了任何构造方法，编译器就不再提供默认的。</text>
+    <text y="75">7. 构造方法可以重载 (Overload)。</text>
+    <text y="95">8. 构造方法不能被 `static`, `final`, `abstract` 修饰。</text>
+  </g>
+
+  <defs>
+    <marker id="arrowRed" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L0,8 L8,4 z" fill="#C62828"/></marker>
+    <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L0,8 L8,4 z" fill="#4CAF50"/></marker>
+  </defs>
+</svg>
+
+#### 代码示例
+
+```java
+public class Car {
+    private String brand;
+    private int speed;
+
+    // 1. 无参构造方法 (默认构造方法)
+    // 如果不写任何构造方法，编译器会自动生成一个这样的方法
+    public Car() {
+        this.brand = "未知品牌"; // 为成员变量提供默认值
+        System.out.println("无参构造方法被调用！");
+    }
+
+    // 2. 有参构造方法 (重载)
+    public Car(String brand) {
+        this.brand = brand;
+        System.out.println("有参构造方法(String)被调用！");
+    }
+
+    // 3. 多个参数的构造方法 (重载)
+    public Car(String brand, int speed) {
+        this.brand = brand;
+        this.speed = speed;
+        System.out.println("有参构造方法(String, int)被调用！");
+    }
+
+    public void showInfo() {
+        System.out.println("品牌: " + this.brand + ", 速度: " + this.speed);
+    }
+
+    public static void main(String[] args) {
+        // 使用 new 关键字自动调用构造方法
+        Car car1 = new Car(); // 调用无参构造
+        car1.showInfo();
+
+        Car car2 = new Car("特斯拉"); // 调用有参构造
+        car2.showInfo();
+
+        Car car3 = new Car("比亚迪", 120); // 调用多参数构造
+        car3.showInfo();
+    }
+}
+```
+
+#### 默认构造方法陷阱
+
+如果一个类**没有**显式定义任何构造方法，Java 编译器会为其提供一个公开的、无参数的默认构造方法。
+
+```java
+class MyClass { 
+    // 编译器自动添加 public MyClass() {}
+}
+MyClass obj = new MyClass(); // 合法
+```
+
+但是，如果**已经**定义了任何构造方法（无论有参还是无参），编译器就**不再**提供默认构造方法。
+
+```java
+class AnotherClass {
+    private String name;
+
+    // 只定义了有参构造
+    public AnotherClass(String name) {
+        this.name = name;
+    }
+}
+
+// AnotherClass obj = new AnotherClass(); // 编译错误！
+// 错误信息: The constructor AnotherClass() is undefined
+// 因为已经定义了有参构造，编译器不再提供无参的默认构造了。
+```
+
+#### 关键要点
+
+1.  **名称必须与类名相同**。
+2.  **没有返回类型**，连 `void` 也不行。
+3.  **核心作用**是**初始化对象**，为成员变量赋初始值。
+4.  通过 `new` 关键字在创建对象时被**自动调用**。
+5.  如果程序员不提供，编译器会提供一个**默认的无参构造方法**。
+6.  如果程序员提供了任何构造方法，编译器就**不再提供**默认的。
+7.  构造方法可以**重载**，以提供多种对象初始化方式。
+8.  构造方法不能被 `static`, `final`, `abstract` 等关键字修饰。
 
 ### 20. 什么是 this 关键字？this 的作用是什么？
 
+`this` 是 Java 的一个关键字，代表**当前对象的引用**。它指向正在调用方法或构造器的那个对象实例。
+
+#### this 的主要作用
+
+1. **区分成员变量和局部变量**
+   ```java
+   public class Person {
+       private String name;
+
+       public void setName(String name) {
+           this.name = name;  // this.name 是成员变量，name 是参数
+       }
+   }
+   ```
+
+2. **调用本类的其他构造方法**
+   ```java
+   public class Person {
+       private String name;
+       private int age;
+
+       public Person() {
+           this("未知", 0);  // 调用另一个构造方法
+       }
+
+       public Person(String name, int age) {
+           this.name = name;
+           this.age = age;
+       }
+   }
+   ```
+
+3. **返回当前对象（支持链式调用）**
+   ```java
+   public class Builder {
+       private String name;
+
+       public Builder setName(String name) {
+           this.name = name;
+           return this;  // 返回当前对象
+       }
+
+       // 使用：new Builder().setName("Tom").setAge(20)
+   }
+   ```
+
+4. **将当前对象作为参数传递**
+   ```java
+   public class Button {
+       public void onClick() {
+           eventHandler.handle(this);  // 将当前按钮对象传递给处理器
+       }
+   }
+   ```
+
+#### 关键要点
+
+- **this 不能在静态方法中使用**（静态方法属于类，不属于对象）
+- **this() 调用构造方法必须放在第一行**
+- **this 本质上是一个引用变量**，存储当前对象的内存地址
+
 ### 21. 什么是 super 关键字？super 的作用是什么？
+
+`super` 是 Java 的一个关键字，代表**父类对象的引用**。它用于在子类中访问父类的成员（属性、方法、构造方法）。
+
+#### super 的主要作用
+
+1. **访问父类的成员变量**
+   ```java
+   class Parent {
+       protected String name = "父类";
+   }
+
+   class Child extends Parent {
+       private String name = "子类";
+
+       public void display() {
+           System.out.println(super.name);  // 输出：父类
+           System.out.println(this.name);   // 输出：子类
+       }
+   }
+   ```
+
+2. **调用父类的方法**
+   ```java
+   class Parent {
+       public void show() {
+           System.out.println("父类方法");
+       }
+   }
+
+   class Child extends Parent {
+       @Override
+       public void show() {
+           super.show();  // 调用父类的 show 方法
+           System.out.println("子类方法");
+       }
+   }
+   ```
+
+3. **调用父类的构造方法**
+   ```java
+   class Parent {
+       public Parent(String name) {
+           System.out.println("父类构造：" + name);
+       }
+   }
+
+   class Child extends Parent {
+       public Child() {
+           super("参数");  // 必须放在第一行
+           System.out.println("子类构造");
+       }
+   }
+   ```
+
+#### this 和 super 的区别
+
+| 特性 | this | super |
+|------|------|-------|
+| **代表对象** | 当前对象 | 父类对象 |
+| **访问成员** | 本类成员 | 父类成员 |
+| **构造调用** | 本类其他构造方法 | 父类构造方法 |
+| **使用位置** | 任意位置 | 任意位置 |
+| **构造调用位置** | 必须第一行 | 必须第一行 |
+
+#### 关键要点
+
+- **super() 必须是子类构造方法的第一条语句**
+- 如果没有显式调用 `super()`，编译器会自动添加 `super()`（无参构造）
+- **super 不能在静态方法中使用**
+- **this() 和 super() 不能同时出现**在同一个构造方法中
 
 ### 22. 什么是内部类？内部类有哪些分类？
 
+**内部类**（Inner Class）是定义在另一个类内部的类。内部类可以访问外部类的所有成员（包括私有成员）。
+
+#### 内部类的四种分类
+
+1. **成员内部类**（Member Inner Class）
+   - 定义在外部类的成员位置
+   - 可以访问外部类的所有成员
+   - 依赖于外部类实例
+
+   ```java
+   public class Outer {
+       private int x = 10;
+
+       class Inner {  // 成员内部类
+           public void show() {
+               System.out.println(x);  // 可以访问外部类成员
+           }
+       }
+
+       public void test() {
+           Inner inner = new Inner();  // 创建内部类实例
+           inner.show();
+       }
+   }
+   ```
+
+2. **静态内部类**（Static Nested Class）
+   - 使用 `static` 修饰的内部类
+   - 不依赖外部类实例
+   - 只能访问外部类的静态成员
+
+   ```java
+   public class Outer {
+       private static int x = 10;
+
+       static class StaticInner {  // 静态内部类
+           public void show() {
+               System.out.println(x);  // 只能访问静态成员
+           }
+       }
+   }
+
+   // 使用：Outer.StaticInner inner = new Outer.StaticInner();
+   ```
+
+3. **局部内部类**（Local Inner Class）
+   - 定义在方法或代码块中
+   - 只能在定义它的方法/代码块中使用
+   - 可以访问外部类成员和方法的 final/effectively final 变量
+
+   ```java
+   public class Outer {
+       public void method() {
+           final int y = 20;
+
+           class LocalInner {  // 局部内部类
+               public void show() {
+                   System.out.println(y);
+               }
+           }
+
+           LocalInner inner = new LocalInner();
+           inner.show();
+       }
+   }
+   ```
+
+4. **匿名内部类**（Anonymous Inner Class）
+   - 没有名字的内部类
+   - 通常用于实现接口或继承类的一次性使用
+   - 常用于事件监听、线程创建等场景
+
+   ```java
+   // 实现接口
+   Runnable runnable = new Runnable() {
+       @Override
+       public void run() {
+           System.out.println("匿名内部类");
+       }
+   };
+
+   // 继承类
+   Thread thread = new Thread() {
+       @Override
+       public void run() {
+           System.out.println("匿名内部类继承");
+       }
+   };
+   ```
+
+#### 内部类的优点
+
+- **封装性更好**：可以隐藏实现细节
+- **可以访问外部类私有成员**：增强了类之间的关联
+- **实现多重继承**：一个类可以有多个内部类分别继承不同的类
+
 ### 23. 静态内部类和非静态内部类的区别？
+
+| 特性 | 非静态内部类（成员内部类） | 静态内部类 |
+|------|------------------------|-----------|
+| **修饰符** | 无 static | 有 static |
+| **依赖外部类实例** | 是 | 否 |
+| **创建方式** | `Outer.Inner inner = outer.new Inner()` | `Outer.Inner inner = new Outer.Inner()` |
+| **访问外部类成员** | 可以访问所有成员（包括实例和静态） | 只能访问静态成员 |
+| **持有外部类引用** | 是（隐式持有 Outer.this） | 否 |
+| **可以定义静态成员** | 否（除了 static final 常量） | 是 |
+| **内存占用** | 较大（持有外部类引用） | 较小 |
+
+#### 代码示例
+
+```java
+public class Outer {
+    private int instanceVar = 10;
+    private static int staticVar = 20;
+
+    // 非静态内部类
+    class Inner {
+        public void show() {
+            System.out.println(instanceVar);  // ✓ 可以访问实例变量
+            System.out.println(staticVar);    // ✓ 可以访问静态变量
+        }
+    }
+
+    // 静态内部类
+    static class StaticInner {
+        public void show() {
+            // System.out.println(instanceVar);  // ✗ 不能访问实例变量
+            System.out.println(staticVar);       // ✓ 可以访问静态变量
+        }
+    }
+}
+
+// 使用
+Outer outer = new Outer();
+Outer.Inner inner = outer.new Inner();              // 非静态需要外部类实例
+Outer.StaticInner staticInner = new Outer.StaticInner();  // 静态不需要
+```
+
+#### 关键要点
+
+- **静态内部类性能更好**：不持有外部类引用，避免内存泄漏
+- **非静态内部类适合需要访问外部类实例成员的场景**
+- **静态内部类类似于静态方法**：属于类而非实例
 
 ### 24. 匿名内部类是什么？如何使用？
 
+**匿名内部类**是一种没有名字的内部类，主要用于**创建某个接口或抽象类的临时实现**。它在定义的同时就创建了对象，通常用于一次性使用的场景。
+
+#### 使用场景
+
+1. **实现接口**
+   ```java
+   // 传统方式
+   class MyRunnable implements Runnable {
+       public void run() {
+           System.out.println("线程执行");
+       }
+   }
+   Thread t = new Thread(new MyRunnable());
+
+   // 匿名内部类方式
+   Thread t = new Thread(new Runnable() {
+       @Override
+       public void run() {
+           System.out.println("线程执行");
+       }
+   });
+
+   // Lambda 表达式（Java 8+，函数式接口）
+   Thread t = new Thread(() -> System.out.println("线程执行"));
+   ```
+
+2. **继承抽象类**
+   ```java
+   abstract class Animal {
+       abstract void makeSound();
+   }
+
+   Animal dog = new Animal() {
+       @Override
+       void makeSound() {
+           System.out.println("汪汪汪");
+       }
+   };
+   dog.makeSound();
+   ```
+
+3. **事件监听（GUI 编程常见）**
+   ```java
+   button.addActionListener(new ActionListener() {
+       @Override
+       public void actionPerformed(ActionEvent e) {
+           System.out.println("按钮被点击");
+       }
+   });
+   ```
+
+#### 匿名内部类的特点
+
+- **没有类名**，在定义时直接创建对象
+- **没有构造方法**（因为没有类名）
+- **只能使用一次**，不能重复创建实例
+- 可以访问外部类成员和方法的 **final 或 effectively final 变量**
+- **不能定义静态成员**（除了 static final 常量）
+
+#### 关键要点
+
+- 匿名内部类适合**简单、临时**的实现
+- 对于函数式接口，**优先使用 Lambda 表达式**（Java 8+）
+- 复杂逻辑建议**定义具名类**，提高代码可读性
+
 ### 25. 什么是多态？多态的实现方式有哪些？
+
+**多态**（Polymorphism）是指**同一个行为具有多种不同的表现形式**。在 Java 中，多态允许父类引用指向子类对象，并在运行时根据实际对象类型调用相应的方法。
+
+#### 多态的两种实现方式
+
+1. **编译时多态（静态多态）**
+   - 通过**方法重载**（Overload）实现
+   - 编译期确定调用哪个方法
+
+   ```java
+   public class Calculator {
+       public int add(int a, int b) {
+           return a + b;
+       }
+
+       public double add(double a, double b) {
+           return a + b;
+       }
+
+       public int add(int a, int b, int c) {
+           return a + b + c;
+       }
+   }
+   ```
+
+2. **运行时多态（动态多态）**
+   - 通过**方法重写**（Override）和**继承/接口实现**
+   - 运行时根据实际对象类型确定调用哪个方法
+
+   ```java
+   class Animal {
+       public void makeSound() {
+           System.out.println("动物叫");
+       }
+   }
+
+   class Dog extends Animal {
+       @Override
+       public void makeSound() {
+           System.out.println("汪汪汪");
+       }
+   }
+
+   class Cat extends Animal {
+       @Override
+       public void makeSound() {
+           System.out.println("喵喵喵");
+       }
+   }
+
+   // 使用多态
+   Animal animal1 = new Dog();  // 父类引用指向子类对象
+   Animal animal2 = new Cat();
+   animal1.makeSound();  // 输出：汪汪汪（运行时确定）
+   animal2.makeSound();  // 输出：喵喵喵
+   ```
+
+#### 多态的三个必要条件
+
+1. **继承**：必须有子类继承父类或实现接口
+2. **重写**：子类重写父类的方法
+3. **向上转型**：父类引用指向子类对象（`Animal animal = new Dog()`）
+
+#### 多态的优点
+
+- **扩展性好**：添加新的子类不需要修改现有代码
+- **代码复用**：通过父类引用操作不同的子类对象
+- **降低耦合度**：面向接口编程，提高灵活性
 
 ### 26. 什么是向上转型和向下转型？
 
+**向上转型**和**向下转型**是 Java 中对象类型转换的两种方式，用于处理继承关系中父类和子类引用之间的转换。
+
+#### 1. 向上转型（Upcasting）
+
+**定义**：子类对象转换为父类引用，**自动进行，无需强制类型转换**。
+
+```java
+class Animal {
+    public void eat() {
+        System.out.println("动物吃东西");
+    }
+}
+
+class Dog extends Animal {
+    public void bark() {
+        System.out.println("汪汪汪");
+    }
+}
+
+// 向上转型（自动）
+Animal animal = new Dog();  // Dog 对象转为 Animal 引用
+animal.eat();   // ✓ 可以调用父类方法
+// animal.bark();  // ✗ 不能调用子类特有方法（编译错误）
+```
+
+**特点**：
+- **自动、安全**，不需要强制转换
+- 只能访问**父类定义的方法**，子类特有方法不可见
+- **多态的基础**
+
+#### 2. 向下转型（Downcasting）
+
+**定义**：父类引用转换为子类引用，**需要强制类型转换**。
+
+```java
+Animal animal = new Dog();  // 向上转型
+
+// 向下转型（强制转换）
+Dog dog = (Dog) animal;
+dog.bark();  // ✓ 可以调用子类方法
+
+// 错误示例：实际对象不是 Cat
+Animal animal2 = new Dog();
+Cat cat = (Cat) animal2;  // 运行时抛出 ClassCastException
+```
+
+**特点**：
+- 需要**显式强制转换**：`(SubClass) parentRef`
+- **可能抛出 ClassCastException**，需要先用 `instanceof` 判断
+- 转换后可以访问**子类特有方法**
+
+#### 安全的向下转型
+
+```java
+Animal animal = new Dog();
+
+// 推荐：先用 instanceof 判断
+if (animal instanceof Dog) {
+    Dog dog = (Dog) animal;
+    dog.bark();  // 安全
+}
+```
+
+#### 关键对比
+
+| 特性 | 向上转型 | 向下转型 |
+|------|---------|---------|
+| **转换方向** | 子类 → 父类 | 父类 → 子类 |
+| **是否需要强制转换** | 否（自动） | 是（必须） |
+| **安全性** | 100% 安全 | 可能失败（ClassCastException） |
+| **访问范围** | 只能访问父类成员 | 可以访问子类成员 |
+| **使用场景** | 多态、统一处理 | 需要访问子类特有功能 |
+
+#### 关键要点
+
+- **向上转型是多态的基础**，编译时自动完成
+- **向下转型需谨慎**，务必用 `instanceof` 检查类型
+- 转型不会改变对象本身，只改变引用的**访问能力**
+
 ### 27. 什么是 instanceof 关键字？
+
+`instanceof` 是 Java 的一个**二元运算符**，用于**判断对象是否是某个类的实例**，或者是否是该类的子类实例。返回 `boolean` 类型。
+
+#### 语法
+
+```java
+object instanceof ClassName
+```
+
+#### 基本使用
+
+```java
+class Animal {}
+class Dog extends Animal {}
+class Cat extends Animal {}
+
+Dog dog = new Dog();
+Animal animal = new Dog();
+
+System.out.println(dog instanceof Dog);      // true
+System.out.println(dog instanceof Animal);   // true（子类是父类实例）
+System.out.println(dog instanceof Cat);      // false
+System.out.println(animal instanceof Dog);   // true（实际对象是 Dog）
+
+// null 检查
+Animal nullAnimal = null;
+System.out.println(nullAnimal instanceof Animal);  // false（null 不是任何类的实例）
+```
+
+#### 主要用途
+
+1. **安全的向下转型前检查**
+   ```java
+   Animal animal = getAnimal();  // 不确定具体类型
+
+   if (animal instanceof Dog) {
+       Dog dog = (Dog) animal;  // 安全转型
+       dog.bark();
+   } else if (animal instanceof Cat) {
+       Cat cat = (Cat) animal;
+       cat.meow();
+   }
+   ```
+
+2. **多态场景中的类型判断**
+   ```java
+   public void handleAnimal(Animal animal) {
+       if (animal instanceof Dog) {
+           System.out.println("处理狗");
+       } else if (animal instanceof Cat) {
+           System.out.println("处理猫");
+       }
+   }
+   ```
+
+3. **接口实现检查**
+   ```java
+   Object obj = "Hello";
+   if (obj instanceof Comparable) {
+       Comparable c = (Comparable) obj;
+       // 安全使用 Comparable 方法
+   }
+   ```
+
+#### 注意事项
+
+- **null 永远返回 false**：`null instanceof AnyClass` 总是 false
+- **编译时检查**：如果类型完全无关（不在继承树上），编译器会报错
+- **接口检查**：可以用于检查是否实现了某个接口
+
+#### Java 14+ 模式匹配增强
+
+```java
+// 传统方式
+if (obj instanceof String) {
+    String str = (String) obj;
+    System.out.println(str.length());
+}
+
+// Java 14+ 模式匹配
+if (obj instanceof String str) {
+    System.out.println(str.length());  // 自动转型
+}
+```
+
+#### 关键要点
+
+- **instanceof 是向下转型前的必备检查**，避免 ClassCastException
+- **null 检查**：`instanceof` 会自动处理 null，无需额外判断
+- **优先考虑多态设计**，减少对 instanceof 的依赖
 
 ## 访问修饰符
 
 ### 28. Java 有哪些访问修饰符？它们的区别是什么？
 
+Java 有 **4 种访问修饰符**，用于控制类、方法、变量的访问权限：
+
+| 修饰符 | 说明 | 适用范围 |
+|-------|------|---------|
+| **private** | 私有的，只能在本类中访问 | 成员变量、方法、内部类 |
+| **default**（无修饰符） | 包级私有，同一包内可访问 | 类、成员变量、方法 |
+| **protected** | 受保护的，同包或子类可访问 | 成员变量、方法 |
+| **public** | 公开的，任何地方都可访问 | 类、成员变量、方法 |
+
+#### 访问权限从小到大
+
+```
+private < default < protected < public
+```
+
 ### 29. public、protected、default、private 的访问范围是什么？
+
+| 访问修饰符 | 本类 | 同包 | 子类（不同包） | 其他包 |
+|-----------|------|------|--------------|--------|
+| **private** | ✓ | ✗ | ✗ | ✗ |
+| **default** | ✓ | ✓ | ✗ | ✗ |
+| **protected** | ✓ | ✓ | ✓ | ✗ |
+| **public** | ✓ | ✓ | ✓ | ✓ |
+
+#### 代码示例
+
+```java
+// 包 com.example.a
+public class Parent {
+    private int privateVar = 1;      // 只能在 Parent 类中访问
+    int defaultVar = 2;              // 同包可访问
+    protected int protectedVar = 3;  // 同包 + 子类可访问
+    public int publicVar = 4;        // 任何地方可访问
+}
+
+// 包 com.example.a（同包）
+class SamePackage {
+    void test() {
+        Parent p = new Parent();
+        // p.privateVar;     // ✗ 编译错误
+        p.defaultVar;        // ✓
+        p.protectedVar;      // ✓
+        p.publicVar;         // ✓
+    }
+}
+
+// 包 com.example.b（不同包）
+class Child extends Parent {
+    void test() {
+        // this.privateVar;     // ✗ 编译错误
+        // this.defaultVar;     // ✗ 编译错误
+        this.protectedVar;      // ✓ 子类可访问
+        this.publicVar;         // ✓
+    }
+}
+
+// 包 com.example.b（不同包，非子类）
+class Other {
+    void test() {
+        Parent p = new Parent();
+        // p.privateVar;     // ✗
+        // p.defaultVar;     // ✗
+        // p.protectedVar;   // ✗
+        p.publicVar;         // ✓
+    }
+}
+```
+
+#### 关键要点
+
+- **顶层类**只能用 `public` 或 `default`
+- **成员变量**推荐使用 `private`，提供 getter/setter 方法
+- **protected** 主要用于继承场景，允许子类访问
 
 ## 关键字
 
 ### 30. final、finally、finalize 的区别？
 
+这三个关键字虽然拼写相似，但用途完全不同：
+
+| 关键字 | 类型 | 作用 | 使用场景 |
+|-------|------|------|---------|
+| **final** | 修饰符 | 表示"最终的、不可改变的" | 修饰类、方法、变量 |
+| **finally** | 代码块 | 异常处理中必定执行的代码 | try-catch-finally 结构 |
+| **finalize** | 方法 | 对象被 GC 回收前调用（已废弃） | 垃圾回收机制 |
+
+#### 1. final
+
+```java
+// final 类：不能被继承
+final class FinalClass {}
+
+// final 方法：不能被重写
+class Parent {
+    final void show() {}
+}
+
+// final 变量：常量，不能修改
+final int MAX = 100;
+final List<String> list = new ArrayList<>();
+list.add("item");  // ✓ 可以修改内容
+// list = new ArrayList<>();  // ✗ 不能重新赋值
+```
+
+#### 2. finally
+
+```java
+try {
+    int result = 10 / 0;
+} catch (ArithmeticException e) {
+    System.out.println("捕获异常");
+} finally {
+    System.out.println("无论是否异常都会执行");
+    // 通常用于关闭资源
+}
+```
+
+#### 3. finalize（已废弃）
+
+```java
+@Override
+protected void finalize() throws Throwable {
+    // 对象被 GC 回收前调用
+    // Java 9+ 已废弃，推荐使用 try-with-resources
+    super.finalize();
+}
+```
+
+#### 关键要点
+
+- **final**：保证不可变性和安全性
+- **finally**：保证资源释放，无论是否异常
+- **finalize**：已废弃，不要使用
+
 ### 31. static 关键字的作用？
+
+`static` 表示**静态的**，修饰的成员**属于类本身，而不属于某个对象实例**。所有实例共享静态成员。
+
+#### 主要用途
+
+1. **静态变量**：类级别的共享变量
+2. **静态方法**：不依赖对象实例的方法
+3. **静态代码块**：类加载时执行一次的初始化代码
+4. **静态内部类**：不依赖外部类实例的嵌套类
+5. **静态导入**：`import static` 导入静态成员
+
+#### 关键特点
+
+- 属于**类**，不属于对象
+- 通过**类名**直接访问（也可通过对象访问，但不推荐）
+- **类加载时初始化**，只有一份
+- 所有实例**共享**静态成员
 
 ### 32. 什么是静态变量、静态方法、静态代码块？
 
+```java
+public class StaticDemo {
+    // 1. 静态变量（类变量）
+    private static int count = 0;
+
+    // 2. 实例变量
+    private int id;
+
+    // 3. 静态代码块（类加载时执行一次）
+    static {
+        System.out.println("静态代码块执行");
+        count = 10;
+    }
+
+    // 4. 实例代码块（每次创建对象时执行）
+    {
+        System.out.println("实例代码块执行");
+    }
+
+    // 5. 静态方法
+    public static void staticMethod() {
+        System.out.println("静态方法，count = " + count);
+        // System.out.println(id);  // ✗ 不能访问实例变量
+        // this.id = 1;             // ✗ 不能使用 this
+    }
+
+    // 6. 实例方法
+    public void instanceMethod() {
+        System.out.println("实例方法");
+        System.out.println(count);  // ✓ 可以访问静态变量
+        System.out.println(id);     // ✓ 可以访问实例变量
+    }
+
+    public static void main(String[] args) {
+        // 调用静态方法（推荐用类名）
+        StaticDemo.staticMethod();
+
+        // 创建对象
+        StaticDemo obj1 = new StaticDemo();
+        StaticDemo obj2 = new StaticDemo();
+
+        // 修改静态变量
+        obj1.count = 100;
+        System.out.println(obj2.count);  // 100（共享）
+    }
+}
+```
+
+#### 执行顺序
+
+```
+静态代码块 → 实例代码块 → 构造方法
+```
+
 ### 33. 静态方法和实例方法的区别？
+
+| 特性 | 静态方法 | 实例方法 |
+|------|---------|---------|
+| **修饰符** | static | 无 static |
+| **调用方式** | `类名.方法名()` | `对象.方法名()` |
+| **依赖对象** | 否 | 是 |
+| **访问实例成员** | 不能 | 能 |
+| **访问静态成员** | 能 | 能 |
+| **使用 this/super** | 不能 | 能 |
+| **重写** | 不能（可以隐藏） | 能 |
 
 ### 34. 能否在静态方法中访问非静态成员？
 
+**不能**。静态方法属于类，加载时就存在，而非静态成员属于对象，需要创建对象后才存在。
+
+```java
+public class Demo {
+    private int instanceVar = 10;
+    private static int staticVar = 20;
+
+    public static void staticMethod() {
+        // System.out.println(instanceVar);  // ✗ 编译错误
+        System.out.println(staticVar);       // ✓
+
+        // 如果必须访问，需要创建对象
+        Demo obj = new Demo();
+        System.out.println(obj.instanceVar);  // ✓
+    }
+}
+```
+
 ### 35. 什么是 transient 关键字？
+
+`transient` 用于**修饰变量**，表示该变量**不参与序列化**。
+
+```java
+public class User implements Serializable {
+    private String username;
+    private transient String password;  // 不会被序列化
+
+    // 序列化时，password 不会被保存
+}
+```
+
+**使用场景**：敏感信息（密码）、派生字段、临时缓存数据。
 
 ### 36. 什么是 volatile 关键字？
 
+`volatile` 用于**修饰变量**，保证多线程环境下的**可见性**和**有序性**（但不保证原子性）。
+
+```java
+public class VolatileDemo {
+    private volatile boolean flag = false;
+
+    // 线程 1
+    public void writer() {
+        flag = true;  // 修改立即对其他线程可见
+    }
+
+    // 线程 2
+    public void reader() {
+        while (!flag) {
+            // 能及时看到 flag 的变化
+        }
+    }
+}
+```
+
+**作用**：
+- 保证**可见性**：一个线程修改后，其他线程立即能看到
+- 禁止**指令重排序**
+- **不保证原子性**：`volatile int count++` 不是线程安全的
+
+**使用场景**：状态标志、双重检查锁定（DCL）。
+
 ### 37. 什么是 native 关键字？
 
+`native` 用于修饰方法，表示该方法由**非 Java 代码实现**（通常是 C/C++），通过 JNI（Java Native Interface）调用。
+
+```java
+public class NativeDemo {
+    // 本地方法声明（无方法体）
+    public native void nativeMethod();
+
+    static {
+        // 加载本地库
+        System.loadLibrary("nativeLib");
+    }
+}
+```
+
+**使用场景**：调用操作系统底层功能、性能优化、硬件交互。
+
+**例子**：`Object.hashCode()` 是 native 方法。
+
 ### 38. 什么是 strictfp 关键字？
+
+`strictfp`（strict floating-point）用于**修饰类或方法**，强制浮点运算**严格遵循 IEEE 754 标准**，保证跨平台结果一致。
+
+```java
+public strictfp class StrictDemo {
+    public void calculate() {
+        double result = 1.0 / 3.0;
+        // 在不同平台上结果完全一致
+    }
+}
+```
+
+**作用**：消除不同硬件平台的浮点运算差异。
+
+**注意**：Java 17+ 中，所有浮点运算默认严格，`strictfp` 变为可选。
 
 ## 异常处理
 
 ### 39. 异常处理机制？
 
+Java 使用**异常对象**来表示程序运行时的错误，通过 `try-catch-finally` 机制处理异常。
+
+#### 异常体系结构
+
+```
+Throwable
+├── Error（错误，程序无法处理）
+│   ├── OutOfMemoryError
+│   ├── StackOverflowError
+│   └── ...
+└── Exception（异常，程序可以处理）
+    ├── 受检异常（Checked Exception）
+    │   ├── IOException
+    │   ├── SQLException
+    │   └── ...
+    └── RuntimeException（非受检异常）
+        ├── NullPointerException
+        ├── ArrayIndexOutOfBoundsException
+        └── ...
+```
+
+#### 异常处理方式
+
+1. **try-catch**：捕获并处理异常
+2. **throws**：声明方法可能抛出的异常
+3. **throw**：主动抛出异常
+4. **finally**：无论是否异常都执行的代码块
+
+```java
+try {
+    // 可能抛出异常的代码
+    int result = 10 / 0;
+} catch (ArithmeticException e) {
+    // 捕获并处理异常
+    System.out.println("除数不能为0");
+} finally {
+    // 总是执行（资源清理）
+    System.out.println("finally 块执行");
+}
+```
+
 ### 40. Error 和 Exception 的区别？
+
+| 特性 | Error | Exception |
+|------|-------|-----------|
+| **定义** | 严重的系统错误 | 程序可以处理的异常 |
+| **是否可恢复** | 不可恢复 | 可恢复 |
+| **是否需要捕获** | 不需要 | 受检异常必须捕获 |
+| **典型例子** | OutOfMemoryError, StackOverflowError | IOException, SQLException |
+| **处理方式** | 程序无法处理，应该终止 | 应该捕获并处理 |
+
+```java
+// Error 示例（不应该捕获）
+public class ErrorDemo {
+    public static void main(String[] args) {
+        recursiveMethod();  // StackOverflowError
+    }
+
+    static void recursiveMethod() {
+        recursiveMethod();  // 无限递归
+    }
+}
+
+// Exception 示例（应该捕获）
+public class ExceptionDemo {
+    public static void main(String[] args) {
+        try {
+            FileReader fr = new FileReader("file.txt");  // IOException
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
 
 ### 41. 受检异常和非受检异常的区别？
 
+| 特性 | 受检异常（Checked） | 非受检异常（Unchecked） |
+|------|-------------------|----------------------|
+| **父类** | Exception（除 RuntimeException） | RuntimeException 及其子类 |
+| **检查时机** | 编译时检查 | 运行时检查 |
+| **是否必须处理** | 必须捕获或声明 | 不强制处理 |
+| **典型例子** | IOException, SQLException | NullPointerException, IllegalArgumentException |
+| **发生原因** | 外部因素（文件、网络） | 编程错误 |
+
+```java
+// 受检异常：必须处理
+public void readFile() throws IOException {  // 必须声明
+    FileReader fr = new FileReader("file.txt");
+}
+
+// 或者捕获
+public void readFile() {
+    try {
+        FileReader fr = new FileReader("file.txt");
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+
+// 非受检异常：不强制处理
+public void divideNumbers(int a, int b) {
+    int result = a / b;  // 可能抛出 ArithmeticException，但不强制处理
+}
+```
+
 ### 42. throw 和 throws 的区别？
+
+| 特性 | throw | throws |
+|------|-------|--------|
+| **位置** | 方法体内部 | 方法声明处 |
+| **作用** | 抛出具体的异常对象 | 声明方法可能抛出的异常类型 |
+| **数量** | 一次只能抛出一个异常对象 | 可以声明多个异常类型 |
+| **语法** | `throw new Exception()` | `void method() throws Exception` |
+
+```java
+// throw：抛出异常对象
+public void withdraw(double amount) {
+    if (amount < 0) {
+        throw new IllegalArgumentException("金额不能为负数");
+    }
+}
+
+// throws：声明异常
+public void readFile() throws IOException, FileNotFoundException {
+    FileReader fr = new FileReader("file.txt");
+}
+
+// 组合使用
+public void processFile() throws IOException {
+    if (!fileExists()) {
+        throw new FileNotFoundException("文件不存在");
+    }
+}
+```
 
 ### 43. try-catch-finally 的执行顺序？
 
+```java
+public static int test() {
+    try {
+        System.out.println("1. try 块");
+        return 1;  // 先暂存返回值
+    } catch (Exception e) {
+        System.out.println("2. catch 块");
+        return 2;
+    } finally {
+        System.out.println("3. finally 块");
+        // return 3;  // 不推荐：会覆盖 try/catch 的返回值
+    }
+}
+
+// 输出：
+// 1. try 块
+// 3. finally 块
+// 返回值：1
+```
+
+#### 执行顺序
+
+1. **执行 try 块**
+2. 如果有异常，**执行对应的 catch 块**
+3. **一定执行 finally 块**（除非 JVM 退出）
+4. **返回值**：
+   - try/catch 中的 return 值会**先暂存**
+   - finally 执行完后再返回
+   - finally 中的 return 会**覆盖** try/catch 的返回值（不推荐）
+
 ### 44. finally 块一定会执行吗？
+
+**几乎总是执行**，但有以下例外：
+
+1. **JVM 提前退出**：`System.exit(0)`
+2. **守护线程**：所有非守护线程结束时，守护线程的 finally 可能不执行
+3. **死循环**：try 块中的死循环
+4. **断电/kill 进程**：操作系统强制终止
+
+```java
+// 示例 1：正常执行
+try {
+    return 1;
+} finally {
+    System.out.println("finally 执行");  // ✓ 会执行
+}
+
+// 示例 2：JVM 退出，finally 不执行
+try {
+    System.exit(0);  // JVM 立即退出
+} finally {
+    System.out.println("finally 执行");  // ✗ 不会执行
+}
+```
 
 ### 45. try-with-resources 是什么？
 
+Java 7 引入的**自动资源管理**机制，自动关闭实现了 `AutoCloseable` 接口的资源。
+
+```java
+// 传统方式（繁琐）
+FileReader fr = null;
+try {
+    fr = new FileReader("file.txt");
+    // 读取文件
+} catch (IOException e) {
+    e.printStackTrace();
+} finally {
+    if (fr != null) {
+        try {
+            fr.close();  // 手动关闭
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+// try-with-resources（推荐）
+try (FileReader fr = new FileReader("file.txt")) {
+    // 读取文件
+} catch (IOException e) {
+    e.printStackTrace();
+}  // 自动调用 fr.close()
+```
+
+#### 特点
+
+- **自动关闭资源**：退出 try 块时自动调用 `close()`
+- **多资源管理**：可以同时管理多个资源
+- **异常处理更简洁**：避免 finally 中的嵌套 try-catch
+
+```java
+// 多资源管理
+try (FileInputStream fis = new FileInputStream("input.txt");
+     FileOutputStream fos = new FileOutputStream("output.txt")) {
+    // 操作两个流
+}  // 自动关闭，关闭顺序与声明顺序相反
+```
+
 ### 46. 如何自定义异常？
+
+继承 `Exception`（受检异常）或 `RuntimeException`（非受检异常）。
+
+```java
+// 自定义受检异常
+public class InsufficientBalanceException extends Exception {
+    private double amount;
+
+    public InsufficientBalanceException(String message, double amount) {
+        super(message);
+        this.amount = amount;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+}
+
+// 自定义非受检异常
+public class InvalidAgeException extends RuntimeException {
+    public InvalidAgeException(String message) {
+        super(message);
+    }
+}
+
+// 使用
+public void withdraw(double amount) throws InsufficientBalanceException {
+    if (balance < amount) {
+        throw new InsufficientBalanceException("余额不足", amount - balance);
+    }
+}
+```
+
+#### 最佳实践
+
+1. **命名**：以 `Exception` 结尾
+2. **提供多个构造方法**：无参、带 message、带 cause
+3. **选择父类**：外部因素用 Exception，编程错误用 RuntimeException
+4. **添加必要字段**：保存异常相关的上下文信息
 
 ## 对象和类
 
 ### 47. 什么是对象？什么是类？
 
+**类**是对象的**模板/蓝图**，定义了对象的属性和行为。
+**对象**是类的**具体实例**，拥有实际的数据和状态。
+
+```java
+// 类：模板
+public class Car {
+    String brand;   // 属性
+    int speed;
+
+    void run() {    // 行为
+        System.out.println("汽车在行驶");
+    }
+}
+
+// 对象：实例
+Car myCar = new Car();  // 创建对象
+myCar.brand = "Tesla";
+myCar.speed = 100;
+myCar.run();
+```
+
+**类是对象的抽象，对象是类的具体化。**
+
 ### 48. 如何创建对象？
+
+Java 有 **4 种**创建对象的方式：
+
+```java
+// 1. new 关键字（最常用）
+Car car1 = new Car();
+
+// 2. 反射
+Class<?> clazz = Class.forName("Car");
+Car car2 = (Car) clazz.newInstance();
+
+// 3. clone() 方法
+Car car3 = (Car) car1.clone();
+
+// 4. 反序列化
+ObjectInputStream ois = new ObjectInputStream(new FileInputStream("car.obj"));
+Car car4 = (Car) ois.readObject();
+```
 
 ### 49. 对象的生命周期是怎样的？
 
+1. **创建阶段**：通过 new 关键字分配内存，调用构造方法初始化
+2. **使用阶段**：对象被引用，执行方法，访问属性
+3. **不可达阶段**：没有任何引用指向该对象
+4. **回收阶段**：GC 标记并回收内存
+
+```java
+Car car = new Car();  // 1. 创建
+car.run();            // 2. 使用
+car = null;           // 3. 不可达
+// 4. 等待 GC 回收
+```
+
 ### 50. 什么是方法签名？
+
+方法签名 = **方法名 + 参数列表**（类型、顺序、数量）
+
+**不包括**：返回值类型、访问修饰符、异常声明。
+
+```java
+// 方法签名：add(int, int)
+public int add(int a, int b) { }
+
+// 方法签名：add(double, double) - 不同签名，可以重载
+public double add(double a, double b) { }
+
+// ✗ 编译错误：签名相同，返回值不同
+// public double add(int a, int b) { }
+```
 
 ### 51. 什么是可变参数？如何使用？
 
+可变参数允许方法接受**不定数量的参数**，本质是**数组**。
+
+```java
+// 语法：type... paramName
+public static int sum(int... numbers) {
+    int total = 0;
+    for (int num : numbers) {
+        total += num;
+    }
+    return total;
+}
+
+// 调用
+sum(1, 2, 3);       // 传入 3 个参数
+sum(1, 2, 3, 4, 5); // 传入 5 个参数
+sum();              // 传入 0 个参数
+```
+
+**注意**：
+- 可变参数必须是**最后一个参数**
+- 一个方法**最多只能有一个**可变参数
+
 ### 52. Java 中参数传递是值传递还是引用传递？
+
+Java **只有值传递**（pass by value）。
+
+- **基本类型**：传递值的副本
+- **引用类型**：传递引用的副本（对象地址的副本）
+
+```java
+public static void main(String[] args) {
+    int num = 10;
+    modify(num);
+    System.out.println(num);  // 10（未改变）
+
+    Person p = new Person("Tom");
+    modifyPerson(p);
+    System.out.println(p.name);  // "Jerry"（改变了）
+
+    reassignPerson(p);
+    System.out.println(p.name);  // "Jerry"（未改变）
+}
+
+static void modify(int n) {
+    n = 20;  // 修改的是副本
+}
+
+static void modifyPerson(Person person) {
+    person.name = "Jerry";  // 通过引用修改对象
+}
+
+static void reassignPerson(Person person) {
+    person = new Person("Alice");  // 重新赋值的是副本
+}
+```
+
+**关键**：传递的是引用的副本，不是引用本身。
 
 ### 53. 什么是浅拷贝和深拷贝？
 
+| 特性 | 浅拷贝（Shallow Copy） | 深拷贝（Deep Copy） |
+|------|---------------------|-------------------|
+| **基本类型** | 复制值 | 复制值 |
+| **引用类型** | 复制引用（共享对象） | 复制对象（新对象） |
+| **独立性** | 修改会互相影响 | 完全独立 |
+
+```java
+class Person implements Cloneable {
+    String name;
+    Address address;  // 引用类型
+
+    // 浅拷贝
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone();  // 只复制引用，不复制 address 对象
+    }
+
+    // 深拷贝
+    public Person deepClone() {
+        Person copy = new Person();
+        copy.name = this.name;
+        copy.address = new Address(this.address.city);  // 复制新对象
+        return copy;
+    }
+}
+```
+
 ### 54. 如何实现对象克隆？
+
+实现 `Cloneable` 接口，重写 `clone()` 方法。
+
+```java
+public class Person implements Cloneable {
+    private String name;
+    private int age;
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone();  // 浅拷贝
+    }
+
+    // 使用
+    public static void main(String[] args) throws CloneNotSupportedException {
+        Person p1 = new Person("Tom", 20);
+        Person p2 = (Person) p1.clone();
+    }
+}
+```
 
 ### 55. Object 类有哪些方法？
 
+Object 是所有类的父类，主要方法：
+
+```java
+public class Object {
+    // 1. 对象比较
+    public boolean equals(Object obj) { }
+    public int hashCode() { }
+
+    // 2. 对象字符串表示
+    public String toString() { }
+
+    // 3. 对象克隆
+    protected Object clone() throws CloneNotSupportedException { }
+
+    // 4. 获取运行时类
+    public final Class<?> getClass() { }
+
+    // 5. 多线程相关
+    public final void wait() throws InterruptedException { }
+    public final void notify() { }
+    public final void notifyAll() { }
+
+    // 6. 垃圾回收（已废弃）
+    protected void finalize() throws Throwable { }
+}
+```
+
 ### 56. hashCode() 和 equals() 的关系？
+
+**关系**：
+1. 两个对象 `equals()` 返回 true，`hashCode()` **必须相同**
+2. 两个对象 `hashCode()` 相同，`equals()` **不一定** true（哈希冲突）
+3. 重写 `equals()` **必须同时重写** `hashCode()`
+
+```java
+Person p1 = new Person("Tom", 20);
+Person p2 = new Person("Tom", 20);
+
+// 正确实现
+p1.equals(p2);     // true
+p1.hashCode() == p2.hashCode();  // true
+```
 
 ### 57. 为什么重写 equals() 必须重写 hashCode()？
 
+**原因**：保证对象在 `HashMap`、`HashSet` 等集合中的正确性。
+
+```java
+Person p1 = new Person("Tom", 20);
+Person p2 = new Person("Tom", 20);
+
+// 只重写 equals，不重写 hashCode
+Set<Person> set = new HashSet<>();
+set.add(p1);
+set.add(p2);  // ✗ 会添加成功（hashCode 不同）
+
+System.out.println(set.size());  // 2（错误！应该是 1）
+```
+
+**正确做法**：同时重写两个方法。
+
+```java
+@Override
+public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (!(obj instanceof Person)) return false;
+    Person p = (Person) obj;
+    return age == p.age && Objects.equals(name, p.name);
+}
+
+@Override
+public int hashCode() {
+    return Objects.hash(name, age);
+}
+```
+
 ### 58. toString() 方法的作用是什么？
+
+返回对象的**字符串表示**，用于调试和日志输出。
+
+```java
+// 默认实现：类名@哈希码
+Person p = new Person("Tom", 20);
+System.out.println(p);  // Person@15db9742
+
+// 重写 toString
+@Override
+public String toString() {
+    return "Person{name='" + name + "', age=" + age + "}";
+}
+
+System.out.println(p);  // Person{name='Tom', age=20}
+```
+
+**最佳实践**：使用 IDE 自动生成或 Lombok 的 `@ToString`。
 
 ## 反射
 
 ### 59. 什么是反射？反射的作用是什么？
 
+**反射**（Reflection）是 Java 在**运行时**动态获取类信息、创建对象、调用方法的机制。
+
+```java
+// 普通方式：编译时确定
+Person p = new Person();
+p.setName("Tom");
+
+// 反射方式：运行时动态
+Class<?> clazz = Class.forName("Person");
+Object obj = clazz.newInstance();
+Method method = clazz.getMethod("setName", String.class);
+method.invoke(obj, "Tom");
+```
+
+**作用**：
+- 动态加载类
+- 运行时获取类的结构（方法、字段、构造器）
+- 动态创建对象和调用方法
+- 突破访问权限限制
+
 ### 60. 如何获取 Class 对象？
+
+```java
+// 方式 1：Class.forName()
+Class<?> clazz1 = Class.forName("java.lang.String");
+
+// 方式 2：类名.class
+Class<?> clazz2 = String.class;
+
+// 方式 3：对象.getClass()
+String str = "hello";
+Class<?> clazz3 = str.getClass();
+
+// 方式 4：类加载器
+Class<?> clazz4 = ClassLoader.getSystemClassLoader().loadClass("java.lang.String");
+```
 
 ### 61. 反射的优缺点是什么？
 
+**优点**：
+- **灵活性**：运行时动态操作类
+- **扩展性**：实现插件化、框架开发
+
+**缺点**：
+- **性能开销**：比直接调用慢 10-100 倍
+- **安全问题**：可以访问私有成员
+- **代码可读性差**：不利于维护
+
 ### 62. 反射的应用场景有哪些？
+
+1. **框架开发**：Spring 的依赖注入、Mybatis 的 ORM 映射
+2. **动态代理**：AOP 实现
+3. **序列化/反序列化**：JSON 转换
+4. **JDBC**：根据配置加载数据库驱动
+5. **单元测试**：JUnit 动态调用测试方法
 
 ## 泛型
 
 ### 63. 什么是泛型？泛型的作用是什么？
 
+**泛型**允许在定义类、接口、方法时使用**类型参数**，实现代码复用和类型安全。
+
+```java
+// 不使用泛型
+List list = new ArrayList();
+list.add("hello");
+list.add(123);  // 可以添加任意类型
+String str = (String) list.get(1);  // 运行时 ClassCastException
+
+// 使用泛型
+List<String> list = new ArrayList<>();
+list.add("hello");
+// list.add(123);  // 编译错误
+String str = list.get(0);  // 无需强转
+```
+
+**作用**：
+- **类型安全**：编译时检查类型
+- **消除强制类型转换**
+- **代码复用**：一套代码适用多种类型
+
 ### 64. 泛型的类型参数有哪些？
+
+常见命名约定：
+- **T**：Type（类型）
+- **E**：Element（元素）
+- **K**：Key（键）
+- **V**：Value（值）
+- **N**：Number（数值）
+
+```java
+// 泛型类
+class Box<T> {
+    private T value;
+}
+
+// 泛型接口
+interface List<E> {
+    void add(E element);
+}
+
+// 泛型方法
+public <T> T getFirst(List<T> list) {
+    return list.get(0);
+}
+```
 
 ### 65. 什么是类型擦除？
 
+Java 泛型在**编译后会被擦除**，运行时不存在泛型信息。
+
+```java
+List<String> list1 = new ArrayList<>();
+List<Integer> list2 = new ArrayList<>();
+
+// 编译后都变成 List，类型参数被擦除
+list1.getClass() == list2.getClass();  // true
+```
+
+**原因**：保证与旧版本 Java 的兼容性。
+
+**影响**：
+- 不能创建泛型数组：`new T[10]` ✗
+- 不能使用 instanceof：`obj instanceof List<String>` ✗
+
 ### 66. 泛型中的 extends 和 super 的区别？
 
+| 特性 | extends（上界） | super（下界） |
+|------|---------------|--------------|
+| **语法** | `<? extends T>` | `<? super T>` |
+| **含义** | T 或 T 的子类 | T 或 T 的父类 |
+| **读取** | 可以（作为 T 读取） | 不安全（只能作为 Object） |
+| **写入** | 不安全 | 可以（写入 T 及其子类） |
+| **助记** | Producer Extends | Consumer Super |
+
+```java
+// extends：适合读取
+List<? extends Number> list1 = new ArrayList<Integer>();
+Number num = list1.get(0);  // ✓ 读取安全
+// list1.add(123);  // ✗ 写入不安全
+
+// super：适合写入
+List<? super Integer> list2 = new ArrayList<Number>();
+list2.add(123);  // ✓ 写入安全
+Object obj = list2.get(0);  // ✓ 只能作为 Object 读取
+```
+
+**PECS 原则**：Producer Extends, Consumer Super
+
 ### 67. 什么是泛型通配符？
+
+`?` 表示**未知类型**。
+
+```java
+// 无界通配符
+List<?> list = new ArrayList<String>();
+
+// 上界通配符
+List<? extends Number> numbers = new ArrayList<Integer>();
+
+// 下界通配符
+List<? super Integer> integers = new ArrayList<Number>();
+```
 
 ## 注解
 
 ### 68. 什么是注解？注解的作用是什么？
 
+**注解**（Annotation）是一种**元数据**，为代码提供附加信息，不直接影响代码逻辑。
+
+**作用**：
+- **编译检查**：`@Override`、`@Deprecated`
+- **配置信息**：Spring 的 `@Component`、`@Autowired`
+- **代码生成**：Lombok 的 `@Data`
+
 ### 69. 常见的注解有哪些？
+
+**内置注解**：
+```java
+@Override        // 重写方法
+@Deprecated      // 已过时
+@SuppressWarnings("unchecked")  // 抑制警告
+@FunctionalInterface  // 函数式接口
+```
+
+**框架注解**：
+```java
+// Spring
+@Component, @Service, @Repository, @Controller
+@Autowired, @Value
+@RequestMapping, @GetMapping
+
+// JPA
+@Entity, @Table, @Id, @Column
+
+// Lombok
+@Data, @Getter, @Setter, @ToString
+```
 
 ### 70. 如何自定义注解？
 
+```java
+@Target(ElementType.METHOD)  // 作用在方法上
+@Retention(RetentionPolicy.RUNTIME)  // 运行时可见
+public @interface MyAnnotation {
+    String value() default "";
+    int count() default 0;
+}
+
+// 使用
+@MyAnnotation(value = "test", count = 3)
+public void myMethod() { }
+```
+
 ### 71. 元注解有哪些？
 
+元注解用于**修饰注解**：
+
+```java
+@Target      // 指定注解的使用位置（类、方法、字段等）
+@Retention   // 指定注解的生命周期（SOURCE/CLASS/RUNTIME）
+@Documented  // 注解是否包含在 JavaDoc 中
+@Inherited   // 注解是否可被继承
+@Repeatable  // 注解是否可重复使用（Java 8+）
+```
+
 ### 72. 注解的应用场景有哪些？
+
+1. **配置替代 XML**：Spring Boot 注解配置
+2. **AOP 切面**：`@Transactional`、`@Async`
+3. **数据校验**：`@NotNull`、`@Email`
+4. **序列化控制**：Jackson 的 `@JsonProperty`
+5. **测试框架**：JUnit 的 `@Test`、`@Before`
 
 ## 枚举
 
 ### 73. 什么是枚举？枚举的作用是什么？
 
+**枚举**（Enum）是一种特殊的类，用于定义**一组固定的常量**。
+
+```java
+public enum Season {
+    SPRING, SUMMER, AUTUMN, WINTER
+}
+
+// 使用
+Season season = Season.SPRING;
+```
+
+**作用**：
+- **类型安全**：不能赋值为枚举外的值
+- **可读性强**：比整数常量更清晰
+- **功能丰富**：可以有字段、方法
+
 ### 74. 如何定义枚举？
+
+```java
+// 简单枚举
+public enum Color {
+    RED, GREEN, BLUE
+}
+
+// 带字段和方法的枚举
+public enum Status {
+    SUCCESS(200, "成功"),
+    ERROR(500, "失败");
+
+    private int code;
+    private String message;
+
+    Status(int code, String message) {
+        this.code = code;
+        this.message = message;
+    }
+
+    public int getCode() {
+        return code;
+    }
+}
+```
 
 ### 75. 枚举的特点是什么？
 
+1. 枚举是 **final 类**，不能被继承
+2. 构造器默认 **private**
+3. 每个枚举常量是该类的 **static final 实例**
+4. 自动继承 `java.lang.Enum`
+5. 可以实现接口，但不能继承类
+6. 支持 **switch** 语句
+
 ### 76. 枚举可以实现接口吗？
+
+**可以**。
+
+```java
+interface Describable {
+    String describe();
+}
+
+public enum Color implements Describable {
+    RED {
+        @Override
+        public String describe() {
+            return "红色";
+        }
+    },
+    GREEN {
+        @Override
+        public String describe() {
+            return "绿色";
+        }
+    }
+}
+```
 
 ## I/O 流
 
 ### 77. Java 中有哪些 I/O 流？
 
+Java I/O 流分为两大类：**字节流**和**字符流**。
+
+**字节流**（处理二进制数据）：
+```
+InputStream / OutputStream
+├── FileInputStream / FileOutputStream
+├── BufferedInputStream / BufferedOutputStream
+├── DataInputStream / DataOutputStream
+└── ObjectInputStream / ObjectOutputStream
+```
+
+**字符流**（处理文本数据）：
+```
+Reader / Writer
+├── FileReader / FileWriter
+├── BufferedReader / BufferedWriter
+├── InputStreamReader / OutputStreamWriter
+└── StringReader / StringWriter
+```
+
 ### 78. 字节流和字符流的区别？
+
+| 特性 | 字节流 | 字符流 |
+|------|-------|-------|
+| **基类** | InputStream / OutputStream | Reader / Writer |
+| **处理单位** | 字节（8 bit） | 字符（16 bit） |
+| **适用场景** | 所有类型文件（图片、视频、音频） | 文本文件 |
+| **编码** | 无需考虑编码 | 需要处理字符编码 |
+| **缓冲区** | 无默认缓冲 | 有默认缓冲 |
+
+```java
+// 字节流：复制图片
+try (FileInputStream fis = new FileInputStream("image.jpg");
+     FileOutputStream fos = new FileOutputStream("copy.jpg")) {
+    byte[] buffer = new byte[1024];
+    int len;
+    while ((len = fis.read(buffer)) != -1) {
+        fos.write(buffer, 0, len);
+    }
+}
+
+// 字符流：读取文本
+try (FileReader fr = new FileReader("test.txt");
+     BufferedReader br = new BufferedReader(fr)) {
+    String line;
+    while ((line = br.readLine()) != null) {
+        System.out.println(line);
+    }
+}
+```
 
 ### 79. 什么是缓冲流？为什么要使用缓冲流？
 
+**缓冲流**在内存中提供缓冲区，减少 I/O 次数，提高效率。
+
+```java
+// 不使用缓冲流（效率低）
+FileInputStream fis = new FileInputStream("file.txt");
+int data;
+while ((data = fis.read()) != -1) {  // 每次读 1 字节，频繁 I/O
+    // 处理数据
+}
+
+// 使用缓冲流（效率高）
+BufferedInputStream bis = new BufferedInputStream(new FileInputStream("file.txt"));
+int data;
+while ((data = bis.read()) != -1) {  // 内部批量读取到缓冲区
+    // 处理数据
+}
+```
+
+**优势**：
+- **提高性能**：批量读写，减少系统调用
+- **提供额外方法**：`BufferedReader.readLine()`
+
 ### 80. 什么是序列化和反序列化？
+
+**序列化**：将对象转换为字节流，用于存储或网络传输。
+**反序列化**：将字节流恢复为对象。
+
+```java
+// 序列化
+try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("person.ser"))) {
+    Person p = new Person("Tom", 20);
+    oos.writeObject(p);
+}
+
+// 反序列化
+try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("person.ser"))) {
+    Person p = (Person) ois.readObject();
+}
+```
+
+**应用场景**：
+- 对象持久化（保存到文件/数据库）
+- 网络传输（RPC、缓存）
+- 深拷贝
 
 ### 81. 如何实现序列化？
 
+实现 `Serializable` 接口（标记接口，无需实现方法）。
+
+```java
+public class Person implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    private String name;
+    private int age;
+    private transient String password;  // 不序列化
+
+    // getter/setter
+}
+```
+
 ### 82. serialVersionUID 的作用是什么？
 
+`serialVersionUID` 用于**验证序列化版本的一致性**。
+
+```java
+// 序列化时的版本
+class Person implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private String name;
+}
+
+// 反序列化时，如果类结构改变（添加字段）但 serialVersionUID 相同，可以兼容
+class Person implements Serializable {
+    private static final long serialVersionUID = 1L;  // 相同
+    private String name;
+    private int age;  // 新增字段
+}
+
+// 如果不指定 serialVersionUID，JVM 会自动生成
+// 类结构改变后，自动生成的 ID 会变化，导致 InvalidClassException
+```
+
+**最佳实践**：显式声明 `serialVersionUID`。
+
 ### 83. 什么是 NIO？NIO 和 IO 的区别？
+
+**NIO**（New I/O）是 Java 1.4 引入的新 I/O API，提供更高效的 I/O 操作。
+
+| 特性 | 传统 I/O | NIO |
+|------|---------|-----|
+| **阻塞性** | 阻塞（Blocking） | 非阻塞（Non-blocking） |
+| **面向** | 流（Stream） | 缓冲区（Buffer） + 通道（Channel） |
+| **选择器** | 无 | Selector（多路复用） |
+| **性能** | 较低 | 高（适合高并发） |
+| **使用复杂度** | 简单 | 复杂 |
+
+```java
+// 传统 I/O
+InputStream is = socket.getInputStream();
+is.read(bytes);  // 阻塞直到数据到达
+
+// NIO
+Selector selector = Selector.open();
+channel.register(selector, SelectionKey.OP_READ);
+selector.select();  // 非阻塞，可以同时监听多个 channel
+```
+
+**应用场景**：
+- **I/O**：少量连接，数据量大
+- **NIO**：大量连接，数据量小（高并发服务器）
 
 ## 其他
 
 ### 84. Java 中的基本数据结构有哪些？
 
+- **数组**：固定大小，随机访问
+- **List**：ArrayList（动态数组）、LinkedList（双向链表）
+- **Set**：HashSet（哈希表）、TreeSet（红黑树）
+- **Map**：HashMap（哈希表）、TreeMap（红黑树）
+- **Queue**：LinkedList、PriorityQueue（优先队列）
+- **Stack**：栈（LIFO）
+
 ### 85. 数组和集合的区别？
+
+| 特性 | 数组 | 集合 |
+|------|-----|------|
+| **长度** | 固定 | 动态 |
+| **类型** | 基本类型 + 引用类型 | 只能存储引用类型（包装类） |
+| **功能** | 简单 | 丰富（排序、查找等） |
+| **性能** | 略高 | 略低 |
+
+```java
+// 数组
+int[] arr = new int[10];  // 固定长度
+arr[0] = 1;
+
+// 集合
+List<Integer> list = new ArrayList<>();
+list.add(1);
+list.add(2);
+list.remove(0);
+```
 
 ### 86. JDK、JRE、JVM 的区别？
 
+```
+JDK (Java Development Kit) - 开发工具包
+├── JRE (Java Runtime Environment) - 运行环境
+│   ├── JVM (Java Virtual Machine) - 虚拟机
+│   └── Java 核心类库
+└── 开发工具（javac、jar、javadoc 等）
+```
+
+- **JDK**：开发 Java 程序（包含 JRE + 编译器）
+- **JRE**：运行 Java 程序（包含 JVM + 类库）
+- **JVM**：执行字节码，跨平台核心
+
 ### 87. Java 是编译型语言还是解释型语言？
+
+**两者都有**。
+
+1. **.java → .class**：编译（javac）
+2. **.class → 机器码**：JVM 解释执行 + JIT 编译优化
+
+```
+源代码(.java) → 编译 → 字节码(.class) → JVM 解释/JIT → 机器码
+```
 
 ### 88. Java 的跨平台性是如何实现的？
 
+通过 **JVM**（Java Virtual Machine）实现。
+
+```
+源代码 → 字节码（.class）→ JVM（不同平台）→ 机器码
+
+Windows JVM、Linux JVM、Mac JVM 都能执行相同的字节码
+```
+
+**口号**："Write Once, Run Anywhere"（一次编写，到处运行）
+
 ### 89. 什么是字节码？
 
+**字节码**（Bytecode）是 Java 编译后的中间代码（.class 文件），由 JVM 执行。
+
+```
+public class Hello {
+    public static void main(String[] args) {
+        System.out.println("Hello");
+    }
+}
+
+// 编译后的字节码（部分）
+0: getstatic     #2   // Field java/lang/System.out
+3: ldc           #3   // String Hello
+5: invokevirtual #4   // Method println
+8: return
+```
+
+**特点**：
+- **平台无关**：不是机器码，需要 JVM 翻译
+- **可优化**：JIT 可以优化热点代码
+
 ### 90. Java 8 有哪些新特性？
+
+1. **Lambda 表达式**：函数式编程
+   ```java
+   list.forEach(item -> System.out.println(item));
+   ```
+
+2. **Stream API**：流式操作集合
+   ```java
+   list.stream().filter(x -> x > 10).map(x -> x * 2).collect(Collectors.toList());
+   ```
+
+3. **Optional**：避免空指针
+   ```java
+   Optional<String> opt = Optional.ofNullable(str);
+   opt.ifPresent(System.out::println);
+   ```
+
+4. **接口默认方法**：接口可以有实现
+   ```java
+   interface MyInterface {
+       default void defaultMethod() {
+           System.out.println("默认方法");
+       }
+   }
+   ```
+
+5. **新的日期时间 API**：LocalDate、LocalTime、LocalDateTime
+
+6. **方法引用**：`System.out::println`
+
+7. **CompletableFuture**：异步编程
+
+8. **Nashorn JavaScript 引擎**：在 JVM 上运行 JS
+
+---
+
+**恭喜！Java 基础 90 题全部完成！🎉**
