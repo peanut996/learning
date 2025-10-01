@@ -101,6 +101,26 @@ When answering interview questions, follow these best practices:
      (Repeat for each question)
      ```
 
+0.5. **File Organization**: Each answer must be in a separate file
+   - Create individual answer files in `content/zh/interview/{topic}/` directory
+   - File naming: use descriptive kebab-case names (e.g., `mybatis-xml-vs-annotation.md`)
+   - Each answer file starts with a `###` heading (H3 level)
+   - The heading must include the question number (e.g., `### 20. XML 配置和注解开发的区别是什么?`)
+   - **NO sub-headings allowed** - Use numbered lists and bold text for formatting instead
+   - Example structure:
+     ```markdown
+     ### 20. XML 配置和注解开发的区别是什么?
+
+     **核心答案**
+
+     1. **配置方式差异**
+        - XML: ...
+        - 注解: ...
+
+     2. **使用场景**
+        ...
+     ```
+
 1. **Memorable Answers**: Provide answers that are easy to remember and understand
    - Use clear explanations with practical examples
    - Include mnemonic devices or mental models when helpful
