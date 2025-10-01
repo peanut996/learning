@@ -2188,13 +2188,13 @@ public class ThirdPartyConfig {
 <text x="130" y="486" text-anchor="start" font-size="11" fill="#333">3. 仍多个 → @Qualifier</text>
 <rect x="315" y="410" width="170" height="90" fill="#fff" stroke="#333" stroke-width="1" rx="3"/>
 <text x="400" y="430" text-anchor="middle" font-size="13" font-weight="bold" fill="#2e7d32">处理集合</text>
-<text x="325" y="450" text-anchor="start" font-size="11" fill="#333">List<T> → 所有类型 T</text>
-<text x="325" y="468" text-anchor="start" font-size="11" fill="#333">Map<String,T> → Bean</text>
+<text x="325" y="450" text-anchor="start" font-size="11" fill="#333">List&lt;T&gt; → 所有类型 T</text>
+<text x="325" y="468" text-anchor="start" font-size="11" fill="#333">Map&lt;String,T&gt; → Bean</text>
 <text x="325" y="486" text-anchor="start" font-size="11" fill="#333">名称作为 key</text>
 <rect x="510" y="410" width="170" height="90" fill="#fff" stroke="#333" stroke-width="1" rx="3"/>
 <text x="595" y="430" text-anchor="middle" font-size="13" font-weight="bold" fill="#f57c00">可选依赖</text>
 <text x="520" y="450" text-anchor="start" font-size="11" fill="#333">required=false</text>
-<text x="520" y="468" text-anchor="start" font-size="11" fill="#333">Optional<T></text>
+<text x="520" y="468" text-anchor="start" font-size="11" fill="#333">Optional&lt;T&gt;</text>
 <text x="520" y="486" text-anchor="start" font-size="11" fill="#333">@Nullable</text>
 </g>
 </svg>
