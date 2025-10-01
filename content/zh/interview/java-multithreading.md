@@ -744,48 +744,1141 @@ try {
 
 ### 10. InheritableThreadLocal 是什么？
 
+**核心答案**：InheritableThreadLocal 是 ThreadLocal 的子类，允许子线程继承父线程的 ThreadLocal 值。
+
+**详细说明**：
+
+普通 ThreadLocal 的值在线程间完全隔离，子线程无法访问父线程的 ThreadLocal 值。InheritableThreadLocal 解决了这个问题。
+
+**对比图示**：
+
+<svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+<text x="400" y="25" text-anchor="middle" font-size="16" font-weight="bold">ThreadLocal vs InheritableThreadLocal</text>
+<rect x="50" y="50" width="330" height="180" fill="#ffebee" stroke="#c62828" stroke-width="2" rx="5"/>
+<text x="215" y="80" text-anchor="middle" font-size="14" font-weight="bold" fill="#c62828">ThreadLocal (不继承)</text>
+<rect x="80" y="100" width="120" height="60" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="3"/>
+<text x="140" y="125" text-anchor="middle" font-size="12" font-weight="bold">父线程</text>
+<text x="140" y="145" text-anchor="middle" font-size="11">value = "Parent"</text>
+<rect x="230" y="100" width="120" height="60" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="3"/>
+<text x="290" y="125" text-anchor="middle" font-size="12" font-weight="bold">子线程</text>
+<text x="290" y="145" text-anchor="middle" font-size="11" fill="#c62828">value = null ✗</text>
+<path d="M 200 130 L 230 130" stroke="#c62828" stroke-width="2" stroke-dasharray="5,5" fill="none"/>
+<text x="215" y="125" text-anchor="middle" font-size="10" fill="#c62828">✗</text>
+<text x="80" y="190" font-size="11" fill="#c62828">• 子线程无法访问父线程的值</text>
+<text x="80" y="210" font-size="11" fill="#c62828">• 每个线程完全独立</text>
+<rect x="420" y="50" width="330" height="180" fill="#e8f5e9" stroke="#388e3c" stroke-width="2" rx="5"/>
+<text x="585" y="80" text-anchor="middle" font-size="14" font-weight="bold" fill="#388e3c">InheritableThreadLocal (继承)</text>
+<rect x="450" y="100" width="120" height="60" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="3"/>
+<text x="510" y="125" text-anchor="middle" font-size="12" font-weight="bold">父线程</text>
+<text x="510" y="145" text-anchor="middle" font-size="11">value = "Parent"</text>
+<rect x="600" y="100" width="120" height="60" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="3"/>
+<text x="660" y="125" text-anchor="middle" font-size="12" font-weight="bold">子线程</text>
+<text x="660" y="145" text-anchor="middle" font-size="11" fill="#388e3c">value = "Parent" ✓</text>
+<path d="M 570 130 L 600 130" stroke="#388e3c" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+<text x="585" y="125" text-anchor="middle" font-size="10" fill="#388e3c">继承</text>
+<text x="450" y="190" font-size="11" fill="#388e3c">• 子线程自动继承父线程的值</text>
+<text x="450" y="210" font-size="11" fill="#388e3c">• 创建子线程时复制</text>
+<text x="50" y="260" font-size="13" font-weight="bold">实现原理：</text>
+<rect x="50" y="275" width="700" height="160" fill="#f5f5f5" stroke="#666" stroke-width="1" rx="5"/>
+<text x="70" y="300" font-size="12" font-weight="bold">Thread 类中的两个变量：</text>
+<text x="80" y="325" font-size="11" font-family="monospace">ThreadLocal.ThreadLocalMap threadLocals;          // 普通 ThreadLocal</text>
+<text x="80" y="350" font-size="11" font-family="monospace">ThreadLocal.ThreadLocalMap inheritableThreadLocals; // 可继承的 ThreadLocal</text>
+<text x="70" y="380" font-size="12" font-weight="bold">继承时机：</text>
+<text x="80" y="405" font-size="11">在创建子线程时 (Thread 构造方法)，如果父线程的 inheritableThreadLocals 不为 null，</text>
+<text x="80" y="425" font-size="11">则将父线程的 inheritableThreadLocals <text fill="#388e3c" font-weight="bold">复制</text> 一份给子线程</text>
+<defs>
+<marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+<path d="M0,0 L0,6 L9,3 z" fill="#666"/>
+</marker>
+</defs>
+</svg>
+
+**使用场景**：
+- **链路追踪**：TraceId 在父子线程间传递
+- **用户上下文传递**：主线程的用户信息传递给子线程
+- **权限信息传递**：子线程需要父线程的权限上下文
+
+**基本用法**：
+```java
+// 创建 InheritableThreadLocal
+private static InheritableThreadLocal<String> context = new InheritableThreadLocal<>();
+
+// 父线程设置值
+context.set("父线程的值");
+
+// 创建子线程
+new Thread(() -> {
+    // 子线程可以直接获取父线程的值
+    String value = context.get(); // 输出: "父线程的值"
+}).start();
+```
+
+**关键要点**：
+- ✓ **自动继承**：子线程创建时自动复制父线程的值
+- ✓ **独立修改**：子线程修改不影响父线程
+- ⚠ **线程池失效**：线程池复用线程，无法继承新任务的父线程值
+- ⚠ **仍需 remove()**：防止内存泄漏
+
+**线程池场景的问题**：
+- 线程池中的线程是复用的
+- InheritableThreadLocal 只在线程**创建时**继承
+- 提交新任务时，线程已存在，不会重新继承
+
+**解决方案**：使用阿里的 **TransmittableThreadLocal** (TTL)
+
+**记忆口诀**：Inheritable 父传子，线程创建时复制，线程池需用 TTL
+
 ## 线程池
 
 ### 11. 为什么使用线程池？
 
+**核心答案**：线程池通过复用线程、控制并发数、统一管理线程，提升性能、降低资源消耗、便于管理。
+
+**详细说明**：
+
+**线程池的优势**：
+
+<svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+<text x="400" y="25" text-anchor="middle" font-size="16" font-weight="bold">使用线程池的优势</text>
+<rect x="50" y="50" width="330" height="180" fill="#ffebee" stroke="#c62828" stroke-width="2" rx="5"/>
+<text x="215" y="80" text-anchor="middle" font-size="14" font-weight="bold" fill="#c62828">✗ 不使用线程池</text>
+<rect x="80" y="100" width="270" height="110" fill="#fff" stroke="#666" stroke-width="1" rx="3"/>
+<text x="90" y="120" font-size="11">每次任务都创建新线程：</text>
+<text x="100" y="140" font-size="10" fill="#c62828">• 频繁创建/销毁线程，开销大</text>
+<text x="100" y="160" font-size="10" fill="#c62828">• 无法控制并发数，可能 OOM</text>
+<text x="100" y="180" font-size="10" fill="#c62828">• 难以统一管理和监控</text>
+<text x="100" y="200" font-size="10" fill="#c62828">• 线程创建时间影响响应速度</text>
+<rect x="420" y="50" width="330" height="180" fill="#e8f5e9" stroke="#388e3c" stroke-width="2" rx="5"/>
+<text x="585" y="80" text-anchor="middle" font-size="14" font-weight="bold" fill="#388e3c">✓ 使用线程池</text>
+<rect x="450" y="100" width="270" height="110" fill="#fff" stroke="#666" stroke-width="1" rx="3"/>
+<text x="460" y="120" font-size="11">线程复用和统一管理：</text>
+<text x="470" y="140" font-size="10" fill="#388e3c">• 线程复用，降低资源消耗</text>
+<text x="470" y="160" font-size="10" fill="#388e3c">• 控制最大并发数，防止资源耗尽</text>
+<text x="470" y="180" font-size="10" fill="#388e3c">• 统一管理、调优、监控</text>
+<text x="470" y="200" font-size="10" fill="#388e3c">• 提高响应速度（线程已创建）</text>
+<text x="50" y="260" font-size="13" font-weight="bold">四大核心优势：</text>
+<rect x="50" y="275" width="330" height="155" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
+<text x="215" y="300" text-anchor="middle" font-size="13" font-weight="bold">1️⃣ 降低资源消耗</text>
+<text x="70" y="325" font-size="11">• 线程复用，减少创建/销毁开销</text>
+<text x="70" y="345" font-size="11">• 一个线程可以处理多个任务</text>
+<text x="215" y="375" text-anchor="middle" font-size="13" font-weight="bold">2️⃣ 提高响应速度</text>
+<text x="70" y="400" font-size="11">• 线程已创建，任务到达立即执行</text>
+<text x="70" y="420" font-size="11">• 无需等待线程创建时间</text>
+<rect x="420" y="275" width="330" height="155" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="5"/>
+<text x="585" y="300" text-anchor="middle" font-size="13" font-weight="bold">3️⃣ 提高可管理性</text>
+<text x="440" y="325" font-size="11">• 统一分配、调优、监控</text>
+<text x="440" y="345" font-size="11">• 控制并发数，防止资源耗尽</text>
+<text x="585" y="375" text-anchor="middle" font-size="13" font-weight="bold">4️⃣ 提供更多功能</text>
+<text x="440" y="400" font-size="11">• 定时执行、周期执行</text>
+<text x="440" y="420" font-size="11">• 任务队列、拒绝策略</text>
+</svg>
+
+**性能对比**：
+
+| 对比项 | 手动创建线程 | 线程池 |
+|-------|------------|-------|
+| **创建销毁开销** | 每次都创建/销毁 | 线程复用，开销低 |
+| **响应速度** | 需等待线程创建 | 立即执行 |
+| **资源控制** | 无法限制线程数 | 可控制最大并发 |
+| **管理维护** | 分散，难以管理 | 集中管理，易监控 |
+| **功能扩展** | 功能有限 | 定时、周期、队列等 |
+
+**典型使用场景**：
+- **Web 服务器**：处理 HTTP 请求
+- **数据库连接池**：管理数据库连接
+- **异步任务处理**：邮件发送、日志记录
+- **批量数据处理**：数据导入、报表生成
+- **定时任务**：ScheduledThreadPool
+
+**关键要点**：
+- ✓ **降低开销**：线程复用避免频繁创建销毁
+- ✓ **提高响应**：线程预创建，任务到达立即执行
+- ✓ **资源可控**：限制最大线程数，防止 OOM
+- ✓ **便于管理**：统一管理、监控、调优
+
+**记忆口诀**：线程池复用快，资源可控易管理
+
 ### 12. 线程池的核心参数？
+
+**核心答案**：ThreadPoolExecutor 有 7 个核心参数：核心线程数、最大线程数、存活时间、时间单位、任务队列、线程工厂、拒绝策略。
+
+**详细说明**：
+
+**ThreadPoolExecutor 构造方法**：
+```java
+public ThreadPoolExecutor(
+    int corePoolSize,              // 核心线程数
+    int maximumPoolSize,           // 最大线程数
+    long keepAliveTime,            // 空闲线程存活时间
+    TimeUnit unit,                 // 时间单位
+    BlockingQueue<Runnable> workQueue,   // 任务队列
+    ThreadFactory threadFactory,   // 线程工厂
+    RejectedExecutionHandler handler     // 拒绝策略
+)
+```
+
+**7 大核心参数图示**：
+
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+<text x="400" y="25" text-anchor="middle" font-size="16" font-weight="bold">线程池 7 大核心参数</text>
+<rect x="50" y="50" width="700" height="530" fill="#f5f5f5" stroke="#666" stroke-width="2" rx="5"/>
+<rect x="70" y="70" width="320" height="80" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
+<text x="230" y="95" text-anchor="middle" font-size="13" font-weight="bold">1️⃣ corePoolSize (核心线程数)</text>
+<text x="85" y="120" font-size="11">• 线程池的基本大小</text>
+<text x="85" y="140" font-size="11">• 即使空闲也会保留在池中</text>
+<rect x="410" y="70" width="320" height="80" fill="#e8f5e9" stroke="#388e3c" stroke-width="2" rx="5"/>
+<text x="570" y="95" text-anchor="middle" font-size="13" font-weight="bold">2️⃣ maximumPoolSize (最大线程数)</text>
+<text x="425" y="120" font-size="11">• 线程池允许创建的最大线程数</text>
+<text x="425" y="140" font-size="11">• 包含核心线程 + 非核心线程</text>
+<rect x="70" y="165" width="320" height="80" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="5"/>
+<text x="230" y="190" text-anchor="middle" font-size="13" font-weight="bold">3️⃣ keepAliveTime (存活时间)</text>
+<text x="85" y="215" font-size="11">• 非核心线程空闲后的存活时间</text>
+<text x="85" y="235" font-size="11">• 超过此时间将被回收</text>
+<rect x="410" y="165" width="320" height="80" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="2" rx="5"/>
+<text x="570" y="190" text-anchor="middle" font-size="13" font-weight="bold">4️⃣ unit (时间单位)</text>
+<text x="425" y="215" font-size="11">• keepAliveTime 的时间单位</text>
+<text x="425" y="235" font-size="11">• SECONDS、MILLISECONDS 等</text>
+<rect x="70" y="260" width="660" height="100" fill="#ffebee" stroke="#c62828" stroke-width="2" rx="5"/>
+<text x="400" y="285" text-anchor="middle" font-size="13" font-weight="bold">5️⃣ workQueue (任务队列)</text>
+<text x="85" y="310" font-size="11">• 用于保存等待执行的任务的阻塞队列</text>
+<text x="85" y="330" font-size="11">• <text font-weight="bold">ArrayBlockingQueue</text>: 有界队列</text>
+<text x="85" y="350" font-size="11">• <text font-weight="bold">LinkedBlockingQueue</text>: 无界队列（默认 Integer.MAX_VALUE）</text>
+<rect x="70" y="375" width="320" height="95" fill="#e1f5fe" stroke="#0277bd" stroke-width="2" rx="5"/>
+<text x="230" y="400" text-anchor="middle" font-size="13" font-weight="bold">6️⃣ threadFactory (线程工厂)</text>
+<text x="85" y="425" font-size="11">• 用于创建新线程</text>
+<text x="85" y="445" font-size="11">• 可自定义线程名称、优先级等</text>
+<text x="85" y="465" font-size="11">• 默认使用 Executors.defaultThreadFactory()</text>
+<rect x="410" y="375" width="320" height="95" fill="#fff9c4" stroke="#f57f17" stroke-width="2" rx="5"/>
+<text x="570" y="400" text-anchor="middle" font-size="13" font-weight="bold">7️⃣ handler (拒绝策略)</text>
+<text x="425" y="425" font-size="11">• 任务无法执行时的处理策略</text>
+<text x="425" y="445" font-size="11">• AbortPolicy (默认，抛异常)</text>
+<text x="425" y="465" font-size="11">• CallerRunsPolicy、DiscardPolicy 等</text>
+<text x="70" y="495" font-size="12" font-weight="bold">参数关系：</text>
+<text x="70" y="520" font-size="11">当任务数 &gt; corePoolSize 时，任务进入队列；队列满时，创建新线程直到 maximumPoolSize；</text>
+<text x="70" y="540" font-size="11">超过 maximumPoolSize 且队列满时，执行拒绝策略；非核心线程空闲 keepAliveTime 后回收。</text>
+<text x="70" y="565" font-size="11" font-weight="bold" fill="#c62828">记忆口诀：核心最大存活时间单位，队列工厂拒绝策略</text>
+</svg>
+
+**参数详解**：
+
+| 参数 | 说明 | 典型值 |
+|------|------|-------|
+| **corePoolSize** | 核心线程数，始终保留 | CPU 密集: CPU 核数+1<br>IO 密集: CPU 核数*2 |
+| **maximumPoolSize** | 最大线程数 | 根据业务场景调整 |
+| **keepAliveTime** | 非核心线程空闲存活时间 | 60 秒 |
+| **unit** | 时间单位 | TimeUnit.SECONDS |
+| **workQueue** | 任务队列 | ArrayBlockingQueue(有界)<br>LinkedBlockingQueue(无界) |
+| **threadFactory** | 线程工厂 | 自定义或默认 |
+| **handler** | 拒绝策略 | AbortPolicy(抛异常) |
+
+**关键要点**：
+- ✓ **corePoolSize**：始终保留的线程数
+- ✓ **maximumPoolSize**：最大可创建的线程数
+- ✓ **workQueue**：任务队列，建议使用有界队列
+- ⚠ **无界队列风险**：可能导致 OOM
+- ⚠ **合理设置参数**：根据任务类型（CPU 密集/IO 密集）调整
+
+**记忆口诀**：核心最大时间单位，队列工厂拒绝策略
 
 ### 13. 线程池的执行流程？
 
+**核心答案**：线程池执行任务遵循"核心线程 → 队列 → 最大线程 → 拒绝策略"的流程。
+
+**详细说明**：
+
+**执行流程图**：
+
+<svg viewBox="0 0 800 550" xmlns="http://www.w3.org/2000/svg">
+<text x="400" y="25" text-anchor="middle" font-size="16" font-weight="bold">线程池执行流程</text>
+<rect x="300" y="50" width="200" height="60" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
+<text x="400" y="85" text-anchor="middle" font-size="14" font-weight="bold">提交任务</text>
+<rect x="300" y="140" width="200" height="60" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="5"/>
+<text x="400" y="165" text-anchor="middle" font-size="12">线程数 &lt; corePoolSize?</text>
+<text x="400" y="185" text-anchor="middle" font-size="11">(当前线程数 &lt; 核心线程数)</text>
+<rect x="50" y="240" width="180" height="60" fill="#e8f5e9" stroke="#388e3c" stroke-width="2" rx="5"/>
+<text x="140" y="265" text-anchor="middle" font-size="12" font-weight="bold">创建核心线程</text>
+<text x="140" y="285" text-anchor="middle" font-size="11">执行任务</text>
+<rect x="310" y="240" width="180" height="60" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="5"/>
+<text x="400" y="265" text-anchor="middle" font-size="12">队列是否已满?</text>
+<text x="400" y="285" text-anchor="middle" font-size="11">(workQueue.offer)</text>
+<rect x="260" y="340" width="120" height="60" fill="#e8f5e9" stroke="#388e3c" stroke-width="2" rx="5"/>
+<text x="320" y="365" text-anchor="middle" font-size="12" font-weight="bold">加入队列</text>
+<text x="320" y="385" text-anchor="middle" font-size="11">等待执行</text>
+<rect x="420" y="340" width="180" height="60" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="5"/>
+<text x="510" y="365" text-anchor="middle" font-size="11">线程数 &lt; maximumPoolSize?</text>
+<text x="510" y="385" text-anchor="middle" font-size="11">(当前 &lt; 最大线程数)</text>
+<rect x="420" y="440" width="180" height="60" fill="#e8f5e9" stroke="#388e3c" stroke-width="2" rx="5"/>
+<text x="510" y="465" text-anchor="middle" font-size="12" font-weight="bold">创建非核心线程</text>
+<text x="510" y="485" text-anchor="middle" font-size="11">执行任务</text>
+<rect x="640" y="440" width="140" height="60" fill="#ffebee" stroke="#c62828" stroke-width="2" rx="5"/>
+<text x="710" y="465" text-anchor="middle" font-size="12" font-weight="bold">执行拒绝策略</text>
+<text x="710" y="485" text-anchor="middle" font-size="11">handler.reject</text>
+<path d="M 400 110 L 400 140" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+<path d="M 300 170 L 140 240" stroke="#388e3c" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+<text x="200" y="210" font-size="11" fill="#388e3c" font-weight="bold">是</text>
+<path d="M 400 200 L 400 240" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+<text x="420" y="225" font-size="11" fill="#666" font-weight="bold">否</text>
+<path d="M 310 270 L 230 270" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+<text x="270" y="265" font-size="11" fill="#666">否</text>
+<path d="M 400 300 L 320 340" stroke="#388e3c" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+<text x="350" y="325" font-size="11" fill="#388e3c" font-weight="bold">否</text>
+<path d="M 490 270 L 510 340" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+<text x="515" y="310" font-size="11" fill="#666" font-weight="bold">是</text>
+<path d="M 510 400 L 510 440" stroke="#388e3c" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+<text x="530" y="425" font-size="11" fill="#388e3c" font-weight="bold">是</text>
+<path d="M 600 370 L 710 440" stroke="#c62828" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+<text x="670" y="410" font-size="11" fill="#c62828" font-weight="bold">否</text>
+<defs>
+<marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+<path d="M0,0 L0,6 L9,3 z" fill="#666"/>
+</marker>
+</defs>
+</svg>
+
+**详细流程说明**：
+
+1. **判断核心线程数**
+   - 如果当前线程数 < corePoolSize
+   - 创建新的核心线程执行任务（即使有空闲核心线程）
+
+2. **任务加入队列**
+   - 如果核心线程已满
+   - 尝试将任务加入 workQueue
+
+3. **创建非核心线程**
+   - 如果队列已满
+   - 且当前线程数 < maximumPoolSize
+   - 创建非核心线程执行任务
+
+4. **执行拒绝策略**
+   - 如果队列满 且 线程数 = maximumPoolSize
+   - 执行 RejectedExecutionHandler
+
+**关键要点**：
+- ✓ **优先级**：核心线程 → 队列 → 非核心线程 → 拒绝
+- ⚠ **注意**：核心线程数未满时，即使有空闲线程也会创建新线程
+- ✓ **队列作用**：缓冲任务，避免频繁创建线程
+- ⚠ **无界队列**：maximumPoolSize 参数会失效（永远不会创建非核心线程）
+
+**记忆口诀**：核心满了进队列，队列满了加线程，线程满了就拒绝
+
 ### 14. 线程池的拒绝策略有哪些？
+
+**核心答案**：Java 提供了 4 种内置拒绝策略：AbortPolicy（抛异常）、CallerRunsPolicy（调用者运行）、DiscardPolicy（丢弃）、DiscardOldestPolicy（丢弃最旧）。
+
+**详细说明**：
+
+**4 种拒绝策略对比**：
+
+<svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+<text x="400" y="25" text-anchor="middle" font-size="16" font-weight="bold">线程池 4 种拒绝策略</text>
+<rect x="50" y="50" width="330" height="200" fill="#ffebee" stroke="#c62828" stroke-width="2" rx="5"/>
+<text x="215" y="80" text-anchor="middle" font-size="14" font-weight="bold">1️⃣ AbortPolicy (默认)</text>
+<text x="70" y="110" font-size="11" font-weight="bold">行为：</text>
+<text x="80" y="130" font-size="11">• 直接抛出 RejectedExecutionException</text>
+<text x="80" y="150" font-size="11">• 拒绝任务，不执行</text>
+<text x="70" y="175" font-size="11" font-weight="bold">使用场景：</text>
+<text x="80" y="195" font-size="11">• 任务重要，不能丢失</text>
+<text x="80" y="215" font-size="11">• 需要感知任务提交失败</text>
+<text x="80" y="235" font-size="11" fill="#c62828">✓ 推荐：大部分场景使用</text>
+<rect x="420" y="50" width="330" height="200" fill="#e8f5e9" stroke="#388e3c" stroke-width="2" rx="5"/>
+<text x="585" y="80" text-anchor="middle" font-size="14" font-weight="bold">2️⃣ CallerRunsPolicy</text>
+<text x="440" y="110" font-size="11" font-weight="bold">行为：</text>
+<text x="450" y="130" font-size="11">• 由调用线程（提交任务的线程）执行</text>
+<text x="450" y="150" font-size="11">• 不丢弃任务</text>
+<text x="440" y="175" font-size="11" font-weight="bold">使用场景：</text>
+<text x="450" y="195" font-size="11">• 任务不能丢失</text>
+<text x="450" y="215" font-size="11">• 可以牺牲调用线程性能</text>
+<text x="450" y="235" font-size="11" fill="#388e3c">✓ 优点：提供负反馈，降低提交速度</text>
+<rect x="50" y="270" width="330" height="200" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="5"/>
+<text x="215" y="300" text-anchor="middle" font-size="14" font-weight="bold">3️⃣ DiscardPolicy</text>
+<text x="70" y="330" font-size="11" font-weight="bold">行为：</text>
+<text x="80" y="350" font-size="11">• 静默丢弃任务</text>
+<text x="80" y="370" font-size="11">• 不抛异常，不执行</text>
+<text x="70" y="395" font-size="11" font-weight="bold">使用场景：</text>
+<text x="80" y="415" font-size="11">• 任务不重要，可以丢失</text>
+<text x="80" y="435" font-size="11">• 如：日志记录、数据采集</text>
+<text x="80" y="455" font-size="11" fill="#f57c00">⚠ 危险：任务丢失无感知</text>
+<rect x="420" y="270" width="330" height="200" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
+<text x="585" y="300" text-anchor="middle" font-size="14" font-weight="bold">4️⃣ DiscardOldestPolicy</text>
+<text x="440" y="330" font-size="11" font-weight="bold">行为：</text>
+<text x="450" y="350" font-size="11">• 丢弃队列中最旧的任务</text>
+<text x="450" y="370" font-size="11">• 然后重新提交当前任务</text>
+<text x="440" y="395" font-size="11" font-weight="bold">使用场景：</text>
+<text x="450" y="415" font-size="11">• 新任务优先级高于旧任务</text>
+<text x="450" y="435" font-size="11">• 如：实时数据处理</text>
+<text x="450" y="455" font-size="11" fill="#1976d2">⚠ 注意：优先级队列慎用</text>
+</svg>
+
+**策略对比表**：
+
+| 拒绝策略 | 行为 | 是否抛异常 | 适用场景 |
+|---------|------|-----------|---------|
+| **AbortPolicy** | 抛异常拒绝 | ✓ 是 | 默认策略，任务不能丢 |
+| **CallerRunsPolicy** | 调用者执行 | ✗ 否 | 任务不能丢，可牺牲提交线程性能 |
+| **DiscardPolicy** | 静默丢弃 | ✗ 否 | 任务可丢失（慎用） |
+| **DiscardOldestPolicy** | 丢弃最旧任务 | ✗ 否 | 新任务优先级高 |
+
+**自定义拒绝策略**：
+```java
+// 实现 RejectedExecutionHandler 接口
+public class CustomRejectedHandler implements RejectedExecutionHandler {
+    @Override
+    public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+        // 自定义处理逻辑
+        // 例如：记录日志、存入数据库、发送告警等
+        log.error("Task rejected: {}", r);
+    }
+}
+```
+
+**关键要点**：
+- ✓ **AbortPolicy**：默认策略，抛异常，任务不丢失
+- ✓ **CallerRunsPolicy**：调用者执行，提供负反馈
+- ⚠ **DiscardPolicy**：静默丢弃，危险！
+- ⚠ **DiscardOldestPolicy**：丢弃最旧任务，慎用
+
+**记忆口诀**：Abort 抛异常，Caller 自己干，Discard 静默丢，Oldest 丢最旧
 
 ### 15. 常见的线程池有哪些？
 
+**核心答案**：Executors 提供了 5 种常见线程池：FixedThreadPool、CachedThreadPool、SingleThreadExecutor、ScheduledThreadPool、WorkStealingPool，但阿里规约禁止直接使用。
+
+**详细说明**：
+
+**5 种线程池对比**：
+
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+<text x="400" y="25" text-anchor="middle" font-size="16" font-weight="bold">5 种常见线程池</text>
+<rect x="50" y="50" width="220" height="160" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
+<text x="160" y="75" text-anchor="middle" font-size="13" font-weight="bold">FixedThreadPool</text>
+<text x="60" y="100" font-size="10">固定大小线程池</text>
+<text x="60" y="120" font-size="10">• core = max = n</text>
+<text x="60" y="140" font-size="10">• 队列: LinkedBlockingQueue</text>
+<text x="60" y="160" font-size="10">• 场景: 负载较重的服务器</text>
+<text x="60" y="180" font-size="10" fill="#c62828">⚠ OOM风险: 无界队列</text>
+<text x="60" y="200" font-size="9">Executors.newFixedThreadPool(n)</text>
+<rect x="290" y="50" width="220" height="160" fill="#e8f5e9" stroke="#388e3c" stroke-width="2" rx="5"/>
+<text x="400" y="75" text-anchor="middle" font-size="13" font-weight="bold">CachedThreadPool</text>
+<text x="300" y="100" font-size="10">缓存线程池</text>
+<text x="300" y="120" font-size="10">• core = 0, max = Integer.MAX</text>
+<text x="300" y="140" font-size="10">• 队列: SynchronousQueue</text>
+<text x="300" y="160" font-size="10">• 场景: 短期异步小任务</text>
+<text x="300" y="180" font-size="10" fill="#c62828">⚠ OOM风险: 无限线程</text>
+<text x="300" y="200" font-size="9">Executors.newCachedThreadPool()</text>
+<rect x="530" y="50" width="220" height="160" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="5"/>
+<text x="640" y="75" text-anchor="middle" font-size="13" font-weight="bold">SingleThreadExecutor</text>
+<text x="540" y="100" font-size="10">单线程线程池</text>
+<text x="540" y="120" font-size="10">• core = max = 1</text>
+<text x="540" y="140" font-size="10">• 队列: LinkedBlockingQueue</text>
+<text x="540" y="160" font-size="10">• 场景: 串行执行任务</text>
+<text x="540" y="180" font-size="10" fill="#c62828">⚠ OOM风险: 无界队列</text>
+<text x="540" y="200" font-size="9">Executors.newSingleThreadExecutor()</text>
+<rect x="50" y="230" width="330" height="160" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="2" rx="5"/>
+<text x="215" y="255" text-anchor="middle" font-size="13" font-weight="bold">ScheduledThreadPool</text>
+<text x="60" y="280" font-size="10">定时/周期任务线程池</text>
+<text x="60" y="300" font-size="10">• core = n, max = Integer.MAX</text>
+<text x="60" y="320" font-size="10">• 队列: DelayedWorkQueue</text>
+<text x="60" y="340" font-size="10">• 场景: 定时任务、周期任务</text>
+<text x="60" y="360" font-size="10" fill="#c62828">⚠ OOM风险: 无限线程</text>
+<text x="60" y="380" font-size="9">Executors.newScheduledThreadPool(n)</text>
+<rect x="420" y="230" width="330" height="160" fill="#e1f5fe" stroke="#0277bd" stroke-width="2" rx="5"/>
+<text x="585" y="255" text-anchor="middle" font-size="13" font-weight="bold">WorkStealingPool</text>
+<text x="430" y="280" font-size="10">工作窃取线程池 (Java 8)</text>
+<text x="430" y="300" font-size="10">• 基于 ForkJoinPool</text>
+<text x="430" y="320" font-size="10">• 并行度 = CPU 核数</text>
+<text x="430" y="340" font-size="10">• 场景: 并行计算密集任务</text>
+<text x="430" y="360" font-size="10" fill="#388e3c">✓ 推荐: 计算密集场景</text>
+<text x="430" y="380" font-size="9">Executors.newWorkStealingPool()</text>
+<rect x="50" y="410" width="700" height="170" fill="#fff9c4" stroke="#f57f17" stroke-width="2" rx="5"/>
+<text x="400" y="435" text-anchor="middle" font-size="14" font-weight="bold" fill="#c62828">⚠ 阿里巴巴 Java 开发手册强制规约</text>
+<text x="70" y="460" font-size="12" font-weight="bold">禁止使用 Executors 创建线程池，必须手动创建 ThreadPoolExecutor</text>
+<text x="70" y="485" font-size="11">原因：</text>
+<text x="80" y="505" font-size="10">1. FixedThreadPool 和 SingleThreadExecutor 使用无界队列，可能堆积大量请求导致 OOM</text>
+<text x="80" y="525" font-size="10">2. CachedThreadPool 和 ScheduledThreadPool 允许创建 Integer.MAX_VALUE 个线程，可能 OOM</text>
+<text x="70" y="550" font-size="11" fill="#388e3c">推荐：手动创建 ThreadPoolExecutor，明确指定核心参数和有界队列</text>
+<text x="70" y="570" font-size="9" font-family="monospace">new ThreadPoolExecutor(core, max, time, unit, new ArrayBlockingQueue&lt;&gt;(capacity), factory, handler)</text>
+</svg>
+
+**参数对比表**：
+
+| 线程池类型 | corePoolSize | maximumPoolSize | 队列类型 | 主要用途 | OOM 风险 |
+|-----------|-------------|-----------------|---------|---------|---------|
+| **FixedThreadPool** | n | n | LinkedBlockingQueue(无界) | 固定线程数 | ✗ 队列堆积 |
+| **CachedThreadPool** | 0 | Integer.MAX_VALUE | SynchronousQueue | 短期异步任务 | ✗ 线程过多 |
+| **SingleThreadExecutor** | 1 | 1 | LinkedBlockingQueue(无界) | 串行执行 | ✗ 队列堆积 |
+| **ScheduledThreadPool** | n | Integer.MAX_VALUE | DelayedWorkQueue | 定时/周期任务 | ✗ 线程过多 |
+| **WorkStealingPool** | CPU核数 | CPU核数 | ForkJoinPool内部队列 | 并行计算 | ✓ 相对安全 |
+
+**关键要点**：
+- ⚠ **禁止直接使用 Executors**：遵循阿里规约
+- ✓ **推荐手动创建**：使用 ThreadPoolExecutor，明确参数
+- ⚠ **无界队列风险**：可能导致 OOM
+- ⚠ **无限线程风险**：可能导致 OOM
+- ✓ **使用有界队列**：ArrayBlockingQueue 等
+
+**记忆口诀**：Fixed 固定数，Cached 无限大，Single 单线程，Scheduled 定时跑，WorkStealing 会窃取，Executors 别直接用
+
 ### 16. FixedThreadPool 和 CachedThreadPool 的区别？
+
+**核心答案**：FixedThreadPool 固定线程数+无界队列，CachedThreadPool 无限线程+直接交接，分别适合稳定负载和短期突发任务。
+
+**详细对比**：
+
+| 对比项 | FixedThreadPool | CachedThreadPool |
+|-------|----------------|------------------|
+| **核心线程数** | n（固定） | 0 |
+| **最大线程数** | n（固定） | Integer.MAX_VALUE |
+| **任务队列** | LinkedBlockingQueue（无界） | SynchronousQueue（容量0） |
+| **线程创建** | 最多 n 个 | 无限制 |
+| **线程回收** | 不回收核心线程 | 60秒空闲后回收 |
+| **适用场景** | 负载稳定，任务量可控 | 短期突发，任务执行快 |
+| **OOM风险** | 队列堆积导致 OOM | 线程过多导致 OOM |
+
+**关键要点**：
+- ✓ **Fixed**：线程数固定，队列无限
+- ✓ **Cached**：线程数无限，队列容量0
+- ⚠ **都有OOM风险**：禁止生产使用
+
+**记忆口诀**：Fixed 队列长，Cached 线程多
 
 ### 17. 如何合理设置线程池大小？
 
+**核心答案**：CPU 密集型任务：N+1，IO 密集型任务：2N 或 N/(1-阻塞系数)，实际需压测调优。
+
+**计算公式**：
+
+**1. CPU 密集型任务**：
+```
+最佳线程数 = CPU 核数 + 1
+```
+- 原因：任务主要消耗 CPU，线程数过多会增加上下文切换
+- +1：防止偶尔的缺页中断或其他原因导致的线程暂停
+
+**2. IO 密集型任务**：
+```
+最佳线程数 = CPU 核数 × 2
+或
+最佳线程数 = CPU 核数 / (1 - 阻塞系数)
+```
+- 阻塞系数：0.8-0.9（线程 80%-90% 时间在等待 IO）
+- 例如：8核 CPU，阻塞系数 0.9，线程数 = 8 / (1-0.9) = 80
+
+**3. 混合型任务**：
+```
+建议拆分为 CPU 密集和 IO 密集分别处理
+```
+
+**关键要点**：
+- ✓ **公式仅供参考**：实际需要压测调优
+- ✓ **监控指标**：CPU 使用率、任务等待时间、吞吐量
+- ✓ **动态调整**：使用 ThreadPoolExecutor 的 setCorePoolSize() 动态调整
+
+**记忆口诀**：CPU 密集 N+1，IO 密集 2N 起，压测调优最重要
+
 ### 18. 线程池如何优雅关闭？shutdown() 和 shutdownNow() 的区别？
+
+**核心答案**：shutdown() 温和关闭（等待任务完成），shutdownNow() 立即关闭（中断任务），生产环境优先 shutdown()。
+
+**对比表**：
+
+| 对比项 | shutdown() | shutdownNow() |
+|-------|-----------|--------------|
+| **行为** | 不接受新任务，等待已提交任务完成 | 不接受新任务，尝试停止所有任务 |
+| **队列任务** | 会执行完 | 不执行，返回未执行任务列表 |
+| **执行中任务** | 等待执行完 | 发送中断信号 |
+| **返回值** | void | List&lt;Runnable&gt; 未执行的任务 |
+| **推荐度** | ✓ 生产环境首选 | ⚠ 紧急情况使用 |
+
+**优雅关闭最佳实践**：
+```java
+executor.shutdown(); // 温和关闭
+try {
+    // 等待60秒
+    if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+        // 超时则强制关闭
+        executor.shutdownNow();
+        // 再等待60秒
+        if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+            System.err.println("线程池无法终止");
+        }
+    }
+} catch (InterruptedException e) {
+    executor.shutdownNow();
+    Thread.currentThread().interrupt();
+}
+```
+
+**关键要点**：
+- ✓ **shutdown()**：优雅关闭，等待任务完成
+- ⚠ **shutdownNow()**：强制关闭，可能丢失任务
+- ✓ **最佳实践**：先 shutdown()，超时再 shutdownNow()
+
+**记忆口诀**：shutdown 等完成，shutdownNow 强制停
 
 ### 19. execute() 和 submit() 的区别？
 
+**核心答案**：execute() 无返回值，submit() 返回 Future，submit() 可获取结果和捕获异常。
+
+**详细对比**：
+
+| 对比项 | execute(Runnable) | submit(Callable/Runnable) |
+|-------|------------------|--------------------------|
+| **接口** | Executor | ExecutorService |
+| **参数类型** | Runnable | Callable 或 Runnable |
+| **返回值** | void | Future&lt;T&gt; |
+| **获取结果** | ✗ 不支持 | ✓ Future.get() |
+| **异常处理** | 抛出到控制台 | 封装在 Future 中 |
+| **使用场景** | 不关心结果的任务 | 需要获取结果或异常 |
+
+**关键要点**：
+- ✓ **execute()**：简单任务，不需要返回值
+- ✓ **submit()**：需要返回值或异常捕获
+- ⚠ **异常处理**：execute() 异常会直接打印，submit() 需 future.get() 才抛出
+
+**记忆口诀**：execute 不返回，submit 有 Future
+
 ### 20. 如何监控线程池状态？
+
+**核心答案**：通过 ThreadPoolExecutor 提供的监控方法获取线程池状态，并可自定义扩展 beforeExecute/afterExecute 等钩子方法。
+
+**核心监控方法**：
+
+```java
+ThreadPoolExecutor executor = ...;
+
+// 线程池状态
+executor.getPoolSize();          // 当前线程数
+executor.getActiveCount();       // 活动线程数
+executor.getCorePoolSize();      // 核心线程数
+executor.getMaximumPoolSize();   // 最大线程数
+executor.getLargestPoolSize();   // 历史最大线程数
+
+// 任务统计
+executor.getTaskCount();         // 总任务数
+executor.getCompletedTaskCount(); // 已完成任务数
+executor.getQueue().size();      // 队列中任务数
+
+// 线程池状态
+executor.isShutdown();           // 是否关闭
+executor.isTerminated();         // 是否终止
+executor.isTerminating();        // 是否正在终止
+```
+
+**自定义监控（扩展 ThreadPoolExecutor）**：
+```java
+public class MonitoredThreadPool extends ThreadPoolExecutor {
+
+    @Override
+    protected void beforeExecute(Thread t, Runnable r) {
+        super.beforeExecute(t, r);
+        // 任务执行前监控
+        log.info("任务开始: {}", r);
+    }
+
+    @Override
+    protected void afterExecute(Runnable r, Throwable t) {
+        super.afterExecute(r, t);
+        // 任务执行后监控
+        log.info("任务结束: {}, 异常: {}", r, t);
+    }
+
+    @Override
+    protected void terminated() {
+        super.terminated();
+        // 线程池终止时监控
+        log.info("线程池已关闭");
+    }
+}
+```
+
+**关键监控指标**：
+- ✓ **线程数**：poolSize、activeCount
+- ✓ **队列**：queue.size()
+- ✓ **任务数**：taskCount、completedTaskCount
+- ✓ **拒绝数**：自定义 RejectedExecutionHandler 统计
+
+**记忆口诀**：线程数、队列长、任务数，三大指标要监控
 
 ## Future 和 CompletableFuture
 
 ### 21. Future 的作用？
 
+**核心答案**：Future 代表异步计算的结果，可以获取任务执行结果、取消任务、判断任务是否完成。
+
+**核心方法**：
+- `get()`：阻塞获取结果
+- `get(timeout, unit)`：超时获取
+- `cancel(boolean)`：取消任务
+- `isDone()`：是否完成
+- `isCancelled()`：是否取消
+
+**使用示例**：
+```java
+ExecutorService executor = Executors.newFixedThreadPool(1);
+
+Future<String> future = executor.submit(() -> {
+    Thread.sleep(1000);
+    return "任务结果";
+});
+
+// 阻塞获取结果
+String result = future.get(); // 阻塞直到任务完成
+
+// 超时获取
+String result = future.get(2, TimeUnit.SECONDS); // 最多等2秒
+
+// 取消任务
+future.cancel(true);
+```
+
+**关键要点**：
+- ✓ **异步获取结果**：不阻塞主线程提交任务
+- ⚠ **get() 阻塞**：调用 get() 会阻塞当前线程
+- ✓ **超时控制**：get(timeout) 避免无限等待
+- ⚠ **异常处理**：get() 抛出 ExecutionException
+
+**记忆口诀**：Future 异步返回，get 阻塞获取
+
 ### 22. Future 的局限性？
+
+**核心答案**：Future 只能被动获取结果、不支持组合、不支持回调，无法满足复杂异步编程需求。
+
+**5 大局限性**：
+
+1. **无法主动获取结果**
+   - 只能通过 get() 阻塞等待
+   - 无法主动通知
+
+2. **不支持回调**
+   - 无法在任务完成时自动执行后续操作
+   - 必须主动调用 get()
+
+3. **不支持多个 Future 组合**
+   - 无法组合多个异步任务
+   - 如：等待所有任务完成、任意一个完成等
+
+4. **不支持异常处理**
+   - 异常封装在 Future 中
+   - 必须 try-catch get()
+
+5. **无法链式调用**
+   - 不支持任务编排
+   - 无法实现复杂的异步流程
+
+**对比 CompletableFuture**：
+CompletableFuture 解决了 Future 的所有局限性。
+
+**记忆口诀**：Future 太被动，组合回调都不行
 
 ### 23. CompletableFuture 是什么？
 
+**核心答案**：CompletableFuture 是 Java 8 引入的增强版 Future，支持回调、组合、链式调用，实现强大的异步编程能力。
+
+**核心特性**：
+- ✓ **主动完成**：手动设置结果
+- ✓ **回调通知**：任务完成自动触发
+- ✓ **组合编排**：多任务编排（all/any）
+- ✓ **链式调用**：流式 API
+- ✓ **异常处理**：优雅的异常处理
+
+**创建 CompletableFuture**：
+```java
+// 1. 无返回值异步任务
+CompletableFuture.runAsync(() -> {
+    // 异步执行
+});
+
+// 2. 有返回值异步任务
+CompletableFuture.supplyAsync(() -> {
+    return "结果";
+});
+
+// 3. 手动创建并完成
+CompletableFuture<String> future = new CompletableFuture<>();
+future.complete("手动设置结果");
+```
+
+**关键要点**：
+- ✓ **异步执行**：runAsync、supplyAsync
+- ✓ **手动完成**：complete()
+- ✓ **默认线程池**：ForkJoinPool.commonPool()
+- ✓ **自定义线程池**：提供 Executor 参数
+
+**记忆口诀**：CompletableFuture 功能强，回调组合链式调
+
 ### 24. CompletableFuture 的常用方法？
 
+**核心答案**：CompletableFuture 提供丰富的方法用于任务编排、结果转换、组合、异常处理。
+
+**常用方法分类**：
+
+**1. 任务编排**：
+```java
+// thenApply - 转换结果
+future.thenApply(result -> result.toUpperCase());
+
+// thenAccept - 消费结果（无返回值）
+future.thenAccept(result -> System.out.println(result));
+
+// thenRun - 执行后续任务（不依赖结果）
+future.thenRun(() -> System.out.println("完成"));
+```
+
+**2. 多任务组合**：
+```java
+// thenCombine - 两个任务都完成后合并结果
+future1.thenCombine(future2, (r1, r2) -> r1 + r2);
+
+// thenCompose - 任务链式依赖
+future.thenCompose(r -> CompletableFuture.supplyAsync(() -> r + "2"));
+
+// allOf - 等待所有任务完成
+CompletableFuture.allOf(f1, f2, f3);
+
+// anyOf - 任意一个任务完成
+CompletableFuture.anyOf(f1, f2, f3);
+```
+
+**3. 异步后缀**：
+```java
+// Async 后缀 - 异步执行（使用线程池）
+future.thenApplyAsync(r -> r.toUpperCase());
+future.thenApplyAsync(r -> r.toUpperCase(), executor);
+```
+
+**方法命名规律**：
+- **then**：任务完成后
+- **Async**：异步执行
+- **Apply**：有返回值
+- **Accept**：无返回值（消费）
+- **Run**：不依赖前置结果
+
+**记忆口诀**：then 之后做，Async 异步跑，Apply 有返回，Accept 来消费
+
 ### 25. CompletableFuture 如何处理异常？
+
+**核心答案**：CompletableFuture 提供 exceptionally、handle、whenComplete 三种异常处理方式。
+
+**3 种异常处理方法**：
+
+```java
+// 1. exceptionally - 异常时返回默认值
+CompletableFuture.supplyAsync(() -> {
+    if (true) throw new RuntimeException("错误");
+    return "正常结果";
+}).exceptionally(ex -> {
+    System.err.println("异常: " + ex.getMessage());
+    return "默认值"; // 异常时的返回值
+});
+
+// 2. handle - 统一处理正常和异常
+CompletableFuture.supplyAsync(() -> {
+    if (true) throw new RuntimeException("错误");
+    return "正常结果";
+}).handle((result, ex) -> {
+    if (ex != null) {
+        return "异常返回: " + ex.getMessage();
+    }
+    return result;
+});
+
+// 3. whenComplete - 不改变结果，只执行额外逻辑
+CompletableFuture.supplyAsync(() -> "结果")
+.whenComplete((result, ex) -> {
+    if (ex != null) {
+        System.err.println("异常: " + ex);
+    } else {
+        System.out.println("成功: " + result);
+    }
+    // 不改变结果，原结果继续传递
+});
+```
+
+**对比表**：
+
+| 方法 | 能否改变结果 | 参数 | 使用场景 |
+|------|------------|------|---------|
+| **exceptionally** | ✓ 是 | Throwable | 异常时返回默认值 |
+| **handle** | ✓ 是 | result, Throwable | 统一处理正常和异常 |
+| **whenComplete** | ✗ 否 | result, Throwable | 记录日志、清理资源 |
+
+**关键要点**：
+- ✓ **exceptionally**：异常时提供默认值
+- ✓ **handle**：最灵活，统一处理
+- ✓ **whenComplete**：不改变结果，适合日志/清理
+- ⚠ **异常传播**：未处理的异常会传递给下游
+
+**记忆口诀**：exceptionally 默认值，handle 能改变，whenComplete 只旁观
 
 ## 其他问题
 
 ### 26. 什么是 ForkJoinPool？
 
+**核心答案**：ForkJoinPool 是专为分治任务设计的线程池，采用工作窃取算法，将大任务拆分（Fork）成小任务并行执行，最后合并（Join）结果。
+
+**核心概念**：
+- **Fork**：将大任务分解成小任务
+- **Join**：等待小任务完成并合并结果
+- **工作窃取**：空闲线程窃取其他线程的任务
+
+**典型使用场景**：
+- 归并排序
+- 大数组求和
+- 并行流（Stream API）
+
+**基本使用**：
+```java
+// 继承 RecursiveTask (有返回值) 或 RecursiveAction (无返回值)
+class SumTask extends RecursiveTask<Long> {
+    private long[] array;
+    private int start, end;
+    private static final int THRESHOLD = 1000; // 阈值
+
+    @Override
+    protected Long compute() {
+        if (end - start <= THRESHOLD) {
+            // 任务足够小，直接计算
+            long sum = 0;
+            for (int i = start; i < end; i++) {
+                sum += array[i];
+            }
+            return sum;
+        } else {
+            // 任务太大，分解
+            int mid = (start + end) / 2;
+            SumTask left = new SumTask(array, start, mid);
+            SumTask right = new SumTask(array, mid, end);
+
+            left.fork();  // Fork 左任务
+            right.fork(); // Fork 右任务
+
+            return left.join() + right.join(); // Join 合并结果
+        }
+    }
+}
+
+// 使用
+ForkJoinPool pool = new ForkJoinPool();
+Long result = pool.invoke(new SumTask(array, 0, array.length));
+```
+
+**关键要点**：
+- ✓ **分治思想**：大任务拆分成小任务
+- ✓ **工作窃取**：提高CPU利用率
+- ✓ **递归计算**：适合递归分治算法
+- ⚠ **不适合IO任务**：仅适合CPU密集型
+
+**记忆口诀**：Fork 拆分任务，Join 合并结果，工作窃取提效率
+
 ### 27. ForkJoinPool 和 ThreadPoolExecutor 的区别？
+
+**核心答案**：ForkJoinPool 专为分治任务设计，采用工作窃取；ThreadPoolExecutor 通用线程池，适合独立任务。
+
+**详细对比**：
+
+| 对比项 | ForkJoinPool | ThreadPoolExecutor |
+|-------|-------------|-------------------|
+| **设计目的** | 分治任务（递归） | 通用异步任务 |
+| **任务类型** | ForkJoinTask（可拆分） | Runnable/Callable |
+| **队列** | 双端队列（每个线程一个） | 单个共享队列 |
+| **调度策略** | 工作窃取算法 | 队列调度 |
+| **适用场景** | CPU密集型分治任务 | 通用异步任务 |
+| **典型应用** | 并行流、归并排序 | Web请求处理、异步任务 |
+
+**关键要点**：
+- ✓ **ForkJoin**：分治+窃取，适合递归计算
+- ✓ **ThreadPool**：通用线程池，适合独立任务
+- ⚠ **不要混用**：各有所长
+
+**记忆口诀**：ForkJoin 分而治之，ThreadPool 通用任务
 
 ### 28. 什么是工作窃取算法？
 
+**核心答案**：工作窃取（Work Stealing）是一种任务调度算法，空闲线程从其他繁忙线程的任务队列尾部"窃取"任务执行，提高CPU利用率。
+
+**工作原理**：
+
+1. **每个线程维护自己的双端队列**
+2. **线程从队列头部取任务**（LIFO）
+3. **空闲线程从其他队列尾部窃取任务**（FIFO）
+4. **减少竞争**：头尾不同方向
+
+**为什么要窃取**：
+- 任务执行时间不均匀
+- 某些线程空闲，某些线程繁忙
+- 平衡负载，提高CPU利用率
+
+**双端队列的妙处**：
+- 自己从头部取（LIFO）：保持热缓存
+- 别人从尾部窃（FIFO）：减少竞争
+
+**关键要点**：
+- ✓ **负载均衡**：自动平衡任务
+- ✓ **减少竞争**：双端队列设计巧妙
+- ✓ **提高利用率**：避免线程空闲
+- ⚠ **窃取开销**：有一定性能开销
+
+**记忆口诀**：双端队列各取一端，窃取任务平衡负载
+
 ### 29. 如何实现一个简单的线程池？
 
+**核心答案**：实现线程池需要任务队列、工作线程数组、线程管理（创建、复用、销毁）。
+
+**简化版实现**：
+
+```java
+public class SimpleThreadPool {
+    private final BlockingQueue<Runnable> taskQueue;
+    private final List<WorkerThread> workers;
+    private volatile boolean isRunning = true;
+
+    public SimpleThreadPool(int poolSize, int queueCapacity) {
+        taskQueue = new ArrayBlockingQueue<>(queueCapacity);
+        workers = new ArrayList<>(poolSize);
+
+        // 创建工作线程
+        for (int i = 0; i < poolSize; i++) {
+            WorkerThread worker = new WorkerThread();
+            workers.add(worker);
+            worker.start();
+        }
+    }
+
+    // 提交任务
+    public void execute(Runnable task) {
+        if (!isRunning) {
+            throw new IllegalStateException("线程池已关闭");
+        }
+        try {
+            taskQueue.put(task); // 阻塞直到队列有空间
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    // 关闭线程池
+    public void shutdown() {
+        isRunning = false;
+        for (WorkerThread worker : workers) {
+            worker.interrupt(); // 中断工作线程
+        }
+    }
+
+    // 工作线程
+    private class WorkerThread extends Thread {
+        @Override
+        public void run() {
+            while (isRunning || !taskQueue.isEmpty()) {
+                try {
+                    Runnable task = taskQueue.poll(1, TimeUnit.SECONDS);
+                    if (task != null) {
+                        task.run(); // 执行任务
+                    }
+                } catch (InterruptedException e) {
+                    // 线程被中断，退出
+                    break;
+                }
+            }
+        }
+    }
+}
+```
+
+**核心要素**：
+1. **任务队列**：BlockingQueue 存储待执行任务
+2. **工作线程**：循环从队列取任务执行
+3. **线程管理**：创建、复用、销毁线程
+4. **状态控制**：isRunning 控制运行状态
+
+**关键要点**：
+- ✓ **阻塞队列**：线程安全的任务队列
+- ✓ **线程复用**：工作线程循环取任务
+- ✓ **优雅关闭**：等待任务完成后关闭
+- ⚠ **简化版**：缺少很多功能（拒绝策略、监控等）
+
+**记忆口诀**：队列存任务，线程循环取，复用提性能
+
 ### 30. 线程池使用中有哪些注意事项？
+
+**核心答案**：合理设置参数、使用有界队列、自定义线程工厂、监控告警、优雅关闭、避免使用 Executors。
+
+**关键注意事项**：
+
+**1. 禁止使用 Executors 创建线程池**
+- ⚠ **强制规约**：阿里巴巴 Java 开发手册
+- ✓ **推荐**：手动创建 ThreadPoolExecutor
+
+**2. 合理设置核心参数**
+```java
+// 推荐配置
+new ThreadPoolExecutor(
+    corePoolSize,           // 根据任务类型计算
+    maximumPoolSize,        // 略大于核心线程数
+    60L,                    // 存活时间
+    TimeUnit.SECONDS,
+    new ArrayBlockingQueue<>(1000),  // 有界队列！
+    new CustomThreadFactory(),       // 自定义线程工厂
+    new AbortPolicy()               // 明确拒绝策略
+);
+```
+
+**3. 必须使用有界队列**
+- ⚠ **无界队列风险**：可能导致 OOM
+- ✓ **推荐**：ArrayBlockingQueue、LinkedBlockingQueue(指定容量)
+
+**4. 自定义线程工厂**
+```java
+new ThreadFactory() {
+    private AtomicInteger counter = new AtomicInteger(0);
+
+    @Override
+    public Thread newThread(Runnable r) {
+        Thread thread = new Thread(r);
+        thread.setName("MyPool-" + counter.incrementAndGet());
+        thread.setUncaughtExceptionHandler((t, e) -> {
+            log.error("线程异常: {}", t.getName(), e);
+        });
+        return thread;
+    }
+}
+```
+
+**5. 监控线程池状态**
+- ✓ **定期监控**：线程数、队列大小、任务数
+- ✓ **告警机制**：队列堆积、拒绝率告警
+
+**6. 优雅关闭**
+```java
+// 先 shutdown，超时再 shutdownNow
+executor.shutdown();
+if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+    executor.shutdownNow();
+}
+```
+
+**7. 异常处理**
+- ⚠ **execute() 异常**：直接打印，可能丢失
+- ✓ **submit() + Future.get()**：捕获异常
+- ✓ **自定义 afterExecute()**：统一处理
+
+**8. 避免任务相互依赖**
+- ⚠ **死锁风险**：任务A等待任务B，但B在队列中
+- ✓ **独立任务**：任务之间不要相互等待
+
+**9. 线程池隔离**
+- ✓ **不同业务使用不同线程池**
+- ⚠ **避免共享**：防止相互影响
+
+**10. 及时 remove() ThreadLocal**
+- ⚠ **内存泄漏**：线程池复用线程，ThreadLocal不清理会泄漏
+- ✓ **必须 remove()**：任务结束后清理
+
+**关键要点**：
+- ⚠ **禁用 Executors**：遵循阿里规约
+- ✓ **有界队列**：防止 OOM
+- ✓ **监控告警**：及时发现问题
+- ✓ **优雅关闭**：避免任务丢失
+- ✓ **清理 ThreadLocal**：防止内存泄漏
+
+**记忆口诀**：禁用Executors，有界队列防OOM，监控告警优雅关，ThreadLocal要清理
