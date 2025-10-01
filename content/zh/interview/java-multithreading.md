@@ -81,6 +81,11 @@
 **状态转换图**：
 
 <svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+<path d="M0,0 L0,6 L9,3 z" fill="#666"/>
+</marker>
+</defs>
 <rect x="350" y="20" width="100" height="50" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
 <text x="400" y="50" text-anchor="middle" font-size="14" font-weight="bold">NEW</text>
 <rect x="350" y="120" width="100" height="50" fill="#e8f5e9" stroke="#388e3c" stroke-width="2" rx="5"/>
@@ -95,25 +100,27 @@
 <text x="400" y="370" text-anchor="middle" font-size="14" font-weight="bold">TERMINATED</text>
 <path d="M 400 70 L 400 120" stroke="#1976d2" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
 <text x="420" y="100" font-size="11" fill="#1976d2">start()</text>
-<path d="M 350 145 L 220 220" stroke="#c62828" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-<text x="260" y="180" font-size="11" fill="#c62828">等待锁</text>
-<path d="M 200 220 L 380 170" stroke="#388e3c" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-<text x="280" y="195" font-size="11" fill="#388e3c">获得锁</text>
-<path d="M 400 170 L 400 220" stroke="#f57c00" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-<text x="420" y="200" font-size="11" fill="#f57c00">wait()</text>
-<path d="M 400 220 L 400 170" stroke="#388e3c" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-<text x="320" y="200" font-size="11" fill="#388e3c">notify()</text>
-<path d="M 450 145 L 630 220" stroke="#7b1fa2" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-<text x="540" y="180" font-size="11" fill="#7b1fa2">sleep(n)</text>
-<path d="M 640 220 L 430 170" stroke="#388e3c" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-<text x="540" y="195" font-size="11" fill="#388e3c">时间到</text>
-<path d="M 400 270 L 400 340" stroke="#455a64" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-<text x="420" y="310" font-size="11" fill="#455a64">run()结束</text>
-<defs>
-<marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
-<path d="M0,0 L0,6 L9,3 z" fill="#666"/>
-</marker>
-</defs>
+<!-- RUNNABLE -> BLOCKED (Downward Curve) -->
+<path d="M 350 155 C 300 210, 250 220, 220 225" stroke="#c62828" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+<text x="280" y="210" font-size="11" fill="#c62828">等待锁</text>
+<!-- BLOCKED -> RUNNABLE (Upward Curve) -->
+<path d="M 220 220 C 270 170, 320 160, 350 135" stroke="#388e3c" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+<text x="280" y="175" font-size="11" fill="#388e3c">获得锁</text>
+<!-- RUNNABLE -> WAITING -->
+<path d="M 400 170 C 440 190, 440 210, 400 220" stroke="#f57c00" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+<text x="445" y="200" font-size="11" fill="#f57c00">wait()</text>
+<!-- WAITING -> RUNNABLE -->
+<path d="M 400 220 C 360 200, 360 180, 400 170" stroke="#388e3c" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+<text x="325" y="200" font-size="11" fill="#388e3c">notify()</text>
+<!-- RUNNABLE -> TIMED_WAITING (Downward Curve) -->
+<path d="M 450 155 C 500 210, 550 220, 580 225" stroke="#7b1fa2" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+<text x="510" y="210" font-size="11" fill="#7b1fa2">sleep(n)</text>
+<!-- TIMED_WAITING -> RUNNABLE (Upward Curve) -->
+<path d="M 580 220 C 530 170, 480 160, 450 135" stroke="#388e3c" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+<text x="515" y="175" font-size="11" fill="#388e3c">时间到</text>
+<!-- RUNNABLE -> TERMINATED (Wider curve around WAITING) -->
+<path d="M 400 170 C 500 220, 500 290, 400 340" stroke="#455a64" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+<text x="505" y="255" font-size="11" fill="#455a64">run()结束</text>
 <text x="50" y="430" font-size="12" font-weight="bold">触发状态转换的关键方法：</text>
 <text x="50" y="450" font-size="11">• start() - NEW → RUNNABLE</text>
 <text x="50" y="470" font-size="11">• wait() - RUNNABLE → WAITING</text>
