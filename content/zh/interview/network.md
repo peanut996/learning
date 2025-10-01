@@ -9903,24 +9903,24 @@ TCP 三次握手是建立连接的过程，通过三次通信确认双方的发�
 <text x="450" y="205" text-anchor="middle" fill="white" font-size="11">SYN=1, seq=x</text>
 <rect x="120" y="170" width="160" height="40" fill="#f39c12" stroke="#e67e22" stroke-width="2" rx="5"/>
 <text x="200" y="195" text-anchor="middle" fill="white" font-size="14" font-weight="bold">SYN_SENT</text>
-<text x="850" y="195" text-anchor="start" fill="#666" font-size="12">客户端：请求建立连接</text>
-<text x="850" y="210" text-anchor="start" fill="#666" font-size="11">发送初始序列号 x</text>
+<text x="720" y="195" text-anchor="start" fill="#666" font-size="12">客户端：请求建立连接</text>
+<text x="720" y="210" text-anchor="start" fill="#666" font-size="11">发送初始序列号 x</text>
 <rect x="620" y="230" width="160" height="40" fill="#9b59b6" stroke="#8e44ad" stroke-width="2" rx="5"/>
 <text x="700" y="255" text-anchor="middle" fill="white" font-size="14" font-weight="bold">SYN_RCVD</text>
 <line x1="690" y1="300" x2="200" y2="360" stroke="#9b59b6" stroke-width="3" marker-end="url(#arrowhead)"/>
 <rect x="350" y="305" width="200" height="50" fill="#9b59b6" stroke="#8e44ad" stroke-width="2" rx="5"/>
 <text x="450" y="323" text-anchor="middle" fill="white" font-size="13" font-weight="bold">第二次握手 (SYN+ACK)</text>
 <text x="450" y="343" text-anchor="middle" fill="white" font-size="11">SYN=1, ACK=1, seq=y, ack=x+1</text>
-<text x="850" y="330" text-anchor="start" fill="#666" font-size="12">服务器：确认收到，同意连接</text>
-<text x="850" y="345" text-anchor="start" fill="#666" font-size="11">发送初始序列号 y，确认 x+1</text>
+<text x="720" y="330" text-anchor="start" fill="#666" font-size="12">服务器：确认收到，同意连接</text>
+<text x="720" y="345" text-anchor="start" fill="#666" font-size="11">发送初始序列号 y，确认 x+1</text>
 <rect x="120" y="370" width="160" height="40" fill="#1abc9c" stroke="#16a085" stroke-width="2" rx="5"/>
 <text x="200" y="395" text-anchor="middle" fill="white" font-size="14" font-weight="bold">ESTABLISHED</text>
 <line x1="200" y1="440" x2="690" y2="500" stroke="#2ecc71" stroke-width="3" marker-end="url(#arrowhead-green)"/>
 <rect x="350" y="445" width="200" height="50" fill="#2ecc71" stroke="#27ae60" stroke-width="2" rx="5"/>
 <text x="450" y="463" text-anchor="middle" fill="white" font-size="13" font-weight="bold">第三次握手 (ACK)</text>
 <text x="450" y="483" text-anchor="middle" fill="white" font-size="11">ACK=1, ack=y+1</text>
-<text x="850" y="470" text-anchor="start" fill="#666" font-size="12">客户端：最终确认</text>
-<text x="850" y="485" text-anchor="start" fill="#666" font-size="11">确认服务器序列号 y+1</text>
+<text x="720" y="470" text-anchor="start" fill="#666" font-size="12">客户端：最终确认</text>
+<text x="720" y="485" text-anchor="start" fill="#666" font-size="11">确认服务器序列号 y+1</text>
 <rect x="620" y="510" width="160" height="40" fill="#1abc9c" stroke="#16a085" stroke-width="2" rx="5"/>
 <text x="700" y="535" text-anchor="middle" fill="white" font-size="14" font-weight="bold">ESTABLISHED</text>
 <rect x="300" y="570" width="300" height="40" fill="#3498db" stroke="#2980b9" stroke-width="2" rx="5"/>
@@ -10102,16 +10102,16 @@ TCP 四次挥手是断开连接的过程，通过四次通信确保双方都能�
 <text x="450" y="203" text-anchor="middle" fill="white" font-size="11">FIN=1, seq=u</text>
 <rect x="120" y="170" width="160" height="40" fill="#f39c12" stroke="#e67e22" stroke-width="2" rx="5"/>
 <text x="200" y="195" text-anchor="middle" fill="white" font-size="14" font-weight="bold">FIN_WAIT_1</text>
-<text x="850" y="190" text-anchor="start" fill="#666" font-size="12">客户端：我要关闭连接</text>
-<text x="850" y="205" text-anchor="start" fill="#666" font-size="11">不再发送数据，但可接收</text>
+<text x="720" y="190" text-anchor="start" fill="#666" font-size="12">客户端：我要关闭连接</text>
+<text x="720" y="205" text-anchor="start" fill="#666" font-size="11">不再发送数据，但可接收</text>
 <rect x="620" y="220" width="160" height="40" fill="#9b59b6" stroke="#8e44ad" stroke-width="2" rx="5"/>
 <text x="700" y="245" text-anchor="middle" fill="white" font-size="14" font-weight="bold">CLOSE_WAIT</text>
 <line x1="690" y1="290" x2="200" y2="340" stroke="#9b59b6" stroke-width="3" marker-end="url(#arrowhead)"/>
 <rect x="350" y="295" width="200" height="50" fill="#9b59b6" stroke="#8e44ad" stroke-width="2" rx="5"/>
 <text x="450" y="313" text-anchor="middle" fill="white" font-size="13" font-weight="bold">第二次挥手 (ACK)</text>
 <text x="450" y="333" text-anchor="middle" fill="white" font-size="11">ACK=1, ack=u+1</text>
-<text x="850" y="315" text-anchor="start" fill="#666" font-size="12">服务器：收到，我准备关闭</text>
-<text x="850" y="330" text-anchor="start" fill="#666" font-size="11">可能还有数据要发送</text>
+<text x="720" y="315" text-anchor="start" fill="#666" font-size="12">服务器：收到，我准备关闭</text>
+<text x="720" y="330" text-anchor="start" fill="#666" font-size="11">可能还有数据要发送</text>
 <rect x="120" y="350" width="160" height="40" fill="#3498db" stroke="#2980b9" stroke-width="2" rx="5"/>
 <text x="200" y="375" text-anchor="middle" fill="white" font-size="14" font-weight="bold">FIN_WAIT_2</text>
 <rect x="620" y="360" width="160" height="60" fill="#ecf0f1" stroke="#bdc3c7" stroke-width="2" rx="5" stroke-dasharray="5,5"/>
@@ -10123,16 +10123,16 @@ TCP 四次挥手是断开连接的过程，通过四次通信确保双方都能�
 <text x="450" y="493" text-anchor="middle" fill="white" font-size="11">FIN=1, seq=w</text>
 <rect x="620" y="510" width="160" height="40" fill="#f39c12" stroke="#e67e22" stroke-width="2" rx="5"/>
 <text x="700" y="535" text-anchor="middle" fill="white" font-size="14" font-weight="bold">LAST_ACK</text>
-<text x="850" y="480" text-anchor="start" fill="#666" font-size="12">服务器：数据发完了</text>
-<text x="850" y="495" text-anchor="start" fill="#666" font-size="11">我也要关闭连接</text>
+<text x="720" y="480" text-anchor="start" fill="#666" font-size="12">服务器：数据发完了</text>
+<text x="720" y="495" text-anchor="start" fill="#666" font-size="11">我也要关闭连接</text>
 <rect x="120" y="510" width="160" height="40" fill="#e67e22" stroke="#d35400" stroke-width="2" rx="5"/>
 <text x="200" y="535" text-anchor="middle" fill="white" font-size="14" font-weight="bold">TIME_WAIT</text>
 <line x1="200" y1="580" x2="690" y2="580" stroke="#2ecc71" stroke-width="3" marker-end="url(#arrowhead-green)"/>
 <rect x="350" y="560" width="200" height="40" fill="#2ecc71" stroke="#27ae60" stroke-width="2" rx="5"/>
 <text x="450" y="583" text-anchor="middle" fill="white" font-size="13" font-weight="bold">第四次挥手 (ACK)</text>
 <text x="450" y="595" text-anchor="middle" fill="white" font-size="10">ACK=1, ack=w+1</text>
-<text x="850" y="575" text-anchor="start" fill="#666" font-size="12">客户端：最终确认</text>
-<text x="850" y="590" text-anchor="start" fill="#666" font-size="11">等待 2MSL 后关闭</text>
+<text x="720" y="575" text-anchor="start" fill="#666" font-size="12">客户端：最终确认</text>
+<text x="720" y="590" text-anchor="start" fill="#666" font-size="11">等待 2MSL 后关闭</text>
 <rect x="120" y="610" width="160" height="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2" rx="5"/>
 <text x="200" y="630" text-anchor="middle" fill="white" font-size="12">等待 2MSL...</text>
 <rect x="620" y="610" width="160" height="30" fill="#34495e" stroke="#2c3e50" stroke-width="2" rx="5"/>
