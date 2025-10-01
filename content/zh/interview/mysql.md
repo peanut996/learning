@@ -60,8 +60,6 @@
 
 **"开(开源)高(高性能)多(多引擎)跨(跨平台)主(主从复制)"** - MySQL五大特点
 
-2. MySQL 有哪些存储引擎？InnoDB 和 MyISAM 的区别是什么？
-
 ### 2. MySQL 有哪些存储引擎?InnoDB 和 MyISAM 的区别是什么?
 
 #### 核心答案
@@ -141,8 +139,6 @@
 
 **"InnoDB 事外行"** - 事务、外键、行锁
 **"MyISAM 快表无"** - 快速查询、表锁、无事务
-
-3. 什么是主键、外键、唯一索引？
 
 ### 3. 什么是主键、外键、唯一索引?
 
@@ -255,8 +251,6 @@
 - 主键:唯一+非空
 - 外键:关联+完整性
 - 唯一索引:多个+可NULL
-
-4. MySQL 中的数据类型有哪些？CHAR 和 VARCHAR 的区别是什么？
 
 ### 4. MySQL中的数据类型有哪些?CHAR和VARCHAR的区别是什么?
 
@@ -377,8 +371,6 @@
 - VARCHAR:变长、省空间、略慢
 
 **"数字串日二JSON"** - MySQL六大数据类型分类
-
-5. 什么是 NULL 值？如何处理 NULL 值？
 
 ### 5. 什么是NULL值?如何处理NULL值?
 
@@ -617,8 +609,6 @@ FROM users;
 **"查快写慢占空间"** - 索引的三大特性
 **"WHERE JOIN ORDER BY"** - 索引使用三大场景
 
-7. MySQL 有哪些索引类型？
-
 ### 7. MySQL有哪些索引类型?
 
 #### 核心答案
@@ -691,8 +681,6 @@ CREATE FULLTEXT INDEX idx_content ON articles(content);
 
 **"树哈全"** - B+树、Hash、全文三种数据结构
 **"普唯主联前"** - 普通、唯一、主键、联合、前缀五种功能
-
-8. 什么是聚簇索引和非聚簇索引？
 
 ### 8. 什么是聚簇索引和非聚簇索引?
 
@@ -796,8 +784,6 @@ SELECT * FROM users WHERE name = 'Alice';
 **"聚一快,非多慢回"**
 - 聚簇:一个、快、不回表
 - 非聚簇:多个、慢、需回表
-
-9. 什么是联合索引？最左前缀原则是什么？
 
 ### 9. 什么是联合索引?最左前缀原则是什么?
 
@@ -939,8 +925,6 @@ INDEX(name, city, age)  -- 将范围查询的age放最后
 - 最左列必须出现才能用索引
 - 范围查询后的列索引失效
 
-10. 什么情况下索引会失效？
-
 ### 10. 什么情况下索引会失效?
 
 #### 核心答案
@@ -1065,8 +1049,6 @@ EXPLAIN SELECT * FROM users WHERE name LIKE '%Alice';
 - 前缀模糊(LIKE '%...')
 - 类型转换
 - OR有非索引列
-
-11. 如何选择合适的列建立索引？
 
 ### 11. 如何选择合适的列建立索引?
 
@@ -1270,9 +1252,6 @@ EXPLAIN SELECT * FROM users WHERE name LIKE 'A%' AND age = 25;
 
 **"条件下推索引过滤,减少回表性能提升"**
 
-12. 什么是覆盖索引？
-13. 什么是索引下推？
-
 ## 事务
 
 ### 14. 什么是事务?事务的ACID特性是什么?
@@ -1395,8 +1374,6 @@ ROLLBACK TO sp1;  -- 回滚到sp1
 #### 记忆口诀
 
 **"原子性全做全不做,一致性前后都合法,隔离性互不干扰,持久性永久保存"**
-
-15. MySQL 如何实现事务？
 
 ### 15. MySQL如何实现事务?
 
@@ -1539,11 +1516,6 @@ transaction-isolation = REPEATABLE-READ
 
 **"读未读已可重复串行化"** - 四个隔离级别
 **"脏读未提交,不可重复UPDATE,幻读INSERT"** - 三个并发问题
-
-16. 什么是事务的隔离级别？各级别分别解决什么问题？
-17. 什么是脏读、不可重复读、幻读？
-18. MySQL 默认的事务隔离级别是什么？
-19. 如何设置事务的隔离级别？
 
 ## 锁
 
@@ -1729,7 +1701,7 @@ UPDATE users SET name = 'Bob' WHERE name = 'Alice';
 **"表行页,共排他,记录间隙临键"** - MySQL锁的三大分类
 **"索引行锁,无索引表锁"** - InnoDB行锁的使用条件
 
-### 21. 什么是行锁、表锁、页锁？
+### 21. 什么是行锁、表锁、页锁?
 
 #### 核心答案
 
@@ -1741,151 +1713,6 @@ UPDATE users SET name = 'Bob' WHERE name = 'Alice';
 
 #### 详细说明
 
-<svg viewBox="0 0 900 520" xmlns="http://www.w3.org/2000/svg">
-<text x="450" y="30" text-anchor="middle" font-size="24" font-weight="bold" fill="#1e293b">行锁 vs 表锁 vs 页锁对比</text>
-<rect x="50" y="70" width="250" height="420" fill="#dcfce7" stroke="#22c55e" stroke-width="2" rx="8"/>
-<text x="175" y="100" text-anchor="middle" font-size="20" font-weight="bold" fill="#15803d">行锁 (Row Lock)</text>
-<rect x="70" y="120" width="210" height="80" fill="#ffffff" stroke="#22c55e" stroke-width="1" rx="5"/>
-<text x="175" y="145" text-anchor="middle" font-size="14" fill="#166534" font-weight="bold">锁粒度: 最小 (单行)</text>
-<line x1="80" y1="155" x2="270" y2="155" stroke="#cbd5e1" stroke-width="1"/>
-<text x="80" y="175" font-size="13" fill="#334155">表 [行1 行2 行3 行4...]</text>
-<rect x="80" y="185" width="40" height="8" fill="#22c55e"/>
-<text x="130" y="193" font-size="11" fill="#475569">← 只锁这行</text>
-<text x="70" y="230" font-size="15" fill="#1e293b" font-weight="bold">特点:</text>
-<text x="80" y="255" font-size="13" fill="#334155">✓ 并发度: 最高</text>
-<text x="80" y="280" font-size="13" fill="#334155">✓ 开销: 大</text>
-<text x="80" y="305" font-size="13" fill="#334155">✓ 加锁速度: 慢</text>
-<text x="80" y="330" font-size="13" fill="#334155">✓ 死锁: 可能发生</text>
-<text x="80" y="355" font-size="13" fill="#334155">✓ 锁冲突: 少</text>
-<text x="70" y="385" font-size="15" fill="#1e293b" font-weight="bold">适用:</text>
-<text x="80" y="410" font-size="13" fill="#334155">• 高并发写入</text>
-<text x="80" y="435" font-size="13" fill="#334155">• 事务性应用</text>
-<text x="80" y="460" font-size="13" fill="#334155">• InnoDB 引擎</text>
-<text x="175" y="485" text-anchor="middle" font-size="12" fill="#059669" font-weight="bold">推荐使用 ⭐⭐⭐⭐⭐</text>
-<rect x="325" y="70" width="250" height="420" fill="#fee2e2" stroke="#dc2626" stroke-width="2" rx="8"/>
-<text x="450" y="100" text-anchor="middle" font-size="20" font-weight="bold" fill="#b91c1c">表锁 (Table Lock)</text>
-<rect x="345" y="120" width="210" height="80" fill="#ffffff" stroke="#dc2626" stroke-width="1" rx="5"/>
-<text x="450" y="145" text-anchor="middle" font-size="14" fill="#7f1d1d" font-weight="bold">锁粒度: 最大 (整表)</text>
-<line x1="355" y1="155" x2="545" y2="155" stroke="#cbd5e1" stroke-width="1"/>
-<text x="355" y="175" font-size="13" fill="#334155">表 [行1 行2 行3 行4...]</text>
-<rect x="355" y="185" width="180" height="8" fill="#dc2626"/>
-<text x="405" y="193" font-size="11" fill="#475569">← 锁整个表</text>
-<text x="345" y="230" font-size="15" fill="#1e293b" font-weight="bold">特点:</text>
-<text x="355" y="255" font-size="13" fill="#334155">✗ 并发度: 最低</text>
-<text x="355" y="280" font-size="13" fill="#334155">✓ 开销: 小</text>
-<text x="355" y="305" font-size="13" fill="#334155">✓ 加锁速度: 快</text>
-<text x="355" y="330" font-size="13" fill="#334155">✓ 死锁: 不会发生</text>
-<text x="355" y="355" font-size="13" fill="#334155">✗ 锁冲突: 频繁</text>
-<text x="345" y="385" font-size="15" fill="#1e293b" font-weight="bold">适用:</text>
-<text x="355" y="410" font-size="13" fill="#334155">• 读多写少</text>
-<text x="355" y="435" font-size="13" fill="#334155">• 全表扫描</text>
-<text x="355" y="460" font-size="13" fill="#334155">• MyISAM 引擎</text>
-<text x="450" y="485" text-anchor="middle" font-size="12" fill="#dc2626" font-weight="bold">不推荐高并发 ⭐</text>
-<rect x="600" y="70" width="250" height="420" fill="#fef3c7" stroke="#f59e0b" stroke-width="2" rx="8"/>
-<text x="725" y="100" text-anchor="middle" font-size="20" font-weight="bold" fill="#d97706">页锁 (Page Lock)</text>
-<rect x="620" y="120" width="210" height="80" fill="#ffffff" stroke="#f59e0b" stroke-width="1" rx="5"/>
-<text x="725" y="145" text-anchor="middle" font-size="14" fill="#78350f" font-weight="bold">锁粒度: 中等 (数据页)</text>
-<line x1="630" y1="155" x2="820" y2="155" stroke="#cbd5e1" stroke-width="1"/>
-<text x="630" y="175" font-size="13" fill="#334155">页 [多行数据 8-16KB]</text>
-<rect x="630" y="185" width="80" height="8" fill="#f59e0b"/>
-<text x="720" y="193" font-size="11" fill="#475569">← 锁这页</text>
-<text x="620" y="230" font-size="15" fill="#1e293b" font-weight="bold">特点:</text>
-<text x="630" y="255" font-size="13" fill="#334155">◐ 并发度: 中等</text>
-<text x="630" y="280" font-size="13" fill="#334155">◐ 开销: 中等</text>
-<text x="630" y="305" font-size="13" fill="#334155">◐ 加锁速度: 中等</text>
-<text x="630" y="330" font-size="13" fill="#334155">⚠️ 死锁: 可能发生</text>
-<text x="630" y="355" font-size="13" fill="#334155">◐ 锁冲突: 中等</text>
-<text x="620" y="385" font-size="15" fill="#1e293b" font-weight="bold">适用:</text>
-<text x="630" y="410" font-size="13" fill="#334155">• 中等并发</text>
-<text x="630" y="435" font-size="13" fill="#334155">• BDB 引擎</text>
-<text x="630" y="460" font-size="13" fill="#78350f">(已不常用)</text>
-<text x="725" y="485" text-anchor="middle" font-size="12" fill="#f59e0b" font-weight="bold">已淘汰 ⭐⭐</text>
-</svg>
-
-**详细对比表**:
-
-| 对比维度 | 行锁 | 表锁 | 页锁 |
-|---------|------|------|------|
-| **锁定粒度** | 单行记录 | 整张表 | 数据页(8-16KB) |
-| **并发性能** | ⭐⭐⭐⭐⭐ 最好 | ⭐ 最差 | ⭐⭐⭐ 中等 |
-| **锁开销** | 大 | 小 | 中等 |
-| **加锁速度** | 慢 | 快 | 中等 |
-| **死锁** | ✅ 可能 | ❌ 不会 | ✅ 可能 |
-| **锁冲突概率** | 低 | 高 | 中等 |
-| **内存消耗** | 高 | 低 | 中等 |
-| **适用场景** | 高并发事务 | 全表操作 | (已淘汰) |
-| **存储引擎** | InnoDB | MyISAM/InnoDB | BDB |
-
-**行锁的实现原理**:
-
-```sql
--- InnoDB 行锁示例
-BEGIN;
-
--- 场景1: 通过索引查询 → 行锁
-UPDATE users SET balance = balance - 100 WHERE id = 10;
--- 只锁 id=10 这一行,其他行可以并发操作
-
--- 场景2: 未使用索引 → 退化为表锁
-UPDATE users SET balance = balance - 100 WHERE name = 'Alice';
--- 如果 name 列无索引,会锁整张表
-
-COMMIT;
-```
-
-**表锁的实现原理**:
-
-```sql
--- 手动加表锁
-LOCK TABLES users READ;   -- 读锁:允许其他读,阻塞写
-LOCK TABLES users WRITE;  -- 写锁:阻塞其他所有读写
-
--- 释放锁
-UNLOCK TABLES;
-
--- MyISAM 自动表锁
--- SELECT 自动加读锁
--- UPDATE/INSERT/DELETE 自动加写锁
-```
-
-**页锁说明**:
-
-- 一次锁定相邻的一组记录
-- 介于行锁和表锁之间
-- BDB引擎使用(MySQL已不再支持BDB)
-- 现代MySQL不再使用页锁
-
-**行锁与表锁的选择**:
-
-```
-高并发写入 → 行锁 (InnoDB)
-├─ 订单系统
-├─ 交易系统
-└─ 用户系统
-
-读多写少 → 表锁 (MyISAM)
-├─ 日志表
-├─ 配置表
-└─ 统计表
-```
-
-#### 关键要点
-
-- **行锁**:InnoDB默认,高并发,必须通过索引,否则退化为表锁
-- **表锁**:MyISAM使用,低并发,开销小,适合全表操作
-- **页锁**:已淘汰,不再使用
-- **锁粒度**:行锁 < 页锁 < 表锁
-- **并发性**:行锁 > 页锁 > 表锁
-- **开销**:行锁 > 页锁 > 表锁
-
-#### 记忆口诀
-
-**"行小快高,表大慢低,页已淘汰"**
-- 行锁:粒度小、并发高、开销大
-- 表锁:粒度大、并发低、开销小
-- 页锁:已淘汰
-
-21. 什么是行锁、表锁、页锁？
 ### 22. 什么是共享锁(S锁)和排他锁(X锁)?
 
 #### 核心答案
@@ -2081,7 +1908,6 @@ FOR UPDATE SKIP LOCKED LIMIT 10;
 - 排他锁:独占,阻塞所有
 - 只有S+S兼容,其他都冲突
 
-22. 什么是共享锁（S锁）和排他锁（X锁）？
 ### 23. 什么是意向锁?
 
 #### 核心答案
@@ -2266,7 +2092,6 @@ SELECT * FROM performance_schema.data_lock_waits;
 - IS表示打算加S锁,IX表示打算加X锁
 - 加行锁时自动加意向锁
 
-23. 什么是意向锁？
 ### 24. 什么是间隙锁、临键锁?
 
 #### 核心答案
@@ -2497,7 +2322,6 @@ SELECT * FROM performance_schema.data_locks;
 - 临键锁:记录+间隙
 - 作用:防止幻读
 
-24. 什么是间隙锁、临键锁？
 ### 25. 如何避免死锁?
 
 #### 核心答案
@@ -2774,7 +2598,6 @@ for (int i = 0; i < maxRetries; i++) {
 - 乐观:使用乐观锁
 - 重试:应用层重试机制
 
-25. 如何避免死锁？
 ### 26. 什么是乐观锁和悲观锁?如何实现?
 
 #### 核心答案
@@ -3371,8 +3194,6 @@ SET GLOBAL long_query_time = 2;  -- 超过2秒记录
 
 **"const ref range好,index ALL要避免"** - type类型记忆
 
-27. 如何分析 SQL 的性能？EXPLAIN 的作用是什么？
-
 ### 28. 如何优化慢查询?
 
 #### 核心答案
@@ -3660,8 +3481,6 @@ SELECT * FROM user_order_stats ORDER BY order_count DESC;
 - 改写SQL:避免索引失效
 - 减数据:只查需要的
 - 缓存分库:终极优化
-
-28. 如何优化慢查询？
 
 ### 29. 什么是SQL注入?如何防止?
 
@@ -3968,8 +3787,6 @@ grep -r "String sql = .*+.*" src/
 - 参数化:#{},?,:param
 - 校验:白名单验证
 - 权限:最小权限原则
-
-29. 什么是 SQL 注入？如何防止？
 
 ### 30. 大表如何优化?
 
@@ -4547,35 +4364,17 @@ UPDATE user_stats SET login_count = login_count + 1 WHERE user_id = ?;
 - 批量异步:提升写入
 - 定期维:表维护
 
-31. 如何优化 INSERT 语句？
-32. 如何优化分页查询？
-33. 什么是子查询？什么情况下用 JOIN 替代子查询？
+### 32. 如何优化分页查询?
+
+### 33. 什么是子查询?什么情况下用 JOIN 替代子查询?
 
 ## 日志
 
-34. MySQL 有哪些日志文件？
-35. 什么是 binlog？有什么作用？
-36. 什么是 redo log 和 undo log？
-37. binlog 和 redo log 的区别是什么？
-38. 什么是两阶段提交？
-
 ## 高可用与性能
-
-39. 什么是主从复制？如何实现？
-40. 主从复制有哪些模式？
-41. 什么是读写分离？
-42. 如何保证主从一致性？
-43. 什么是分库分表？什么时候需要分库分表？
-44. 垂直分库和水平分库的区别是什么？
-45. 分库分表后如何解决跨库查询、事务问题？
 
 ## 其他
 
-46. MySQL 如何实现排序？filesort 和 index sort 的区别？
-47. MySQL 的架构是怎样的？
-48. 什么是 MVCC？如何实现？
-49. COUNT(*) 和 COUNT(1) 和 COUNT(列名) 的区别？
-50. 如何设计一个高性能的数据库表？31. 如何优化 INSERT 语句？
+### 31. 如何优化 INSERT 语句?
 
 ### 核心答案
 批量插入、禁用索引检查、使用事务、优化表结构。
@@ -4958,7 +4757,7 @@ WHERE u.city = 'Beijing';
 
 ## 日志
 
-34. MySQL 有哪些日志文件？
+### 34. MySQL 有哪些日志文件?
 
 ### 核心答案
 MySQL主要有四类日志:错误日志、二进制日志(binlog)、查询日志、慢查询日志,以及InnoDB特有的redo log和undo log。
@@ -5069,7 +4868,7 @@ MySQL主要有四类日志:错误日志、二进制日志(binlog)、查询日志
 - **持**:持久性(Redo)
 - **原**:原子性(Undo)
 
-35. 什么是 binlog？有什么作用？
+### 35. 什么是 binlog?有什么作用?
 
 ### 核心答案
 binlog(Binary Log)是MySQL Server层的二进制日志,记录所有修改数据的SQL语句,主要用于主从复制和数据恢复。
@@ -5216,7 +5015,7 @@ sync_binlog = 1  -- 每次提交都刷盘(最安全)
 - **行格**:ROW格式
 - **安全**:sync_binlog=1
 
-36. 什么是 redo log 和 undo log？
+### 36. 什么是 redo log 和 undo log?
 
 ### 核心答案
 - **Redo Log**:InnoDB重做日志,记录物理数据页的修改,用于崩溃恢复,保证持久性(D)
@@ -5355,7 +5154,7 @@ UPDATE users SET name = 'Bob' WHERE id = 1;
 - **逻**:逻辑日志
 - **版本**:MVCC多版本
 
-37. binlog 和 redo log 的区别是什么？
+### 37. binlog 和 redo log 的区别是什么?
 
 ### 核心答案
 binlog是MySQL Server层的逻辑日志,用于复制和恢复;redo log是InnoDB引擎层的物理日志,用于崩溃恢复。两者通过两阶段提交保证一致性。
@@ -5469,7 +5268,7 @@ innodb_flush_log_at_trx_commit = 2  -- 写OS cache,每秒刷盘(折中)
 - **循**:循环写(redo log)
 - **崩**:崩溃恢复(redo log)
 
-38. 什么是两阶段提交？
+### 38. 什么是两阶段提交?
 
 ### 核心答案
 两阶段提交(Two-Phase Commit)是MySQL为保证binlog和redo log一致性而采用的提交协议,分为prepare和commit两个阶段。
@@ -5556,7 +5355,7 @@ MySQL重启后的恢复策略:
 
 ## 高可用与性能
 
-39. 什么是主从复制？如何实现？
+### 39. 什么是主从复制？如何实现？
 
 ### 核心答案
 主从复制是MySQL通过binlog将主库数据变更同步到从库的机制,实现数据备份和读写分离。流程:主库写binlog → 从库IO线程读取 → 写入relay log → SQL线程重放。
@@ -6269,8 +6068,6 @@ SHOW SLAVE STATUS\G
 ---
 
 ## 其他
-
-46. MySQL 如何实现排序？filesort 和 index sort 的区别？
 
 ### 46. MySQL 如何实现排序？filesort 和 index sort 的区别？
 
