@@ -87,6 +87,20 @@ Pagefind generates a static search index post-build from `.next/server/app` to `
 
 When answering interview questions, follow these best practices:
 
+0. **⚠️ CRITICAL: Answer ONE Question at a Time**
+   - **NEVER batch multiple questions in a single edit**
+   - **Complete one question fully before moving to the next**
+   - Use task tracking to monitor progress across multiple questions
+   - This ensures quality, allows for review, and prevents overwhelming edits
+   - Example workflow:
+     ```
+     1. Answer question 1 → Edit file
+     2. Mark question 1 as completed
+     3. Answer question 2 → Edit file
+     4. Mark question 2 as completed
+     (Repeat for each question)
+     ```
+
 1. **Memorable Answers**: Provide answers that are easy to remember and understand
    - Use clear explanations with practical examples
    - Include mnemonic devices or mental models when helpful
@@ -108,10 +122,11 @@ When answering interview questions, follow these best practices:
    - Prefer pseudo-code or simplified examples when possible
 
 4. **Structure**: Organize answers clearly
-   - Start with a concise definition
-   - Follow with detailed explanation
+   - Start with a concise definition (核心答案)
+   - Follow with detailed explanation (详细说明)
    - Include examples and use cases
-   - End with key takeaways or common pitfalls
+   - Add visual aids (SVG diagrams, tables, etc.)
+   - End with key takeaways (关键要点) and memory aids (记忆口诀)
 
 ## Important Notes
 
