@@ -1,28 +1,5 @@
 # Spring 面试题
 
-## Spring 基础
-
-1. 什么是 Spring 框架？Spring 的特点是什么？
-2. Spring 有哪些核心模块？
-3. 什么是 Spring IoC（控制反转）？
-4. 什么是 Spring DI（依赖注入）？
-5. IoC 和 DI 的区别是什么？
-6. Spring IoC 容器是什么？有哪些实现？
-7. BeanFactory 和 ApplicationContext 的区别是什么？
-8. Spring 的优点和缺点是什么？
-
-## Spring Bean
-
-9. 什么是 Spring Bean？
-10. Spring Bean 的作用域有哪些？
-11. Spring Bean 的生命周期是怎样的？
-12. 如何定义 Spring Bean？
-13. 什么是 Bean 的装配？有哪些方式？
-14. 什么是自动装配？有哪些方式？
-15. @Autowired 和 @Resource 的区别是什么？
-16. @Component、@Service、@Repository、@Controller 的区别是什么？
-17. 什么是 Bean 的循环依赖？Spring 如何解决？
-18. 什么是三级缓存？
 
 ## Spring AOP
 
