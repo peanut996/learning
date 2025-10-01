@@ -92,9 +92,8 @@ When answering interview questions, follow these best practices:
    - Include mnemonic devices or mental models when helpful
    - Break down complex concepts into digestible parts
 
-2. **Visual Aids**: Add diagrams and visualizations when they enhance understanding
-   - **For simple conceptual questions**: Skip complex diagrams and code - provide clear, direct answers instead
-   - **For complex topics**: Use SVG diagrams to illustrate concepts (e.g., network protocols, data structures, design patterns)
+2. **Visual Aids**: Add diagrams and visualizations whenever possible
+   - Use SVG diagrams to illustrate concepts (e.g., network protocols, data structures, design patterns)
    - **SVG should be embedded directly in markdown without code block wrapping** (write `<svg>...</svg>` directly, not inside ` ```svg ` blocks)
    - **SVG should be compact without unnecessary comments or extra line breaks** (keep it clean and minimal)
    - Include flowcharts for processes and algorithms
