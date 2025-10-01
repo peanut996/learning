@@ -1729,19 +1729,2824 @@ UPDATE users SET name = 'Bob' WHERE name = 'Alice';
 **"表行页,共排他,记录间隙临键"** - MySQL锁的三大分类
 **"索引行锁,无索引表锁"** - InnoDB行锁的使用条件
 
+### 21. 什么是行锁、表锁、页锁？
+
+#### 核心答案
+
+**行锁**(Row Lock):锁定单行数据,InnoDB默认使用,并发性能最好。
+
+**表锁**(Table Lock):锁定整张表,MyISAM使用,并发性能最差,但开销小。
+
+**页锁**(Page Lock):锁定数据页(8-16KB),介于行锁和表锁之间,BDB引擎使用(已不常用)。
+
+#### 详细说明
+
+<svg viewBox="0 0 900 520" xmlns="http://www.w3.org/2000/svg">
+<text x="450" y="30" text-anchor="middle" font-size="24" font-weight="bold" fill="#1e293b">行锁 vs 表锁 vs 页锁对比</text>
+<rect x="50" y="70" width="250" height="420" fill="#dcfce7" stroke="#22c55e" stroke-width="2" rx="8"/>
+<text x="175" y="100" text-anchor="middle" font-size="20" font-weight="bold" fill="#15803d">行锁 (Row Lock)</text>
+<rect x="70" y="120" width="210" height="80" fill="#ffffff" stroke="#22c55e" stroke-width="1" rx="5"/>
+<text x="175" y="145" text-anchor="middle" font-size="14" fill="#166534" font-weight="bold">锁粒度: 最小 (单行)</text>
+<line x1="80" y1="155" x2="270" y2="155" stroke="#cbd5e1" stroke-width="1"/>
+<text x="80" y="175" font-size="13" fill="#334155">表 [行1 行2 行3 行4...]</text>
+<rect x="80" y="185" width="40" height="8" fill="#22c55e"/>
+<text x="130" y="193" font-size="11" fill="#475569">← 只锁这行</text>
+<text x="70" y="230" font-size="15" fill="#1e293b" font-weight="bold">特点:</text>
+<text x="80" y="255" font-size="13" fill="#334155">✓ 并发度: 最高</text>
+<text x="80" y="280" font-size="13" fill="#334155">✓ 开销: 大</text>
+<text x="80" y="305" font-size="13" fill="#334155">✓ 加锁速度: 慢</text>
+<text x="80" y="330" font-size="13" fill="#334155">✓ 死锁: 可能发生</text>
+<text x="80" y="355" font-size="13" fill="#334155">✓ 锁冲突: 少</text>
+<text x="70" y="385" font-size="15" fill="#1e293b" font-weight="bold">适用:</text>
+<text x="80" y="410" font-size="13" fill="#334155">• 高并发写入</text>
+<text x="80" y="435" font-size="13" fill="#334155">• 事务性应用</text>
+<text x="80" y="460" font-size="13" fill="#334155">• InnoDB 引擎</text>
+<text x="175" y="485" text-anchor="middle" font-size="12" fill="#059669" font-weight="bold">推荐使用 ⭐⭐⭐⭐⭐</text>
+<rect x="325" y="70" width="250" height="420" fill="#fee2e2" stroke="#dc2626" stroke-width="2" rx="8"/>
+<text x="450" y="100" text-anchor="middle" font-size="20" font-weight="bold" fill="#b91c1c">表锁 (Table Lock)</text>
+<rect x="345" y="120" width="210" height="80" fill="#ffffff" stroke="#dc2626" stroke-width="1" rx="5"/>
+<text x="450" y="145" text-anchor="middle" font-size="14" fill="#7f1d1d" font-weight="bold">锁粒度: 最大 (整表)</text>
+<line x1="355" y1="155" x2="545" y2="155" stroke="#cbd5e1" stroke-width="1"/>
+<text x="355" y="175" font-size="13" fill="#334155">表 [行1 行2 行3 行4...]</text>
+<rect x="355" y="185" width="180" height="8" fill="#dc2626"/>
+<text x="405" y="193" font-size="11" fill="#475569">← 锁整个表</text>
+<text x="345" y="230" font-size="15" fill="#1e293b" font-weight="bold">特点:</text>
+<text x="355" y="255" font-size="13" fill="#334155">✗ 并发度: 最低</text>
+<text x="355" y="280" font-size="13" fill="#334155">✓ 开销: 小</text>
+<text x="355" y="305" font-size="13" fill="#334155">✓ 加锁速度: 快</text>
+<text x="355" y="330" font-size="13" fill="#334155">✓ 死锁: 不会发生</text>
+<text x="355" y="355" font-size="13" fill="#334155">✗ 锁冲突: 频繁</text>
+<text x="345" y="385" font-size="15" fill="#1e293b" font-weight="bold">适用:</text>
+<text x="355" y="410" font-size="13" fill="#334155">• 读多写少</text>
+<text x="355" y="435" font-size="13" fill="#334155">• 全表扫描</text>
+<text x="355" y="460" font-size="13" fill="#334155">• MyISAM 引擎</text>
+<text x="450" y="485" text-anchor="middle" font-size="12" fill="#dc2626" font-weight="bold">不推荐高并发 ⭐</text>
+<rect x="600" y="70" width="250" height="420" fill="#fef3c7" stroke="#f59e0b" stroke-width="2" rx="8"/>
+<text x="725" y="100" text-anchor="middle" font-size="20" font-weight="bold" fill="#d97706">页锁 (Page Lock)</text>
+<rect x="620" y="120" width="210" height="80" fill="#ffffff" stroke="#f59e0b" stroke-width="1" rx="5"/>
+<text x="725" y="145" text-anchor="middle" font-size="14" fill="#78350f" font-weight="bold">锁粒度: 中等 (数据页)</text>
+<line x1="630" y1="155" x2="820" y2="155" stroke="#cbd5e1" stroke-width="1"/>
+<text x="630" y="175" font-size="13" fill="#334155">页 [多行数据 8-16KB]</text>
+<rect x="630" y="185" width="80" height="8" fill="#f59e0b"/>
+<text x="720" y="193" font-size="11" fill="#475569">← 锁这页</text>
+<text x="620" y="230" font-size="15" fill="#1e293b" font-weight="bold">特点:</text>
+<text x="630" y="255" font-size="13" fill="#334155">◐ 并发度: 中等</text>
+<text x="630" y="280" font-size="13" fill="#334155">◐ 开销: 中等</text>
+<text x="630" y="305" font-size="13" fill="#334155">◐ 加锁速度: 中等</text>
+<text x="630" y="330" font-size="13" fill="#334155">⚠️ 死锁: 可能发生</text>
+<text x="630" y="355" font-size="13" fill="#334155">◐ 锁冲突: 中等</text>
+<text x="620" y="385" font-size="15" fill="#1e293b" font-weight="bold">适用:</text>
+<text x="630" y="410" font-size="13" fill="#334155">• 中等并发</text>
+<text x="630" y="435" font-size="13" fill="#334155">• BDB 引擎</text>
+<text x="630" y="460" font-size="13" fill="#78350f">(已不常用)</text>
+<text x="725" y="485" text-anchor="middle" font-size="12" fill="#f59e0b" font-weight="bold">已淘汰 ⭐⭐</text>
+</svg>
+
+**详细对比表**:
+
+| 对比维度 | 行锁 | 表锁 | 页锁 |
+|---------|------|------|------|
+| **锁定粒度** | 单行记录 | 整张表 | 数据页(8-16KB) |
+| **并发性能** | ⭐⭐⭐⭐⭐ 最好 | ⭐ 最差 | ⭐⭐⭐ 中等 |
+| **锁开销** | 大 | 小 | 中等 |
+| **加锁速度** | 慢 | 快 | 中等 |
+| **死锁** | ✅ 可能 | ❌ 不会 | ✅ 可能 |
+| **锁冲突概率** | 低 | 高 | 中等 |
+| **内存消耗** | 高 | 低 | 中等 |
+| **适用场景** | 高并发事务 | 全表操作 | (已淘汰) |
+| **存储引擎** | InnoDB | MyISAM/InnoDB | BDB |
+
+**行锁的实现原理**:
+
+```sql
+-- InnoDB 行锁示例
+BEGIN;
+
+-- 场景1: 通过索引查询 → 行锁
+UPDATE users SET balance = balance - 100 WHERE id = 10;
+-- 只锁 id=10 这一行,其他行可以并发操作
+
+-- 场景2: 未使用索引 → 退化为表锁
+UPDATE users SET balance = balance - 100 WHERE name = 'Alice';
+-- 如果 name 列无索引,会锁整张表
+
+COMMIT;
+```
+
+**表锁的实现原理**:
+
+```sql
+-- 手动加表锁
+LOCK TABLES users READ;   -- 读锁:允许其他读,阻塞写
+LOCK TABLES users WRITE;  -- 写锁:阻塞其他所有读写
+
+-- 释放锁
+UNLOCK TABLES;
+
+-- MyISAM 自动表锁
+-- SELECT 自动加读锁
+-- UPDATE/INSERT/DELETE 自动加写锁
+```
+
+**页锁说明**:
+
+- 一次锁定相邻的一组记录
+- 介于行锁和表锁之间
+- BDB引擎使用(MySQL已不再支持BDB)
+- 现代MySQL不再使用页锁
+
+**行锁与表锁的选择**:
+
+```
+高并发写入 → 行锁 (InnoDB)
+├─ 订单系统
+├─ 交易系统
+└─ 用户系统
+
+读多写少 → 表锁 (MyISAM)
+├─ 日志表
+├─ 配置表
+└─ 统计表
+```
+
+#### 关键要点
+
+- **行锁**:InnoDB默认,高并发,必须通过索引,否则退化为表锁
+- **表锁**:MyISAM使用,低并发,开销小,适合全表操作
+- **页锁**:已淘汰,不再使用
+- **锁粒度**:行锁 < 页锁 < 表锁
+- **并发性**:行锁 > 页锁 > 表锁
+- **开销**:行锁 > 页锁 > 表锁
+
+#### 记忆口诀
+
+**"行小快高,表大慢低,页已淘汰"**
+- 行锁:粒度小、并发高、开销大
+- 表锁:粒度大、并发低、开销小
+- 页锁:已淘汰
+
 21. 什么是行锁、表锁、页锁？
+### 22. 什么是共享锁(S锁)和排他锁(X锁)?
+
+#### 核心答案
+
+**共享锁**(Shared Lock, S锁, 读锁):多个事务可以同时持有同一资源的共享锁,允许并发读取。
+
+**排他锁**(Exclusive Lock, X锁, 写锁):只有一个事务可以持有排他锁,会阻塞其他所有锁(包括共享锁和排他锁)。
+
+#### 详细说明
+
+<svg viewBox="0 0 900 550" xmlns="http://www.w3.org/2000/svg">
+<text x="450" y="30" text-anchor="middle" font-size="24" font-weight="bold" fill="#1e293b">共享锁 vs 排他锁</text>
+<rect x="50" y="70" width="380" height="200" fill="#dcfce7" stroke="#22c55e" stroke-width="2" rx="8"/>
+<text x="240" y="100" text-anchor="middle" font-size="20" font-weight="bold" fill="#15803d">共享锁 (S锁 / 读锁)</text>
+<text x="70" y="135" font-size="15" fill="#1e293b" font-weight="bold">特点:</text>
+<text x="80" y="160" font-size="13" fill="#334155">✓ 多个事务可同时持有</text>
+<text x="80" y="185" font-size="13" fill="#334155">✓ 允许并发读取</text>
+<text x="80" y="210" font-size="13" fill="#334155">✓ 阻塞写操作(排他锁)</text>
+<text x="80" y="235" font-size="13" fill="#334155">✓ 读读不冲突</text>
+<text x="240" y="260" text-anchor="middle" font-size="12" fill="#059669" font-weight="bold">SELECT ... LOCK IN SHARE MODE</text>
+<rect x="470" y="70" width="380" height="200" fill="#fee2e2" stroke="#dc2626" stroke-width="2" rx="8"/>
+<text x="660" y="100" text-anchor="middle" font-size="20" font-weight="bold" fill="#b91c1c">排他锁 (X锁 / 写锁)</text>
+<text x="490" y="135" font-size="15" fill="#1e293b" font-weight="bold">特点:</text>
+<text x="500" y="160" font-size="13" fill="#334155">✗ 只能一个事务持有</text>
+<text x="500" y="185" font-size="13" fill="#334155">✗ 阻塞所有其他锁</text>
+<text x="500" y="210" font-size="13" fill="#334155">✗ 读写都冲突</text>
+<text x="500" y="235" font-size="13" fill="#334155">✗ 写写冲突</text>
+<text x="660" y="260" text-anchor="middle" font-size="12" fill="#dc2626" font-weight="bold">SELECT ... FOR UPDATE</text>
+<rect x="50" y="300" width="800" height="230" fill="#f0f4f8" stroke="#64748b" stroke-width="2" rx="8"/>
+<text x="450" y="330" text-anchor="middle" font-size="20" font-weight="bold" fill="#1e293b">锁兼容性矩阵</text>
+<rect x="150" y="360" width="120" height="40" fill="#cbd5e1"/>
+<text x="210" y="385" text-anchor="middle" font-size="15" fill="#1e293b" font-weight="bold">已有锁 ↓</text>
+<rect x="280" y="360" width="140" height="40" fill="#cbd5e1"/>
+<text x="350" y="385" text-anchor="middle" font-size="15" fill="#1e293b" font-weight="bold">请求 S 锁 →</text>
+<rect x="430" y="360" width="140" height="40" fill="#cbd5e1"/>
+<text x="500" y="385" text-anchor="middle" font-size="15" fill="#1e293b" font-weight="bold">请求 X 锁 →</text>
+<rect x="150" y="410" width="120" height="50" fill="#dcfce7"/>
+<text x="210" y="440" text-anchor="middle" font-size="16" fill="#15803d" font-weight="bold">S 锁</text>
+<rect x="280" y="410" width="140" height="50" fill="#dcfce7" stroke="#22c55e" stroke-width="3"/>
+<text x="350" y="430" text-anchor="middle" font-size="18" fill="#059669" font-weight="bold">✓ 兼容</text>
+<text x="350" y="448" text-anchor="middle" font-size="11" fill="#475569">可以读</text>
+<rect x="430" y="410" width="140" height="50" fill="#fee2e2" stroke="#dc2626" stroke-width="3"/>
+<text x="500" y="430" text-anchor="middle" font-size="18" fill="#dc2626" font-weight="bold">✗ 冲突</text>
+<text x="500" y="448" text-anchor="middle" font-size="11" fill="#475569">等待</text>
+<rect x="150" y="470" width="120" height="50" fill="#fee2e2"/>
+<text x="210" y="500" text-anchor="middle" font-size="16" fill="#b91c1c" font-weight="bold">X 锁</text>
+<rect x="280" y="470" width="140" height="50" fill="#fee2e2" stroke="#dc2626" stroke-width="3"/>
+<text x="350" y="490" text-anchor="middle" font-size="18" fill="#dc2626" font-weight="bold">✗ 冲突</text>
+<text x="350" y="508" text-anchor="middle" font-size="11" fill="#475569">等待</text>
+<rect x="430" y="470" width="140" height="50" fill="#fee2e2" stroke="#dc2626" stroke-width="3"/>
+<text x="500" y="490" text-anchor="middle" font-size="18" fill="#dc2626" font-weight="bold">✗ 冲突</text>
+<text x="500" y="508" text-anchor="middle" font-size="11" fill="#475569">等待</text>
+<rect x="590" y="360" width="240" height="160" fill="#ffffff" stroke="#94a3b8" stroke-width="1" rx="5"/>
+<text x="710" y="385" text-anchor="middle" font-size="16" fill="#1e293b" font-weight="bold">兼容性规则</text>
+<text x="605" y="410" font-size="13" fill="#059669" font-weight="bold">✓ S + S = 兼容</text>
+<text x="615" y="430" font-size="12" fill="#475569">多个事务可同时读</text>
+<text x="605" y="460" font-size="13" fill="#dc2626" font-weight="bold">✗ S + X = 冲突</text>
+<text x="615" y="480" font-size="12" fill="#475569">读时不能写</text>
+<text x="605" y="505" font-size="13" fill="#dc2626" font-weight="bold">✗ X + X = 冲突</text>
+<text x="615" y="523" font-size="12" fill="#475569">写时不能再写</text>
+</svg>
+
+**共享锁的使用场景**:
+
+```sql
+-- 场景1: 显式加共享锁
+BEGIN;
+SELECT * FROM users WHERE id = 10 LOCK IN SHARE MODE;
+-- 其他事务可以读,但不能修改 id=10 的记录
+COMMIT;
+
+-- 场景2: 多个事务并发读
+-- 事务A
+BEGIN;
+SELECT * FROM users WHERE id = 10 LOCK IN SHARE MODE;
+-- 持有共享锁
+
+-- 事务B (同时进行)
+BEGIN;
+SELECT * FROM users WHERE id = 10 LOCK IN SHARE MODE;
+-- ✅ 可以获取共享锁,并发读取
+
+-- 事务C (同时进行)
+BEGIN;
+UPDATE users SET name = 'Alice' WHERE id = 10;
+-- ❌ 阻塞,必须等待A和B释放共享锁
+```
+
+**排他锁的使用场景**:
+
+```sql
+-- 场景1: 显式加排他锁
+BEGIN;
+SELECT * FROM users WHERE id = 10 FOR UPDATE;
+-- 其他事务不能读取或修改 id=10 的记录
+COMMIT;
+
+-- 场景2: 自动加排他锁
+BEGIN;
+UPDATE users SET balance = balance - 100 WHERE id = 10;
+-- UPDATE/DELETE/INSERT 自动加排他锁
+COMMIT;
+
+-- 场景3: 转账操作(防止并发问题)
+BEGIN;
+-- 先加排他锁,防止余额被其他事务修改
+SELECT balance FROM account WHERE id = 1 FOR UPDATE;
+-- 扣款
+UPDATE account SET balance = balance - 100 WHERE id = 1;
+-- 加款
+UPDATE account SET balance = balance + 100 WHERE id = 2;
+COMMIT;
+```
+
+**锁冲突示例**:
+
+```sql
+-- 时间线示例
+-- 时间  事务A                                事务B
+-- T1    BEGIN
+-- T2    SELECT * FROM users WHERE id=10
+--       LOCK IN SHARE MODE;
+--       (获得 S 锁)
+-- T3                                        BEGIN
+-- T4                                        SELECT * FROM users WHERE id=10
+--                                           LOCK IN SHARE MODE;
+--                                           (✅ 获得 S 锁,成功)
+-- T5                                        UPDATE users SET name='Bob' WHERE id=10;
+--                                           (❌ 请求 X 锁,阻塞等待)
+-- T6    COMMIT
+--       (释放 S 锁)
+-- T7                                        (✅ 获得 X 锁,继续执行)
+-- T8                                        COMMIT
+```
+
+**共享锁与排他锁的对比**:
+
+| 对比维度 | 共享锁 (S锁) | 排他锁 (X锁) |
+|---------|-------------|-------------|
+| **持有数量** | 多个事务同时持有 | 只有一个事务持有 |
+| **锁定操作** | SELECT (读) | UPDATE/DELETE/INSERT (写) |
+| **兼容性** | S+S 兼容 | X+任何锁 都冲突 |
+| **阻塞情况** | 不阻塞读,阻塞写 | 阻塞所有读写 |
+| **获取方式** | LOCK IN SHARE MODE | FOR UPDATE / 写操作自动 |
+| **释放时机** | 事务提交/回滚 | 事务提交/回滚 |
+| **应用场景** | 并发查询,防止修改 | 修改数据,防止并发 |
+
+**注意事项**:
+
+```sql
+-- ⚠️ 死锁风险
+-- 事务A
+BEGIN;
+SELECT * FROM users WHERE id = 1 LOCK IN SHARE MODE;  -- A持有S锁
+UPDATE users SET name = 'Alice' WHERE id = 2;         -- A请求id=2的X锁
+
+-- 事务B
+BEGIN;
+SELECT * FROM users WHERE id = 2 LOCK IN SHARE MODE;  -- B持有S锁
+UPDATE users SET name = 'Bob' WHERE id = 1;           -- B请求id=1的X锁
+-- ❌ 死锁: A等B释放id=2的S锁, B等A释放id=1的S锁
+
+-- ✅ 避免死锁: 统一加锁顺序
+-- 两个事务都按 id 顺序加锁:先锁 id=1,再锁 id=2
+```
+
+**MySQL 8.0 新特性 - NOWAIT 和 SKIP LOCKED**:
+
+```sql
+-- NOWAIT: 如果锁被占用,立即返回错误,不等待
+SELECT * FROM users WHERE id = 10 FOR UPDATE NOWAIT;
+
+-- SKIP LOCKED: 跳过被锁定的行
+SELECT * FROM users WHERE status = 'pending'
+FOR UPDATE SKIP LOCKED LIMIT 10;
+-- 用于任务队列,跳过正在处理的任务
+```
+
+#### 关键要点
+
+- **S锁(共享锁)**:读锁,多个事务可同时持有,读读兼容
+- **X锁(排他锁)**:写锁,独占,阻塞所有其他锁
+- **兼容性**:只有S+S兼容,其他组合都冲突
+- **获取方式**:
+  - S锁:`LOCK IN SHARE MODE`
+  - X锁:`FOR UPDATE`或写操作自动
+- **释放时机**:事务提交或回滚时自动释放
+
+#### 记忆口诀
+
+**"共享读多,排他写独,只有S+S通"**
+- 共享锁:多个事务并发读
+- 排他锁:独占,阻塞所有
+- 只有S+S兼容,其他都冲突
+
 22. 什么是共享锁（S锁）和排他锁（X锁）？
+### 23. 什么是意向锁?
+
+#### 核心答案
+
+**意向锁**(Intention Lock):表级锁,用于表明事务"打算"对表中的某些行加什么类型的锁。
+
+**作用**:简化表锁和行锁的冲突检测,提高加表锁的效率。
+
+**类型**:
+- **意向共享锁**(IS):表示事务打算给表中的某些行加共享锁(S锁)
+- **意向排他锁**(IX):表示事务打算给表中的某些行加排他锁(X锁)
+
+#### 详细说明
+
+<svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg">
+<text x="450" y="30" text-anchor="middle" font-size="24" font-weight="bold" fill="#1e293b">意向锁工作原理</text>
+<rect x="50" y="70" width="800" height="120" fill="#f0f4f8" stroke="#64748b" stroke-width="2" rx="8"/>
+<text x="450" y="100" text-anchor="middle" font-size="18" fill="#1e293b" font-weight="bold">为什么需要意向锁?</text>
+<rect x="70" y="120" width="380" height="60" fill="#fee2e2" stroke="#dc2626" stroke-width="2" rx="5"/>
+<text x="260" y="142" text-anchor="middle" font-size="15" fill="#b91c1c" font-weight="bold">❌ 没有意向锁的问题</text>
+<text x="80" y="165" font-size="13" fill="#475569">事务A:加表锁前,需要遍历所有行</text>
+<text x="80" y="182" font-size="13" fill="#475569">检查是否有行锁 → O(n) 很慢!</text>
+<rect x="470" y="120" width="360" height="60" fill="#dcfce7" stroke="#22c55e" stroke-width="2" rx="5"/>
+<text x="650" y="142" text-anchor="middle" font-size="15" fill="#15803d" font-weight="bold">✅ 有意向锁的优化</text>
+<text x="480" y="165" font-size="13" fill="#475569">事务A:只需检查表级意向锁</text>
+<text x="480" y="182" font-size="13" fill="#475569">→ O(1) 很快!</text>
+<rect x="50" y="220" width="390" height="350" fill="#dbeafe" stroke="#2563eb" stroke-width="2" rx="8"/>
+<text x="245" y="250" text-anchor="middle" font-size="18" font-weight="bold" fill="#1e40af">意向共享锁 (IS)</text>
+<text x="70" y="285" font-size="15" fill="#1e293b" font-weight="bold">定义:</text>
+<text x="80" y="310" font-size="13" fill="#334155">表示事务打算对表中某些行</text>
+<text x="80" y="330" font-size="13" fill="#334155">加共享锁(S锁)</text>
+<text x="70" y="365" font-size="15" fill="#1e293b" font-weight="bold">触发时机:</text>
+<text x="80" y="390" font-size="13" fill="#334155">SELECT ... LOCK IN SHARE MODE</text>
+<text x="80" y="410" font-size="13" fill="#334155">自动在表上加 IS 锁</text>
+<text x="70" y="445" font-size="15" fill="#1e293b" font-weight="bold">特点:</text>
+<text x="80" y="470" font-size="13" fill="#334155">✓ 表级锁(锁整张表)</text>
+<text x="80" y="495" font-size="13" fill="#334155">✓ 与 IS、IX 兼容</text>
+<text x="80" y="520" font-size="13" fill="#334155">✓ 与 X(表锁) 冲突</text>
+<text x="80" y="545" font-size="13" fill="#334155">✓ 允许其他事务读行</text>
+<rect x="460" y="220" width="390" height="350" fill="#fce7f3" stroke="#ec4899" stroke-width="2" rx="8"/>
+<text x="655" y="250" text-anchor="middle" font-size="18" font-weight="bold" fill="#be185d">意向排他锁 (IX)</text>
+<text x="480" y="285" font-size="15" fill="#1e293b" font-weight="bold">定义:</text>
+<text x="490" y="310" font-size="13" fill="#334155">表示事务打算对表中某些行</text>
+<text x="490" y="330" font-size="13" fill="#334155">加排他锁(X锁)</text>
+<text x="480" y="365" font-size="15" fill="#1e293b" font-weight="bold">触发时机:</text>
+<text x="490" y="390" font-size="13" fill="#334155">SELECT ... FOR UPDATE</text>
+<text x="490" y="410" font-size="13" fill="#334155">UPDATE / DELETE / INSERT</text>
+<text x="490" y="430" font-size="13" fill="#334155">自动在表上加 IX 锁</text>
+<text x="480" y="465" font-size="15" fill="#1e293b" font-weight="bold">特点:</text>
+<text x="490" y="490" font-size="13" fill="#334155">✓ 表级锁(锁整张表)</text>
+<text x="490" y="515" font-size="13" fill="#334155">✓ 与 IS、IX 兼容</text>
+<text x="490" y="540" font-size="13" fill="#334155">✓ 与 S、X(表锁) 冲突</text>
+</svg>
+
+**意向锁的兼容性矩阵**:
+
+| 已有锁 ↓ \ 请求锁 → | IS(意向共享) | IX(意向排他) | S(表共享) | X(表排他) |
+|-------------------|-------------|-------------|----------|----------|
+| **IS** | ✅ 兼容 | ✅ 兼容 | ✅ 兼容 | ❌ 冲突 |
+| **IX** | ✅ 兼容 | ✅ 兼容 | ❌ 冲突 | ❌ 冲突 |
+| **S** | ✅ 兼容 | ❌ 冲突 | ✅ 兼容 | ❌ 冲突 |
+| **X** | ❌ 冲突 | ❌ 冲突 | ❌ 冲突 | ❌ 冲突 |
+
+**关键规则**:
+- **意向锁之间(IS与IX)**: 完全兼容
+- **意向锁与行锁**: 不冲突(不同级别)
+- **意向锁与表锁**: 可能冲突(同级别)
+
+**意向锁的工作流程**:
+
+```sql
+-- 场景1: 加行级共享锁
+BEGIN;
+SELECT * FROM users WHERE id = 10 LOCK IN SHARE MODE;
+-- 步骤:
+-- 1. 自动在表上加 IS 锁
+-- 2. 在 id=10 的行上加 S 锁
+COMMIT;
+
+-- 场景2: 加行级排他锁
+BEGIN;
+UPDATE users SET name = 'Alice' WHERE id = 10;
+-- 步骤:
+-- 1. 自动在表上加 IX 锁
+-- 2. 在 id=10 的行上加 X 锁
+COMMIT;
+```
+
+**为什么需要意向锁? - 性能优化示例**:
+
+```sql
+-- 假设: 事务A正在修改 id=10 的行(持有行级X锁)
+-- 事务B想要加表级X锁
+
+-- ❌ 没有意向锁:
+-- 事务B必须遍历所有行,检查是否有行锁
+-- 如果表有100万行 → 需要检查100万次 → 很慢!
+
+-- ✅ 有意向锁:
+-- 1. 事务A加行锁时,自动在表上加 IX 锁
+-- 2. 事务B加表锁时,只需检查表的 IX 锁
+-- 3. 发现 IX 锁,知道表内有行被锁定,直接阻塞
+-- → 只需1次检查 → 很快!
+```
+
+**意向锁与表锁、行锁的关系**:
+
+```
+                表 (Table)
+                  |
+        +---------+---------+
+        |                   |
+    意向锁 IS/IX          表锁 S/X
+   (表级,不实际锁行)      (表级,锁全表)
+        |
+      行锁 S/X
+   (行级,锁具体行)
+```
+
+**完整示例**:
+
+```sql
+-- 事务A: 修改一行
+BEGIN;
+UPDATE users SET name = 'Alice' WHERE id = 10;
+-- 加锁过程:
+-- 1. 在表上自动加 IX 锁
+-- 2. 在 id=10 行上加 X 锁
+
+-- 事务B: 尝试加表锁
+LOCK TABLES users WRITE;  -- 请求表级 X 锁
+-- 检查过程:
+-- 1. 检查表上的意向锁
+-- 2. 发现 IX 锁存在
+-- 3. IX 与 X(表锁) 冲突
+-- 4. 阻塞等待
+
+-- 事务C: 修改另一行
+BEGIN;
+UPDATE users SET name = 'Bob' WHERE id = 20;
+-- ✅ 成功:
+-- 1. 在表上加 IX 锁 (IX 与 IX 兼容)
+-- 2. 在 id=20 行上加 X 锁 (不同行)
+```
+
+**意向锁的特点总结**:
+
+1. **自动加锁**: 用户无需手动操作,InnoDB自动管理
+2. **表级锁**: 虽然是表级,但不会阻塞行级操作
+3. **优化性能**: O(n) → O(1) 的检测优化
+4. **透明**: 对用户透明,不影响正常的锁使用
+
+**查看意向锁**:
+
+```sql
+-- 查看当前锁信息
+SELECT * FROM performance_schema.data_locks;
+
+-- 查看锁等待
+SELECT * FROM performance_schema.data_lock_waits;
+
+-- 示例输出:
+-- LOCK_TYPE | LOCK_MODE | OBJECT_NAME
+-- TABLE     | IX        | users        (意向排他锁)
+-- RECORD    | X         | users        (行级排他锁)
+```
+
+#### 关键要点
+
+- **意向锁**:表级锁,表明事务打算对某些行加锁
+- **类型**: IS(打算加S锁)、IX(打算加X锁)
+- **自动加锁**:加行锁时自动加意向锁
+- **优化性能**:快速判断表锁与行锁是否冲突,O(n)→O(1)
+- **兼容性**:IS与IX完全兼容,与表锁可能冲突
+- **透明**:用户无需关心,InnoDB自动管理
+
+#### 记忆口诀
+
+**"意向表锁不锁行,快速检测防遍历,IS共享IX排他,行锁自动带意向"**
+- 意向锁是表级锁,但不实际锁行
+- 避免遍历所有行检查冲突
+- IS表示打算加S锁,IX表示打算加X锁
+- 加行锁时自动加意向锁
+
 23. 什么是意向锁？
+### 24. 什么是间隙锁、临键锁?
+
+#### 核心答案
+
+**间隙锁**(Gap Lock):锁定索引记录之间的间隙,防止其他事务在间隙中插入数据,防止幻读。
+
+**临键锁**(Next-Key Lock):记录锁+间隙锁,锁定索引记录及其前面的间隙,InnoDB默认使用。
+
+**作用**:在REPEATABLE READ隔离级别下防止幻读问题。
+
+#### 详细说明
+
+<svg viewBox="0 0 900 580" xmlns="http://www.w3.org/2000/svg">
+<text x="450" y="30" text-anchor="middle" font-size="24" font-weight="bold" fill="#1e293b">间隙锁与临键锁</text>
+<rect x="50" y="70" width="380" height="230" fill="#dcfce7" stroke="#22c55e" stroke-width="2" rx="8"/>
+<text x="240" y="100" text-anchor="middle" font-size="20" font-weight="bold" fill="#15803d">记录锁 (Record Lock)</text>
+<text x="70" y="135" font-size="15" fill="#1e293b" font-weight="bold">锁定范围:</text>
+<text x="80" y="160" font-size="13" fill="#334155">只锁定单个索引记录</text>
+<rect x="100" y="180" width="240" height="100" fill="#ffffff" stroke="#94a3b8" stroke-width="1" rx="5"/>
+<text x="220" y="200" text-anchor="middle" font-size="12" fill="#475569">索引值: 1  5  10  15  20</text>
+<line x1="110" y1="210" x2="330" y2="210" stroke="#cbd5e1" stroke-width="1"/>
+<circle cx="178" cy="240" r="8" fill="#22c55e" stroke="#15803d" stroke-width="2"/>
+<text x="220" y="245" text-anchor="middle" font-size="13" fill="#166534" font-weight="bold">锁 id=10</text>
+<text x="220" y="263" text-anchor="middle" font-size="11" fill="#475569">只锁这个记录</text>
+<rect x="470" y="70" width="380" height="230" fill="#fef3c7" stroke="#f59e0b" stroke-width="2" rx="8"/>
+<text x="660" y="100" text-anchor="middle" font-size="20" font-weight="bold" fill="#d97706">间隙锁 (Gap Lock)</text>
+<text x="490" y="135" font-size="15" fill="#1e293b" font-weight="bold">锁定范围:</text>
+<text x="500" y="160" font-size="13" fill="#334155">锁定索引记录之间的间隙</text>
+<rect x="520" y="180" width="240" height="100" fill="#ffffff" stroke="#94a3b8" stroke-width="1" rx="5"/>
+<text x="640" y="200" text-anchor="middle" font-size="12" fill="#475569">索引值: 1  5  10  15  20</text>
+<line x1="530" y1="210" x2="750" y2="210" stroke="#cbd5e1" stroke-width="1"/>
+<rect x="608" y="225" width="64" height="30" fill="#fef3c7" stroke="#f59e0b" stroke-width="2" rx="3"/>
+<text x="640" y="245" text-anchor="middle" font-size="13" fill="#78350f" font-weight="bold">锁 (10,15)</text>
+<text x="640" y="263" text-anchor="middle" font-size="11" fill="#475569">锁间隙,不锁记录</text>
+<rect x="50" y="330" width="800" height="230" fill="#fce7f3" stroke="#ec4899" stroke-width="2" rx="8"/>
+<text x="450" y="360" text-anchor="middle" font-size="20" font-weight="bold" fill="#be185d">临键锁 (Next-Key Lock) = 记录锁 + 间隙锁</text>
+<text x="70" y="395" font-size="15" fill="#1e293b" font-weight="bold">锁定范围:</text>
+<text x="80" y="420" font-size="13" fill="#334155">锁定索引记录 + 记录前的间隙</text>
+<rect x="150" y="440" width="600" height="100" fill="#ffffff" stroke="#94a3b8" stroke-width="1" rx="5"/>
+<text x="450" y="460" text-anchor="middle" font-size="12" fill="#475569">索引值: 1  5  10  15  20</text>
+<line x1="170" y1="470" x2="730" y2="470" stroke="#cbd5e1" stroke-width="1"/>
+<rect x="338" y="485" width="104" height="40" fill="#fecaca" stroke="#dc2626" stroke-width="2" rx="3"/>
+<text x="390" y="500" text-anchor="middle" font-size="13" fill="#7f1d1d" font-weight="bold">锁 (5, 10]</text>
+<text x="390" y="515" text-anchor="middle" font-size="11" fill="#475569">间隙 (5,10)</text>
+<text x="390" y="528" text-anchor="middle" font-size="11" fill="#475569">+ 记录 10</text>
+</svg>
+
+**三种锁的对比**:
+
+| 锁类型 | 锁定范围 | 防止插入 | 防止幻读 | 使用场景 |
+|-------|---------|---------|---------|---------|
+| **记录锁** | 单个索引记录 | ❌ 否 | ❌ 否 | 精确匹配查询 |
+| **间隙锁** | 索引记录之间 | ✅ 是 | ✅ 是 | 范围查询 |
+| **临键锁** | 记录+前间隙 | ✅ 是 | ✅ 是 | RR级别默认 |
+
+**间隙锁的工作原理**:
+
+```sql
+-- 假设表中有索引值: 1, 5, 10, 15, 20
+-- 间隙: (-∞,1), (1,5), (5,10), (10,15), (15,20), (20,+∞)
+
+-- 事务A: 范围查询
+BEGIN;
+SELECT * FROM users WHERE id BETWEEN 5 AND 15 FOR UPDATE;
+-- 加锁范围:
+-- 1. 记录锁: id=5, id=10, id=15
+-- 2. 间隙锁: (5,10), (10,15)
+-- 总共: (5, 15] 临键锁
+
+-- 事务B: 尝试插入
+INSERT INTO users (id, name) VALUES (7, 'Alice');
+-- ❌ 阻塞! 因为 7 在间隙 (5,10) 中,被间隙锁锁定
+
+INSERT INTO users (id, name) VALUES (3, 'Bob');
+-- ✅ 成功! 因为 3 在间隙 (1,5) 中,未被锁定
+```
+
+**临键锁的示例**:
+
+```sql
+-- 场景: 防止幻读
+-- 表中数据: id = 1, 5, 10, 15, 20
+
+-- 事务A
+BEGIN;
+SELECT * FROM users WHERE id > 5 AND id <= 15 FOR UPDATE;
+-- InnoDB 使用临键锁:
+-- (5,10] → 锁间隙(5,10)和记录10
+-- (10,15] → 锁间隙(10,15)和记录15
+
+-- 事务B
+INSERT INTO users (id, name) VALUES (7, 'Alice');
+-- ❌ 阻塞! id=7 在间隙 (5,10) 中
+
+INSERT INTO users (id, name) VALUES (12, 'Bob');
+-- ❌ 阻塞! id=12 在间隙 (10,15) 中
+
+INSERT INTO users (id, name) VALUES (3, 'Charlie');
+-- ✅ 成功! id=3 在间隙 (1,5) 中,未被锁定
+```
+
+**间隙锁的特点**:
+
+1. **只在RR级别存在**: READ COMMITTED不使用间隙锁
+2. **只锁间隙不锁记录**: 允许其他事务读取记录
+3. **防止插入**: 阻止在间隙中INSERT
+4. **可能降低并发**: 锁定范围较大
+
+**临键锁的加锁规则**:
+
+```sql
+-- 规则1: 唯一索引等值查询
+-- 记录存在 → 退化为记录锁
+SELECT * FROM users WHERE id = 10 FOR UPDATE;
+-- 只锁 id=10,不锁间隙
+
+-- 记录不存在 → 退化为间隙锁
+SELECT * FROM users WHERE id = 7 FOR UPDATE;
+-- 锁间隙 (5,10),不锁记录
+
+-- 规则2: 非唯一索引等值查询
+SELECT * FROM users WHERE age = 25 FOR UPDATE;
+-- 临键锁 + 间隙锁
+
+-- 规则3: 范围查询
+SELECT * FROM users WHERE id > 10 FOR UPDATE;
+-- 使用临键锁,锁 (10,+∞)
+```
+
+**幻读问题与间隙锁**:
+
+```sql
+-- 没有间隙锁的幻读问题:
+-- 时间  事务A                              事务B
+-- T1    BEGIN
+-- T2    SELECT * FROM users WHERE id BETWEEN 5 AND 15;
+--       (返回 id=5, 10, 15 三条记录)
+-- T3                                       INSERT INTO users VALUES (7, ...);
+--                                          COMMIT;
+-- T4    SELECT * FROM users WHERE id BETWEEN 5 AND 15;
+--       (返回 id=5, 7, 10, 15 四条记录)
+--       → 幻读! 凭空多了一条记录
+
+-- 有间隙锁防止幻读:
+-- T1    BEGIN
+-- T2    SELECT * FROM users WHERE id BETWEEN 5 AND 15 FOR UPDATE;
+--       (加临键锁: (5,15])
+-- T3                                       INSERT INTO users VALUES (7, ...);
+--                                          ❌ 阻塞等待
+-- T4    SELECT * FROM users WHERE id BETWEEN 5 AND 15;
+--       (依然是 id=5, 10, 15 三条记录)
+-- T5    COMMIT
+--       → 没有幻读!
+```
+
+**间隙锁的冲突与兼容**:
+
+```sql
+-- ✅ 间隙锁之间不冲突
+-- 事务A
+SELECT * FROM users WHERE id BETWEEN 5 AND 15 FOR UPDATE;
+-- 加间隙锁 (5,15)
+
+-- 事务B
+SELECT * FROM users WHERE id BETWEEN 5 AND 15 LOCK IN SHARE MODE;
+-- ✅ 也可以加间隙锁 (5,15)
+-- 间隙锁之间不冲突!
+
+-- ❌ 间隙锁阻止插入
+-- 事务C
+INSERT INTO users VALUES (7, ...);
+-- ❌ 阻塞! 与间隙锁冲突
+```
+
+**如何避免间隙锁带来的问题**:
+
+```sql
+-- 1. 降低隔离级别为 READ COMMITTED
+SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
+-- RC 级别不使用间隙锁,但可能出现幻读
+
+-- 2. 使用唯一索引精确匹配
+-- ✅ 好: 唯一索引等值查询,只加记录锁
+SELECT * FROM users WHERE id = 10 FOR UPDATE;
+
+-- ❌ 差: 范围查询,会加间隙锁
+SELECT * FROM users WHERE id > 5 FOR UPDATE;
+
+-- 3. 优化查询条件,缩小锁定范围
+-- ❌ 锁定范围大
+SELECT * FROM users WHERE create_time > '2024-01-01' FOR UPDATE;
+
+-- ✅ 锁定范围小
+SELECT * FROM users
+WHERE create_time > '2024-01-01'
+  AND id < 1000
+FOR UPDATE;
+```
+
+**查看当前锁信息**:
+
+```sql
+-- 查看锁信息
+SELECT * FROM performance_schema.data_locks;
+
+-- 示例输出:
+-- LOCK_TYPE | LOCK_MODE    | INDEX_NAME | LOCK_DATA
+-- RECORD    | X            | PRIMARY    | 10          (记录锁)
+-- RECORD    | X,GAP        | PRIMARY    | 15          (间隙锁)
+-- RECORD    | X            | PRIMARY    | 15          (临键锁=记录+间隙)
+```
+
+#### 关键要点
+
+- **记录锁**:锁单个索引记录
+- **间隙锁**:锁索引记录之间的间隙,防止插入
+- **临键锁**:记录锁+间隙锁,InnoDB RR级别默认
+- **防幻读**:间隙锁和临键锁防止幻读
+- **只在RR级别**:READ COMMITTED不使用间隙锁
+- **间隙锁兼容**:多个事务可同时持有同一间隙锁
+- **降低并发**:锁定范围大,可能降低并发性能
+
+#### 记忆口诀
+
+**"记录单点,间隙范围,临键两者,防止幻读"**
+- 记录锁:锁单个记录
+- 间隙锁:锁记录间隙
+- 临键锁:记录+间隙
+- 作用:防止幻读
+
 24. 什么是间隙锁、临键锁？
+### 25. 如何避免死锁?
+
+#### 核心答案
+
+**死锁**:两个或多个事务相互等待对方释放锁,导致永久阻塞。
+
+**避免死锁的方法**:
+1. 固定加锁顺序
+2. 尽量使用索引,减少锁范围
+3. 降低事务隔离级别
+4. 合理设计索引,避免间隙锁
+5. 为事务设置超时时间
+6. 使用乐观锁代替悲观锁
+
+#### 详细说明
+
+<svg viewBox="0 0 900 500" xmlns="http://www.w3.org/2000/svg">
+<text x="450" y="30" text-anchor="middle" font-size="24" font-weight="bold" fill="#1e293b">死锁示例与避免方法</text>
+<rect x="50" y="70" width="380" height="180" fill="#fee2e2" stroke="#dc2626" stroke-width="2" rx="8"/>
+<text x="240" y="100" text-anchor="middle" font-size="18" font-weight="bold" fill="#b91c1c">❌ 死锁场景</text>
+<text x="70" y="135" font-size="14" fill="#1e293b" font-weight="bold">事务A:</text>
+<text x="80" y="160" font-size="13" fill="#475569">1. 锁住资源 R1</text>
+<text x="80" y="180" font-size="13" fill="#475569">2. 尝试锁 R2 (等待B释放)</text>
+<text x="70" y="210" font-size="14" fill="#1e293b" font-weight="bold">事务B:</text>
+<text x="80" y="235" font-size="13" fill="#475569">1. 锁住资源 R2</text>
+<text x="240" y="213" text-anchor="middle" font-size="18" fill="#dc2626">⚠</text>
+<text x="80" y="255" font-size="13" fill="#475569">2. 尝试锁 R1 (等待A释放)</text>
+<path d="M 350 150 Q 450 120, 480 150" stroke="#dc2626" stroke-width="2" marker-end="url(#arrow-red)" fill="none"/>
+<path d="M 480 230 Q 450 260, 350 230" stroke="#dc2626" stroke-width="2" marker-end="url(#arrow-red)" fill="none"/>
+<defs><marker id="arrow-red" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#dc2626"/></marker></defs>
+<text x="415" y="115" text-anchor="middle" font-size="12" fill="#dc2626" font-weight="bold">互相等待</text>
+<text x="415" y="265" text-anchor="middle" font-size="12" fill="#dc2626" font-weight="bold">形成死锁</text>
+<rect x="470" y="70" width="380" height="180" fill="#dcfce7" stroke="#22c55e" stroke-width="2" rx="8"/>
+<text x="660" y="100" text-anchor="middle" font-size="18" font-weight="bold" fill="#15803d">✅ 避免死锁</text>
+<text x="490" y="135" font-size="14" fill="#1e293b" font-weight="bold">事务A:</text>
+<text x="500" y="160" font-size="13" fill="#475569">1. 先锁 R1 (id小的)</text>
+<text x="500" y="180" font-size="13" fill="#475569">2. 再锁 R2</text>
+<text x="490" y="210" font-size="14" fill="#1e293b" font-weight="bold">事务B:</text>
+<text x="500" y="235" font-size="13" fill="#475569">1. 先锁 R1 (id小的)</text>
+<text x="660" y="213" text-anchor="middle" font-size="18" fill="#22c55e">✓</text>
+<text x="500" y="255" font-size="13" fill="#475569">2. 再锁 R2</text>
+<line x1="720" y1="160" x2="720" y2="235" stroke="#22c55e" stroke-width="2" marker-end="url(#arrow-green)"/>
+<defs><marker id="arrow-green" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#22c55e"/></marker></defs>
+<text x="750" y="200" font-size="12" fill="#15803d" font-weight="bold">顺序一致</text>
+<text x="750" y="215" font-size="12" fill="#15803d" font-weight="bold">不会死锁</text>
+<rect x="50" y="280" width="800" height="200" fill="#f0f4f8" stroke="#64748b" stroke-width="2" rx="8"/>
+<text x="450" y="310" text-anchor="middle" font-size="18" font-weight="bold" fill="#1e293b">避免死锁的6大方法</text>
+<rect x="70" y="330" width="250" height="135" fill="#ffffff" stroke="#94a3b8" stroke-width="1" rx="5"/>
+<text x="195" y="355" text-anchor="middle" font-size="15" fill="#1e40af" font-weight="bold">程序设计</text>
+<text x="80" y="380" font-size="13" fill="#334155">1. 固定加锁顺序</text>
+<text x="80" y="405" font-size="13" fill="#334155">2. 缩短事务时间</text>
+<text x="80" y="430" font-size="13" fill="#334155">3. 一次性锁定所有资源</text>
+<text x="80" y="455" font-size="13" fill="#334155">4. 使用乐观锁</text>
+<rect x="340" y="330" width="250" height="135" fill="#ffffff" stroke="#94a3b8" stroke-width="1" rx="5"/>
+<text x="465" y="355" text-anchor="middle" font-size="15" fill="#15803d" font-weight="bold">数据库配置</text>
+<text x="350" y="380" font-size="13" fill="#334155">5. 降低隔离级别(RC)</text>
+<text x="350" y="405" font-size="13" fill="#334155">6. 添加索引减少锁范围</text>
+<text x="350" y="430" font-size="13" fill="#334155">7. 设置锁超时时间</text>
+<text x="350" y="455" font-size="13" fill="#334155">8. 开启死锁检测</text>
+<rect x="610" y="330" width="220" height="135" fill="#ffffff" stroke="#94a3b8" stroke-width="1" rx="5"/>
+<text x="720" y="355" text-anchor="middle" font-size="15" fill="#d97706" font-weight="bold">监控处理</text>
+<text x="620" y="380" font-size="13" fill="#334155">9. 监控死锁日志</text>
+<text x="620" y="405" font-size="13" fill="#334155">10. 定期分析优化</text>
+<text x="620" y="430" font-size="13" fill="#334155">11. 业务重试机制</text>
+</svg>
+
+**死锁示例**:
+
+```sql
+-- ❌ 死锁场景
+-- 事务A
+BEGIN;
+UPDATE account SET balance = balance - 100 WHERE id = 1;  -- 锁 id=1
+-- 等待 1 秒
+UPDATE account SET balance = balance + 100 WHERE id = 2;  -- 请求 id=2,等待
+
+-- 事务B (同时进行)
+BEGIN;
+UPDATE account SET balance = balance - 50 WHERE id = 2;   -- 锁 id=2
+-- 等待 1 秒
+UPDATE account SET balance = balance + 50 WHERE id = 1;   -- 请求 id=1,等待
+
+-- 结果: 死锁! A等B释放id=2, B等A释放id=1
+-- MySQL检测到死锁,自动回滚其中一个事务
+```
+
+**避免方法1: 固定加锁顺序**
+
+```sql
+-- ✅ 正确做法: 统一按 id 升序加锁
+-- 事务A
+BEGIN;
+UPDATE account SET balance = balance - 100 WHERE id = 1;  -- 先锁小id
+UPDATE account SET balance = balance + 100 WHERE id = 2;  -- 再锁大id
+COMMIT;
+
+-- 事务B
+BEGIN;
+UPDATE account SET balance = balance + 50 WHERE id = 1;   -- 先锁小id
+UPDATE account SET balance = balance - 50 WHERE id = 2;   -- 再锁大id
+COMMIT;
+
+-- 结果: 不会死锁! 两个事务都按id顺序加锁
+```
+
+**避免方法2: 尽量使用索引,减少锁范围**
+
+```sql
+-- ❌ 没有索引,锁整张表
+UPDATE users SET status = 'active' WHERE name = 'Alice';
+-- 如果 name 无索引,会锁整张表,容易死锁
+
+-- ✅ 有索引,只锁行
+CREATE INDEX idx_name ON users(name);
+UPDATE users SET status = 'active' WHERE name = 'Alice';
+-- 只锁 name='Alice' 的行,减少冲突
+```
+
+**避免方法3: 降低事务隔离级别**
+
+```sql
+-- ❌ RR 级别使用间隙锁,容易死锁
+SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+BEGIN;
+SELECT * FROM users WHERE id BETWEEN 5 AND 15 FOR UPDATE;
+-- 锁 (5,15] 包括间隙,范围大
+
+-- ✅ RC 级别不使用间隙锁
+SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
+BEGIN;
+SELECT * FROM users WHERE id BETWEEN 5 AND 15 FOR UPDATE;
+-- 只锁存在的记录,不锁间隙,范围小
+```
+
+**避免方法4: 缩短事务时间**
+
+```sql
+-- ❌ 事务时间长
+BEGIN;
+SELECT * FROM users WHERE id = 1 FOR UPDATE;
+-- ... 执行复杂业务逻辑(5秒)
+-- ... 调用外部API(10秒)
+UPDATE users SET status = 'done' WHERE id = 1;
+COMMIT;  -- 事务持续15秒
+
+-- ✅ 缩短事务时间
+-- 1. 先执行业务逻辑
+-- 业务逻辑计算...
+-- 调用外部API...
+
+-- 2. 最后快速提交事务
+BEGIN;
+SELECT * FROM users WHERE id = 1 FOR UPDATE;
+UPDATE users SET status = 'done' WHERE id = 1;
+COMMIT;  -- 事务只持续0.1秒
+```
+
+**避免方法5: 一次性锁定所有资源**
+
+```sql
+-- ❌ 分批加锁
+BEGIN;
+UPDATE account SET balance = balance - 100 WHERE id = 1;
+-- ... 中间可能被打断
+UPDATE account SET balance = balance + 100 WHERE id = 2;
+COMMIT;
+
+-- ✅ 一次性锁定
+BEGIN;
+SELECT * FROM account WHERE id IN (1, 2) FOR UPDATE;  -- 一次性锁定
+UPDATE account SET balance = balance - 100 WHERE id = 1;
+UPDATE account SET balance = balance + 100 WHERE id = 2;
+COMMIT;
+```
+
+**避免方法6: 使用乐观锁代替悲观锁**
+
+```sql
+-- 悲观锁 (容易死锁)
+BEGIN;
+SELECT * FROM product WHERE id = 1 FOR UPDATE;
+UPDATE product SET stock = stock - 1 WHERE id = 1;
+COMMIT;
+
+-- 乐观锁 (不使用锁,不会死锁)
+-- 1. 读取数据和版本号
+SELECT id, stock, version FROM product WHERE id = 1;
+-- stock=10, version=5
+
+-- 2. 更新时检查版本号
+UPDATE product
+SET stock = stock - 1, version = version + 1
+WHERE id = 1 AND version = 5;  -- 版本号匹配才更新
+
+-- 如果更新失败(affected rows = 0),说明被其他事务修改过,重试
+```
+
+**死锁检测与处理**:
+
+```sql
+-- 1. 查看死锁日志
+SHOW ENGINE INNODB STATUS;
+-- 输出包含 "LATEST DETECTED DEADLOCK" 部分
+
+-- 2. 设置锁等待超时时间
+SET innodb_lock_wait_timeout = 50;  -- 默认50秒
+
+-- 3. 开启死锁检测(默认开启)
+SET GLOBAL innodb_deadlock_detect = ON;
+
+-- 4. 查看当前锁等待
+SELECT * FROM performance_schema.data_lock_waits;
+
+-- 5. 查看锁持有情况
+SELECT * FROM performance_schema.data_locks;
+```
+
+**应用层处理死锁**:
+
+```java
+// 捕获死锁异常,自动重试
+int maxRetries = 3;
+for (int i = 0; i < maxRetries; i++) {
+    try {
+        // 执行事务
+        transferMoney(fromId, toId, amount);
+        break;  // 成功,跳出
+    } catch (DeadlockException e) {
+        if (i == maxRetries - 1) {
+            throw e;  // 最后一次还失败,抛出异常
+        }
+        // 等待一段随机时间后重试
+        Thread.sleep((long)(Math.random() * 1000));
+    }
+}
+```
+
+**死锁避免原则总结**:
+
+1. **程序设计**:
+   - 统一加锁顺序(按id升序)
+   - 缩短事务时间
+   - 一次性锁定所有资源
+   - 避免用户交互
+
+2. **数据库优化**:
+   - 添加索引,减少锁范围
+   - 降低隔离级别(RC)
+   - 合理设计事务
+
+3. **监控处理**:
+   - 监控死锁日志
+   - 设置超时时间
+   - 应用层重试机制
+
+#### 关键要点
+
+- **死锁原因**:相互等待对方释放锁
+- **核心方法**:固定加锁顺序,按id升序
+- **减少锁范围**:使用索引,避免全表锁
+- **降低隔离级别**:RC不使用间隙锁
+- **缩短事务**:减少锁持有时间
+- **乐观锁**:不加锁,使用版本号
+- **自动检测**:MySQL自动检测并回滚
+
+#### 记忆口诀
+
+**"顺序一致索引全,降级缩短快提交,乐观重试不怕死"**
+- 顺序一致:固定加锁顺序
+- 索引全:使用索引,减少锁范围
+- 降级:降低隔离级别
+- 缩短:缩短事务时间
+- 快提交:避免长时间持锁
+- 乐观:使用乐观锁
+- 重试:应用层重试机制
+
 25. 如何避免死锁？
-26. 什么是乐观锁和悲观锁？如何实现？
+### 26. 什么是乐观锁和悲观锁?如何实现?
+
+#### 核心答案
+
+**悲观锁**(Pessimistic Lock):假设会发生冲突,在操作前先加锁。MySQL的`FOR UPDATE`、`LOCK IN SHARE MODE`都是悲观锁。
+
+**乐观锁**(Optimistic Lock):假设不会发生冲突,不加锁,通过版本号或CAS机制在更新时检查数据是否被修改。
+
+**对比**:
+- 悲观锁:先加锁再操作,高冲突场景
+- 乐观锁:先操作再检查,低冲突场景
+
+#### 详细说明
+
+<svg viewBox="0 0 900 550" xmlns="http://www.w3.org/2000/svg">
+<text x="450" y="30" text-anchor="middle" font-size="24" font-weight="bold" fill="#1e293b">乐观锁 vs 悲观锁</text>
+<rect x="50" y="70" width="380" height="240" fill="#fee2e2" stroke="#dc2626" stroke-width="2" rx="8"/>
+<text x="240" y="100" text-anchor="middle" font-size="20" font-weight="bold" fill="#b91c1c">悲观锁 (Pessimistic)</text>
+<text x="70" y="135" font-size="15" fill="#1e293b" font-weight="bold">核心思想:</text>
+<text x="80" y="160" font-size="13" fill="#475569">假设一定会冲突,先加锁</text>
+<text x="70" y="190" font-size="15" fill="#1e293b" font-weight="bold">流程:</text>
+<rect x="80" y="205" width="320" height="90" fill="#ffffff" stroke="#94a3b8" stroke-width="1" rx="5"/>
+<text x="90" y="225" font-size="13" fill="#334155">1. 开始事务</text>
+<text x="90" y="245" font-size="13" fill="#dc2626" font-weight="bold">2. 加锁 (FOR UPDATE)</text>
+<text x="90" y="265" font-size="13" fill="#334155">3. 读取数据</text>
+<text x="90" y="285" font-size="13" fill="#334155">4. 修改数据</text>
+<rect x="470" y="70" width="380" height="240" fill="#dcfce7" stroke="#22c55e" stroke-width="2" rx="8"/>
+<text x="660" y="100" text-anchor="middle" font-size="20" font-weight="bold" fill="#15803d">乐观锁 (Optimistic)</text>
+<text x="490" y="135" font-size="15" fill="#1e293b" font-weight="bold">核心思想:</text>
+<text x="500" y="160" font-size="13" fill="#475569">假设不会冲突,不加锁</text>
+<text x="490" y="190" font-size="15" fill="#1e293b" font-weight="bold">流程:</text>
+<rect x="500" y="205" width="320" height="90" fill="#ffffff" stroke="#94a3b8" stroke-width="1" rx="5"/>
+<text x="510" y="225" font-size="13" fill="#334155">1. 读取数据+版本号</text>
+<text x="510" y="245" font-size="13" fill="#334155">2. 修改数据</text>
+<text x="510" y="265" font-size="13" fill="#22c55e" font-weight="bold">3. 更新时检查版本号</text>
+<text x="510" y="285" font-size="13" fill="#334155">4. 失败则重试</text>
+<rect x="50" y="330" width="800" height="200" fill="#f0f4f8" stroke="#64748b" stroke-width="2" rx="8"/>
+<text x="450" y="360" text-anchor="middle" font-size="18" font-weight="bold" fill="#1e293b">详细对比</text>
+<rect x="70" y="380" width="110" height="30" fill="#cbd5e1"/>
+<text x="125" y="400" text-anchor="middle" font-size="14" fill="#1e293b" font-weight="bold">对比项</text>
+<rect x="190" y="380" width="150" height="30" fill="#fee2e2"/>
+<text x="265" y="400" text-anchor="middle" font-size="14" fill="#b91c1c" font-weight="bold">悲观锁</text>
+<rect x="350" y="380" width="150" height="30" fill="#dcfce7"/>
+<text x="425" y="400" text-anchor="middle" font-size="14" fill="#15803d" font-weight="bold">乐观锁</text>
+<rect x="70" y="420" width="110" height="30" fill="#ffffff"/>
+<text x="125" y="440" text-anchor="middle" font-size="13" fill="#334155">加锁时机</text>
+<rect x="190" y="420" width="150" height="30" fill="#ffffff"/>
+<text x="265" y="440" text-anchor="middle" font-size="12" fill="#475569">操作前加锁</text>
+<rect x="350" y="420" width="150" height="30" fill="#ffffff"/>
+<text x="425" y="440" text-anchor="middle" font-size="12" fill="#475569">不加锁</text>
+<rect x="70" y="460" width="110" height="30" fill="#ffffff"/>
+<text x="125" y="480" text-anchor="middle" font-size="13" fill="#334155">性能</text>
+<rect x="190" y="460" width="150" height="30" fill="#ffffff"/>
+<text x="265" y="480" text-anchor="middle" font-size="12" fill="#475569">并发低</text>
+<rect x="350" y="460" width="150" height="30" fill="#ffffff"/>
+<text x="425" y="480" text-anchor="middle" font-size="12" fill="#475569">并发高</text>
+<rect x="70" y="500" width="110" height="20" fill="#ffffff"/>
+<text x="125" y="515" text-anchor="middle" font-size="13" fill="#334155">适用场景</text>
+<rect x="190" y="500" width="150" height="20" fill="#ffffff"/>
+<text x="265" y="515" text-anchor="middle" font-size="11" fill="#475569">写多读少</text>
+<rect x="350" y="500" width="150" height="20" fill="#ffffff"/>
+<text x="425" y="515" text-anchor="middle" font-size="11" fill="#475569">读多写少</text>
+<rect x="520" y="380" width="310" height="140" fill="#ffffff" stroke="#94a3b8" stroke-width="1" rx="5"/>
+<text x="675" y="400" text-anchor="middle" font-size="14" fill="#1e293b" font-weight="bold">选择建议</text>
+<text x="530" y="425" font-size="12" fill="#dc2626" font-weight="bold">✓ 悲观锁:</text>
+<text x="540" y="443" font-size="11" fill="#475569">冲突频繁、一致性要求高</text>
+<text x="540" y="458" font-size="11" fill="#475569">如: 库存扣减、账户余额</text>
+<text x="530" y="483" font-size="12" fill="#22c55e" font-weight="bold">✓ 乐观锁:</text>
+<text x="540" y="501" font-size="11" fill="#475569">冲突少、性能要求高</text>
+<text x="540" y="516" font-size="11" fill="#475569">如: 文章点赞、商品浏览</text>
+</svg>
+
+**悲观锁实现方式**:
+
+```sql
+-- 方式1: FOR UPDATE (排他锁)
+BEGIN;
+SELECT * FROM product WHERE id = 1 FOR UPDATE;
+-- 其他事务被阻塞,等待锁释放
+UPDATE product SET stock = stock - 1 WHERE id = 1;
+COMMIT;
+
+-- 方式2: LOCK IN SHARE MODE (共享锁)
+BEGIN;
+SELECT * FROM product WHERE id = 1 LOCK IN SHARE MODE;
+-- 允许其他事务读,但不能写
+-- 适用于读取后需要保证数据不被修改的场景
+COMMIT;
+
+-- 方式3: 表锁
+LOCK TABLES product WRITE;
+-- 锁整张表
+UPDATE product SET stock = stock - 1 WHERE id = 1;
+UNLOCK TABLES;
+```
+
+**乐观锁实现方式**:
+
+**方式1: 版本号机制(Version)**
+
+```sql
+-- 表结构
+CREATE TABLE product (
+    id INT PRIMARY KEY,
+    name VARCHAR(100),
+    stock INT,
+    version INT DEFAULT 0  -- 版本号
+);
+
+-- 乐观锁更新流程
+-- 1. 读取数据和版本号
+SELECT id, stock, version FROM product WHERE id = 1;
+-- 假设读到: id=1, stock=10, version=5
+
+-- 2. 业务逻辑处理
+-- ... 计算新的库存 ...
+
+-- 3. 更新时检查版本号
+UPDATE product
+SET stock = stock - 1,
+    version = version + 1
+WHERE id = 1 AND version = 5;  -- 版本号匹配才更新
+
+-- 4. 检查更新结果
+-- affected rows = 1 → 更新成功
+-- affected rows = 0 → 版本号已变,数据被其他事务修改,需要重试
+```
+
+**方式2: 时间戳机制**
+
+```sql
+-- 表结构
+CREATE TABLE product (
+    id INT PRIMARY KEY,
+    name VARCHAR(100),
+    stock INT,
+    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- 乐观锁更新
+-- 1. 读取数据和时间戳
+SELECT id, stock, update_time FROM product WHERE id = 1;
+-- 假设: update_time = '2024-01-01 10:00:00'
+
+-- 2. 更新时检查时间戳
+UPDATE product
+SET stock = stock - 1
+WHERE id = 1 AND update_time = '2024-01-01 10:00:00';
+
+-- 3. 检查结果
+-- affected rows = 1 → 成功
+-- affected rows = 0 → 时间戳已变,需要重试
+```
+
+**方式3: 状态+条件更新(CAS)**
+
+```sql
+-- 不使用版本号,直接在UPDATE时检查数据
+-- 适用于简单场景
+
+-- 扣库存
+UPDATE product
+SET stock = stock - 1
+WHERE id = 1 AND stock >= 1;  -- 库存足够才扣减
+
+-- 修改状态
+UPDATE order_table
+SET status = 'processing'
+WHERE id = 1 AND status = 'pending';  -- 状态为pending才能处理
+```
+
+**完整示例对比**:
+
+```sql
+-- 场景: 扣减库存
+
+-- ❌ 不加锁 (可能超卖)
+-- 事务A
+SELECT stock FROM product WHERE id = 1;  -- stock=10
+-- 事务B 同时读取
+SELECT stock FROM product WHERE id = 1;  -- stock=10
+-- 事务A 更新
+UPDATE product SET stock = 9 WHERE id = 1;
+-- 事务B 更新
+UPDATE product SET stock = 9 WHERE id = 1;  -- 覆盖A的更新,实际卖了2个,库存应该是8
+
+-- ✅ 悲观锁 (性能低但安全)
+BEGIN;
+SELECT stock FROM product WHERE id = 1 FOR UPDATE;  -- 加排他锁
+-- 其他事务被阻塞
+IF stock >= 1 THEN
+    UPDATE product SET stock = stock - 1 WHERE id = 1;
+END IF;
+COMMIT;
+
+-- ✅ 乐观锁 (性能高,需要重试)
+-- 读取
+SELECT id, stock, version FROM product WHERE id = 1;
+-- stock=10, version=5
+
+-- 更新
+UPDATE product
+SET stock = stock - 1, version = version + 1
+WHERE id = 1 AND version = 5 AND stock >= 1;
+
+-- 检查 affected rows
+IF affected_rows = 0 THEN
+    -- 冲突,重试
+    RETRY;
+END IF;
+```
+
+**Java实现乐观锁示例**:
+
+```java
+// 使用版本号的乐观锁
+public boolean updateProductStock(int productId, int quantity) {
+    int maxRetries = 3;
+    for (int i = 0; i < maxRetries; i++) {
+        // 1. 读取数据和版本号
+        Product product = productDao.selectById(productId);
+        int stock = product.getStock();
+        int version = product.getVersion();
+
+        // 2. 检查库存
+        if (stock < quantity) {
+            return false;  // 库存不足
+        }
+
+        // 3. 更新(带版本号检查)
+        int affectedRows = productDao.updateWithVersion(
+            productId,
+            stock - quantity,
+            version + 1,
+            version  // WHERE version = ?
+        );
+
+        // 4. 检查结果
+        if (affectedRows > 0) {
+            return true;  // 更新成功
+        }
+
+        // 5. 版本号冲突,重试
+        Thread.sleep(10);  // 短暂等待
+    }
+
+    return false;  // 重试次数耗尽
+}
+```
+
+**乐观锁vs悲观锁选择**:
+
+| 场景 | 推荐方案 | 原因 |
+|-----|---------|------|
+| **库存扣减** | 悲观锁 | 冲突频繁,需要强一致性 |
+| **账户余额** | 悲观锁 | 金额敏感,不能出错 |
+| **抢购秒杀** | 乐观锁 | 高并发,失败可重试 |
+| **文章点赞** | 乐观锁 | 冲突少,性能优先 |
+| **商品浏览** | 乐观锁 | 读多写少 |
+| **订单状态** | 乐观锁 | 状态机转换 |
+
+**乐观锁的优缺点**:
+
+**优点**:
+- 不加锁,并发性能高
+- 不会产生死锁
+- 适合读多写少场景
+
+**缺点**:
+- 需要重试机制
+- 高冲突场景性能差(频繁重试)
+- 需要应用层处理失败
+
+**悲观锁的优缺点**:
+
+**优点**:
+- 数据一致性强
+- 适合写多场景
+- 不需要重试
+
+**缺点**:
+- 并发性能低
+- 可能产生死锁
+- 锁等待影响响应时间
+
+#### 关键要点
+
+- **悲观锁**:先加锁再操作,`FOR UPDATE`、`LOCK IN SHARE MODE`
+- **乐观锁**:不加锁,版本号或CAS检查冲突
+- **悲观锁适用**:写多读少,冲突频繁,一致性要求高
+- **乐观锁适用**:读多写少,冲突少,性能要求高
+- **实现方式**:
+  - 悲观锁:数据库锁
+  - 乐观锁:版本号、时间戳、CAS
+- **重试机制**:乐观锁失败需要重试
+
+#### 记忆口诀
+
+**"悲观先锁后操作,乐观先操作后check,写多用悲观,读多用乐观"**
+- 悲观:先锁后操作
+- 乐观:先操作后检查
+- 写多→悲观锁
+- 读多→乐观锁
+
 
 ## SQL 优化
 
+### 27. 如何分析SQL的性能?EXPLAIN的作用是什么?
+
+#### 核心答案
+
+**EXPLAIN**:MySQL提供的SQL执行计划分析工具,显示SQL如何被执行,帮助优化查询性能。
+
+**作用**:查看索引使用情况、扫描行数、连接类型等,定位性能瓶颈。
+
+**关键字段**:
+- **type**:访问类型(system > const > eq_ref > ref > range > index > ALL)
+- **key**:实际使用的索引
+- **rows**:预估扫描行数
+- **Extra**:额外信息(Using index、Using filesort等)
+
+#### 详细说明
+
+<svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg">
+<text x="450" y="30" text-anchor="middle" font-size="24" font-weight="bold" fill="#1e293b">EXPLAIN 执行计划分析</text>
+<rect x="50" y="70" width="800" height="60" fill="#dbeafe" stroke="#2563eb" stroke-width="2" rx="8"/>
+<text x="450" y="95" text-anchor="middle" font-size="18" fill="#1e40af" font-weight="bold">EXPLAIN 基本用法</text>
+<text x="70" y="120" font-size="14" fill="#334155">EXPLAIN SELECT * FROM users WHERE id = 10;</text>
+<rect x="50" y="150" width="800" height="420" fill="#f0f4f8" stroke="#64748b" stroke-width="2" rx="8"/>
+<text x="450" y="180" text-anchor="middle" font-size="18" font-weight="bold" fill="#1e293b">EXPLAIN 输出字段详解</text>
+<rect x="70" y="200" width="760" height="50" fill="#dcfce7" stroke="#22c55e" stroke-width="2" rx="5"/>
+<text x="90" y="220" font-size="14" fill="#166534" font-weight="bold">1. type (访问类型) - 最重要!</text>
+<text x="100" y="240" font-size="12" fill="#475569">system > const > eq_ref > ref > range > index > ALL</text>
+<rect x="70" y="260" width="760" height="50" fill="#fef3c7" stroke="#f59e0b" stroke-width="2" rx="5"/>
+<text x="90" y="280" font-size="14" fill="#78350f" font-weight="bold">2. key (使用的索引)</text>
+<text x="100" y="300" font-size="12" fill="#475569">实际使用的索引名,NULL表示未使用索引</text>
+<rect x="70" y="320" width="760" height="50" fill="#fee2e2" stroke="#dc2626" stroke-width="2" rx="5"/>
+<text x="90" y="340" font-size="14" fill="#7f1d1d" font-weight="bold">3. rows (扫描行数)</text>
+<text x="100" y="360" font-size="12" fill="#475569">预估需要扫描的行数,越少越好</text>
+<rect x="70" y="380" width="760" height="50" fill="#e0e7ff" stroke="#6366f1" stroke-width="2" rx="5"/>
+<text x="90" y="400" font-size="14" fill="#4338ca" font-weight="bold">4. Extra (额外信息)</text>
+<text x="100" y="420" font-size="12" fill="#475569">Using index(覆盖索引) | Using filesort(排序) | Using temporary(临时表)</text>
+<rect x="70" y="440" width="370" height="120" fill="#ffffff" stroke="#94a3b8" stroke-width="1" rx="5"/>
+<text x="255" y="460" text-anchor="middle" font-size="15" fill="#1e293b" font-weight="bold">type 访问类型排序</text>
+<text x="90" y="485" font-size="12" fill="#059669">✓ system/const - 最优</text>
+<text x="90" y="505" font-size="12" fill="#059669">✓ eq_ref/ref - 好</text>
+<text x="90" y="525" font-size="12" fill="#f59e0b">⚠ range/index - 一般</text>
+<text x="90" y="545" font-size="12" fill="#dc2626">✗ ALL - 最差(全表扫描)</text>
+<rect x="460" y="440" width="370" height="120" fill="#ffffff" stroke="#94a3b8" stroke-width="1" rx="5"/>
+<text x="645" y="460" text-anchor="middle" font-size="15" fill="#1e293b" font-weight="bold">Extra 重要信息</text>
+<text x="480" y="485" font-size="12" fill="#059669">✓ Using index - 覆盖索引</text>
+<text x="480" y="505" font-size="12" fill="#dc2626">✗ Using filesort - 文件排序</text>
+<text x="480" y="525" font-size="12" fill="#dc2626">✗ Using temporary - 临时表</text>
+<text x="480" y="545" font-size="12" fill="#f59e0b">⚠ Using where - 条件过滤</text>
+</svg>
+
+**EXPLAIN输出字段完整说明**:
+
+| 字段 | 含义 | 说明 |
+|-----|------|------|
+| **id** | 查询序号 | SELECT的执行顺序,id越大越先执行 |
+| **select_type** | 查询类型 | SIMPLE(简单查询)、PRIMARY(主查询)、SUBQUERY(子查询)等 |
+| **table** | 表名 | 正在访问的表 |
+| **type** | 访问类型 | 性能从好到差:system > const > eq_ref > ref > range > index > ALL |
+| **possible_keys** | 可能用到的索引 | 优化器考虑使用的索引 |
+| **key** | 实际使用的索引 | NULL表示未使用索引 |
+| **key_len** | 索引使用长度 | 使用索引的字节数,越短越好 |
+| **ref** | 索引比较的列 | 显示哪些列或常量被用于查找 |
+| **rows** | 扫描行数 | 预估需要扫描的行数 |
+| **filtered** | 过滤百分比 | 表示符合查询条件的行占总行数的百分比 |
+| **Extra** | 额外信息 | 重要的执行细节 |
+
+**type访问类型详解**:
+
+```sql
+-- 1. system/const (最优)
+EXPLAIN SELECT * FROM users WHERE id = 1;
+-- type: const
+-- 通过主键或唯一索引查询单条记录,最快
+
+-- 2. eq_ref (优)
+EXPLAIN SELECT * FROM orders o
+JOIN users u ON o.user_id = u.id;
+-- type: eq_ref
+-- 唯一索引扫描,对于每个索引键,表中只有一条记录匹配
+
+-- 3. ref (好)
+EXPLAIN SELECT * FROM users WHERE name = 'Alice';
+-- type: ref
+-- 非唯一索引扫描,返回匹配某个单独值的所有行
+
+-- 4. range (一般)
+EXPLAIN SELECT * FROM users WHERE id BETWEEN 10 AND 20;
+-- type: range
+-- 索引范围扫描,常见于 <、>、BETWEEN、IN
+
+-- 5. index (差)
+EXPLAIN SELECT id FROM users;
+-- type: index
+-- 全索引扫描,比ALL好一点,但仍然扫描所有索引
+
+-- 6. ALL (最差)
+EXPLAIN SELECT * FROM users WHERE phone = '123456';
+-- type: ALL
+-- 全表扫描,没有使用索引,性能最差
+```
+
+**Extra额外信息详解**:
+
+```sql
+-- ✅ Using index (最好)
+EXPLAIN SELECT id, name FROM users WHERE name = 'Alice';
+-- Extra: Using index
+-- 覆盖索引,查询的列都在索引中,不需要回表
+
+-- ✅ Using index condition (好)
+EXPLAIN SELECT * FROM users WHERE name LIKE 'A%' AND age = 25;
+-- Extra: Using index condition
+-- 索引下推,在索引中过滤数据,减少回表
+
+-- ❌ Using filesort (差)
+EXPLAIN SELECT * FROM users ORDER BY age;
+-- Extra: Using filesort
+-- 无法使用索引排序,需要额外的排序操作,性能差
+
+-- ❌ Using temporary (差)
+EXPLAIN SELECT name, COUNT(*) FROM users GROUP BY name;
+-- Extra: Using temporary
+-- 使用临时表保存中间结果,性能差
+
+-- ⚠️ Using where (一般)
+EXPLAIN SELECT * FROM users WHERE age > 25;
+-- Extra: Using where
+-- 使用WHERE过滤,但没有使用索引
+```
+
+**实战案例分析**:
+
+**案例1: 未使用索引(全表扫描)**
+
+```sql
+EXPLAIN SELECT * FROM users WHERE name = 'Alice';
+
+-- 输出:
+-- type: ALL
+-- key: NULL
+-- rows: 100000
+-- Extra: Using where
+
+-- ❌ 问题: 全表扫描,未使用索引
+-- ✅ 优化: 在name列添加索引
+CREATE INDEX idx_name ON users(name);
+
+-- 优化后:
+-- type: ref
+-- key: idx_name
+-- rows: 10
+-- Extra: Using index condition
+```
+
+**案例2: 索引失效(函数操作)**
+
+```sql
+EXPLAIN SELECT * FROM users WHERE YEAR(create_time) = 2024;
+
+-- 输出:
+-- type: ALL
+-- key: NULL
+-- rows: 100000
+
+-- ❌ 问题: 在索引列上使用函数,索引失效
+-- ✅ 优化: 改写查询条件
+EXPLAIN SELECT * FROM users
+WHERE create_time >= '2024-01-01'
+  AND create_time < '2025-01-01';
+
+-- 优化后:
+-- type: range
+-- key: idx_create_time
+-- rows: 5000
+```
+
+**案例3: 排序未使用索引**
+
+```sql
+EXPLAIN SELECT * FROM users ORDER BY age;
+
+-- 输出:
+-- type: ALL
+-- key: NULL
+-- rows: 100000
+-- Extra: Using filesort
+
+-- ❌ 问题: 排序字段没有索引
+-- ✅ 优化: 添加索引
+CREATE INDEX idx_age ON users(age);
+
+-- 优化后:
+-- type: index
+-- key: idx_age
+-- rows: 100000
+-- Extra: Using index
+```
+
+**案例4: JOIN未使用索引**
+
+```sql
+EXPLAIN SELECT * FROM orders o
+JOIN users u ON o.user_name = u.name;
+
+-- 输出:
+-- type: ALL
+-- key: NULL
+-- rows: 1000000
+
+-- ❌ 问题: JOIN字段没有索引
+-- ✅ 优化: 在JOIN字段添加索引
+CREATE INDEX idx_user_name ON orders(user_name);
+CREATE INDEX idx_name ON users(name);
+
+-- 优化后:
+-- type: ref
+-- key: idx_user_name
+-- rows: 10
+```
+
+**EXPLAIN的变体**:
+
+```sql
+-- 1. EXPLAIN ANALYZE (MySQL 8.0+)
+-- 实际执行查询并返回真实的执行统计
+EXPLAIN ANALYZE SELECT * FROM users WHERE name = 'Alice';
+
+-- 2. EXPLAIN FORMAT=JSON
+-- 以JSON格式输出,包含更多细节
+EXPLAIN FORMAT=JSON SELECT * FROM users WHERE name = 'Alice';
+
+-- 3. EXPLAIN FORMAT=TREE (MySQL 8.0.16+)
+-- 以树形格式显示执行计划
+EXPLAIN FORMAT=TREE SELECT * FROM users WHERE name = 'Alice';
+```
+
+**其他性能分析工具**:
+
+```sql
+-- 1. SHOW PROFILE (查看查询执行各阶段耗时)
+SET profiling = 1;
+SELECT * FROM users WHERE name = 'Alice';
+SHOW PROFILES;
+SHOW PROFILE FOR QUERY 1;
+
+-- 2. SHOW STATUS (查看服务器状态变量)
+SHOW STATUS LIKE 'Handler_read%';
+
+-- 3. 慢查询日志
+SET GLOBAL slow_query_log = ON;
+SET GLOBAL long_query_time = 2;  -- 超过2秒记录
+```
+
+**优化建议根据EXPLAIN结果**:
+
+| 问题 | EXPLAIN特征 | 优化方法 |
+|-----|------------|---------|
+| **全表扫描** | type=ALL, key=NULL | 添加索引 |
+| **索引失效** | key=NULL, possible_keys有值 | 检查WHERE条件,避免函数、类型转换 |
+| **扫描行数多** | rows很大 | 优化索引,缩小查询范围 |
+| **文件排序** | Extra=Using filesort | 在排序字段添加索引 |
+| **临时表** | Extra=Using temporary | 优化GROUP BY或DISTINCT |
+| **未覆盖索引** | Extra无Using index | 使用覆盖索引,减少回表 |
+
+#### 关键要点
+
+- **EXPLAIN**:SQL性能分析神器,必须掌握
+- **type**:最重要字段,const/ref/range优于index/ALL
+- **key**:查看是否使用了索引
+- **rows**:扫描行数,越少越好
+- **Extra**:
+  - Using index(好):覆盖索引
+  - Using filesort(差):额外排序
+  - Using temporary(差):临时表
+- **优化目标**:
+  - type尽量达到ref及以上
+  - 避免ALL全表扫描
+  - 减少扫描行数
+  - 避免filesort和temporary
+
+#### 记忆口诀
+
+**"type定快慢,key看索引,rows看数量,Extra看细节"**
+- type:访问类型决定性能
+- key:是否使用索引
+- rows:扫描行数
+- Extra:额外信息
+
+**"const ref range好,index ALL要避免"** - type类型记忆
+
 27. 如何分析 SQL 的性能？EXPLAIN 的作用是什么？
+
+### 28. 如何优化慢查询?
+
+#### 核心答案
+
+**慢查询优化步骤**:
+1. **定位慢查询**:开启慢查询日志,记录执行时间超过阈值的SQL
+2. **分析慢查询**:使用EXPLAIN分析执行计划
+3. **优化策略**:添加索引、优化SQL、调整表结构、缓存结果
+
+**常见慢查询原因**:
+- 未使用索引(全表扫描)
+- 索引失效
+- 返回数据量太大
+- JOIN表过多
+- 子查询性能差
+
+#### 详细说明
+
+**1. 开启慢查询日志**:
+
+```sql
+-- 查看慢查询日志配置
+SHOW VARIABLES LIKE 'slow_query%';
+SHOW VARIABLES LIKE 'long_query_time';
+
+-- 开启慢查询日志
+SET GLOBAL slow_query_log = ON;
+SET GLOBAL slow_query_log_file = '/var/log/mysql/slow.log';
+SET GLOBAL long_query_time = 2;  -- 超过2秒的查询记录
+
+-- 记录未使用索引的查询
+SET GLOBAL log_queries_not_using_indexes = ON;
+```
+
+**2. 分析慢查询**:
+
+```sql
+-- 使用 mysqldumpslow 分析慢查询日志
+-- Linux命令行
+mysqldumpslow -s t -t 10 /var/log/mysql/slow.log
+-- -s t: 按查询时间排序
+-- -t 10: 显示前10条
+
+-- 查看慢查询统计
+SHOW STATUS LIKE 'Slow_queries';
+```
+
+**3. 优化方法**:
+
+**方法1: 添加索引**
+
+```sql
+-- ❌ 慢查询: 全表扫描
+SELECT * FROM users WHERE name = 'Alice' AND age = 25;
+-- 执行时间: 5秒, 扫描100万行
+
+-- ✅ 优化: 添加联合索引
+CREATE INDEX idx_name_age ON users(name, age);
+-- 执行时间: 0.01秒, 扫描10行
+```
+
+**方法2: 避免SELECT ***
+
+```sql
+-- ❌ 慢查询: 返回所有字段
+SELECT * FROM users WHERE id = 10;
+-- 需要回表,查询所有字段
+
+-- ✅ 优化: 只查询需要的字段
+SELECT id, name, email FROM users WHERE id = 10;
+-- 如果(id, name, email)都在索引中,使用覆盖索引,无需回表
+```
+
+**方法3: 分页优化**
+
+```sql
+-- ❌ 慢查询: 深度分页
+SELECT * FROM orders ORDER BY id LIMIT 1000000, 20;
+-- 需要扫描前100万行,性能极差
+
+-- ✅ 优化: 使用子查询或延迟关联
+SELECT * FROM orders
+WHERE id >= (SELECT id FROM orders ORDER BY id LIMIT 1000000, 1)
+ORDER BY id LIMIT 20;
+
+-- 或使用上次查询的最大ID
+SELECT * FROM orders
+WHERE id > 999999
+ORDER BY id LIMIT 20;
+```
+
+**方法4: 优化JOIN**
+
+```sql
+-- ❌ 慢查询: JOIN字段无索引
+SELECT * FROM orders o
+JOIN users u ON o.user_name = u.name;
+-- user_name和name都没有索引
+
+-- ✅ 优化: 添加索引
+CREATE INDEX idx_user_name ON orders(user_name);
+CREATE INDEX idx_name ON users(name);
+
+-- 或者使用ID关联(更快)
+SELECT * FROM orders o
+JOIN users u ON o.user_id = u.id;
+```
+
+**方法5: 避免子查询**
+
+```sql
+-- ❌ 慢查询: 子查询
+SELECT * FROM users
+WHERE id IN (SELECT user_id FROM orders WHERE amount > 1000);
+-- 子查询可能被执行多次
+
+-- ✅ 优化: 改为JOIN
+SELECT DISTINCT u.* FROM users u
+JOIN orders o ON u.id = o.user_id
+WHERE o.amount > 1000;
+```
+
+**方法6: 优化OR条件**
+
+```sql
+-- ❌ 慢查询: OR连接多个条件
+SELECT * FROM users WHERE name = 'Alice' OR email = 'alice@example.com';
+-- 可能无法使用索引
+
+-- ✅ 优化: 使用UNION
+SELECT * FROM users WHERE name = 'Alice'
+UNION
+SELECT * FROM users WHERE email = 'alice@example.com';
+```
+
+**方法7: 避免函数操作索引列**
+
+```sql
+-- ❌ 慢查询: 在索引列上使用函数
+SELECT * FROM orders WHERE DATE(create_time) = '2024-01-01';
+-- 索引失效
+
+-- ✅ 优化: 改写条件
+SELECT * FROM orders
+WHERE create_time >= '2024-01-01 00:00:00'
+  AND create_time < '2024-01-02 00:00:00';
+```
+
+**方法8: 优化GROUP BY和ORDER BY**
+
+```sql
+-- ❌ 慢查询: 排序字段无索引
+SELECT user_id, COUNT(*) FROM orders
+GROUP BY user_id
+ORDER BY user_id;
+-- Extra: Using filesort
+
+-- ✅ 优化: 在GROUP BY字段添加索引
+CREATE INDEX idx_user_id ON orders(user_id);
+-- Extra: Using index
+```
+
+**方法9: 减少返回数据量**
+
+```sql
+-- ❌ 慢查询: 返回大量数据
+SELECT * FROM orders;  -- 返回100万行
+
+-- ✅ 优化: 分批查询
+SELECT * FROM orders WHERE create_time >= '2024-01-01' LIMIT 1000;
+
+-- 或使用流式查询(JDBC)
+```
+
+**方法10: 优化COUNT查询**
+
+```sql
+-- ❌ 慢查询: COUNT(*)在大表上
+SELECT COUNT(*) FROM orders;
+-- InnoDB需要扫描所有行
+
+-- ✅ 优化: 使用近似值或缓存
+-- 1. 使用 EXPLAIN 获取近似行数
+EXPLAIN SELECT COUNT(*) FROM orders;
+-- rows字段是近似值
+
+-- 2. 使用统计表
+CREATE TABLE order_count (
+    count INT,
+    update_time TIMESTAMP
+);
+
+-- 定期更新统计
+```
+
+**慢查询优化总结**:
+
+| 优化方向 | 具体方法 | 效果 |
+|---------|---------|------|
+| **索引优化** | 添加合适的索引 | ⭐⭐⭐⭐⭐ |
+| **SQL改写** | 避免函数、类型转换 | ⭐⭐⭐⭐ |
+| **减少数据量** | 只查询必要字段和行 | ⭐⭐⭐⭐ |
+| **优化JOIN** | 在连接字段添加索引 | ⭐⭐⭐⭐ |
+| **分页优化** | 使用延迟关联或游标 | ⭐⭐⭐⭐ |
+| **子查询优化** | 改为JOIN | ⭐⭐⭐ |
+| **缓存** | 使用Redis缓存结果 | ⭐⭐⭐⭐⭐ |
+| **分库分表** | 水平拆分大表 | ⭐⭐⭐⭐⭐ |
+
+**实战案例**:
+
+**案例1: 电商订单查询优化**
+
+```sql
+-- 原SQL: 查询用户最近的订单
+SELECT o.*, u.name, u.email
+FROM orders o
+JOIN users u ON o.user_id = u.id
+WHERE o.user_id = 123
+ORDER BY o.create_time DESC
+LIMIT 10;
+
+-- 问题分析:
+-- 1. SELECT * 返回所有字段
+-- 2. user_id可能没有索引
+-- 3. create_time排序可能无索引
+
+-- 优化后:
+-- 1. 添加索引
+CREATE INDEX idx_user_create ON orders(user_id, create_time DESC);
+
+-- 2. 只查询必要字段
+SELECT o.id, o.order_no, o.amount, o.create_time,
+       u.name, u.email
+FROM orders o
+JOIN users u ON o.user_id = u.id
+WHERE o.user_id = 123
+ORDER BY o.create_time DESC
+LIMIT 10;
+
+-- 性能提升: 5秒 → 0.01秒
+```
+
+**案例2: 统计查询优化**
+
+```sql
+-- 原SQL: 统计每个用户的订单数
+SELECT user_id, COUNT(*) as order_count
+FROM orders
+GROUP BY user_id
+ORDER BY order_count DESC;
+
+-- 问题: 全表扫描+排序
+
+-- 优化方案1: 添加索引
+CREATE INDEX idx_user_id ON orders(user_id);
+
+-- 优化方案2: 使用统计表(定时更新)
+CREATE TABLE user_order_stats (
+    user_id INT PRIMARY KEY,
+    order_count INT,
+    update_time TIMESTAMP
+);
+
+-- 通过定时任务更新统计表,查询时直接读取
+SELECT * FROM user_order_stats ORDER BY order_count DESC;
+```
+
+#### 关键要点
+
+- **定位慢查询**:开启慢查询日志
+- **分析执行计划**:使用EXPLAIN找出问题
+- **索引优化**:最重要,添加合适的索引
+- **SQL改写**:避免函数、SELECT *、子查询
+- **分页优化**:深度分页使用延迟关联
+- **JOIN优化**:在连接字段添加索引
+- **减少数据量**:只返回必要的字段和行
+- **缓存**:热点数据使用Redis缓存
+
+#### 记忆口诀
+
+**"定位分析加索引,改写SQL减数据,缓存分库终极法"**
+- 定位:慢查询日志
+- 分析:EXPLAIN
+- 加索引:最重要优化手段
+- 改写SQL:避免索引失效
+- 减数据:只查需要的
+- 缓存分库:终极优化
+
 28. 如何优化慢查询？
+
+### 29. 什么是SQL注入?如何防止?
+
+#### 核心答案
+
+**SQL注入**(SQL Injection):攻击者通过在输入中插入恶意SQL代码,改变原SQL语句的逻辑,从而获取、篡改或删除数据库数据的攻击手段。
+
+**防止方法**:
+1. **预编译语句**(PreparedStatement):最有效
+2. **参数化查询**:使用占位符
+3. **输入验证**:白名单校验
+4. **最小权限原则**:限制数据库权限
+5. **避免拼接SQL**:不要直接拼接用户输入
+
+#### 详细说明
+
+**SQL注入原理**:
+
+```sql
+-- 正常查询
+SELECT * FROM users WHERE username = 'alice' AND password = 'password123';
+
+-- 恶意输入: username = admin' OR '1'='1
+-- 拼接后的SQL:
+SELECT * FROM users WHERE username = 'admin' OR '1'='1' AND password = 'password123';
+-- '1'='1' 永远为真,跳过密码验证,成功登录!
+```
+
+**常见SQL注入攻击场景**:
+
+**场景1: 绕过登录验证**
+
+```sql
+-- 正常登录
+username: alice
+password: password123
+
+-- SQL: SELECT * FROM users WHERE username = 'alice' AND password = 'password123';
+
+-- ❌ SQL注入攻击
+username: admin' OR '1'='1' --
+password: (任意)
+
+-- 拼接后的SQL:
+SELECT * FROM users WHERE username = 'admin' OR '1'='1' -- ' AND password = '...';
+-- '1'='1' 永远为真, -- 注释掉后面的代码
+-- 结果: 绕过密码验证,登录成功!
+```
+
+**场景2: 获取敏感数据**
+
+```sql
+-- 正常查询
+id: 1
+
+-- SQL: SELECT * FROM users WHERE id = 1;
+
+-- ❌ SQL注入攻击
+id: 1 UNION SELECT username, password FROM admin_users
+
+-- 拼接后的SQL:
+SELECT * FROM users WHERE id = 1
+UNION SELECT username, password FROM admin_users;
+-- 结果: 查询到管理员账号密码!
+```
+
+**场景3: 删除数据**
+
+```sql
+-- 正常删除
+id: 1
+
+-- SQL: DELETE FROM orders WHERE id = 1;
+
+-- ❌ SQL注入攻击
+id: 1 OR 1=1
+
+-- 拼接后的SQL:
+DELETE FROM orders WHERE id = 1 OR 1=1;
+-- 结果: 删除所有订单!
+```
+
+**场景4: 批量操作**
+
+```sql
+-- ❌ SQL注入攻击
+id: 1; DROP TABLE users; --
+
+-- 拼接后的SQL:
+SELECT * FROM orders WHERE id = 1;
+DROP TABLE users;
+-- 结果: 删除用户表!
+```
+
+**防止SQL注入的方法**:
+
+**方法1: 使用预编译语句(最推荐)**
+
+```java
+// ❌ 错误做法: 字符串拼接
+String sql = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'";
+Statement stmt = conn.createStatement();
+ResultSet rs = stmt.executeQuery(sql);
+
+// ✅ 正确做法: 预编译语句
+String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+PreparedStatement pstmt = conn.prepareStatement(sql);
+pstmt.setString(1, username);  // 自动转义特殊字符
+pstmt.setString(2, password);
+ResultSet rs = pstmt.executeQuery();
+```
+
+**方法2: ORM框架参数化查询**
+
+```java
+// MyBatis (推荐使用 #{} 占位符)
+// ✅ 正确: 使用 #{}
+<select id="getUserByName" parameterType="string" resultType="User">
+    SELECT * FROM users WHERE username = #{username}
+</select>
+
+// ❌ 错误: 使用 ${}(直接拼接,存在注入风险)
+<select id="getUserByName" parameterType="string" resultType="User">
+    SELECT * FROM users WHERE username = '${username}'
+</select>
+
+// JPA
+// ✅ 正确
+@Query("SELECT u FROM User u WHERE u.username = :username")
+User findByUsername(@Param("username") String username);
+
+// Hibernate
+// ✅ 正确
+Query query = session.createQuery("FROM User WHERE username = :username");
+query.setParameter("username", username);
+```
+
+**方法3: 输入验证和过滤**
+
+```java
+// 白名单验证
+public boolean isValidUsername(String username) {
+    // 只允许字母、数字、下划线
+    return username.matches("^[a-zA-Z0-9_]{3,20}$");
+}
+
+// 黑名单过滤(不推荐作为唯一防护)
+public String sanitizeInput(String input) {
+    // 过滤SQL关键字和特殊字符
+    String[] keywords = {"OR", "AND", "UNION", "SELECT", "DROP", "--", ";", "'", "\""};
+    for (String keyword : keywords) {
+        input = input.replaceAll("(?i)" + keyword, "");
+    }
+    return input;
+}
+
+// ⚠️ 注意: 黑名单过滤容易被绕过,不应作为唯一防护手段
+```
+
+**方法4: 使用存储过程**
+
+```sql
+-- 创建存储过程
+DELIMITER //
+CREATE PROCEDURE GetUser(IN p_username VARCHAR(50), IN p_password VARCHAR(50))
+BEGIN
+    SELECT * FROM users WHERE username = p_username AND password = p_password;
+END //
+DELIMITER ;
+
+-- Java调用
+CallableStatement cstmt = conn.prepareCall("{call GetUser(?, ?)}");
+cstmt.setString(1, username);
+cstmt.setString(2, password);
+ResultSet rs = cstmt.executeQuery();
+```
+
+**方法5: 最小权限原则**
+
+```sql
+-- 应用程序使用的数据库账号只授予必要的权限
+-- ❌ 不要使用 root 或 admin 账号
+-- ✅ 创建专用账号,只授予必要权限
+
+CREATE USER 'app_user'@'localhost' IDENTIFIED BY 'password';
+
+-- 只授予SELECT、INSERT、UPDATE权限,不授予DROP、DELETE等危险权限
+GRANT SELECT, INSERT, UPDATE ON mydb.* TO 'app_user'@'localhost';
+
+-- 不授予 FILE、PROCESS、SUPER 等管理权限
+```
+
+**方法6: WAF(Web应用防火墙)**
+
+- ModSecurity
+- 云WAF服务(阿里云、腾讯云)
+- 拦截常见SQL注入攻击模式
+
+**防止SQL注入的最佳实践**:
+
+| 方法 | 效果 | 推荐度 | 说明 |
+|-----|------|-------|------|
+| **预编译语句** | ⭐⭐⭐⭐⭐ | ✅ 必须 | 最有效,参数自动转义 |
+| **ORM参数化** | ⭐⭐⭐⭐⭐ | ✅ 必须 | MyBatis用#{},JPA用:param |
+| **输入验证** | ⭐⭐⭐⭐ | ✅ 推荐 | 白名单验证,限制格式 |
+| **最小权限** | ⭐⭐⭐⭐ | ✅ 推荐 | 限制数据库权限 |
+| **黑名单过滤** | ⭐⭐ | ⚠️ 不推荐单用 | 容易被绕过 |
+| **存储过程** | ⭐⭐⭐ | ✅ 可选 | 减少拼接,但维护成本高 |
+| **WAF** | ⭐⭐⭐⭐ | ✅ 推荐 | 多一层防护 |
+
+**实战案例**:
+
+**案例1: 登录功能防SQL注入**
+
+```java
+// ❌ 危险代码: 字符串拼接
+public User login(String username, String password) {
+    String sql = "SELECT * FROM users WHERE username = '" + username +
+                 "' AND password = '" + password + "'";
+    // 存在SQL注入风险!
+    return jdbcTemplate.queryForObject(sql, User.class);
+}
+
+// ✅ 安全代码: 预编译
+public User login(String username, String password) {
+    String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+    return jdbcTemplate.queryForObject(sql, new Object[]{username, password}, User.class);
+}
+
+// ✅ 更安全: 预编译 + 输入验证
+public User login(String username, String password) {
+    // 1. 输入验证
+    if (!username.matches("^[a-zA-Z0-9_]{3,20}$")) {
+        throw new IllegalArgumentException("Invalid username");
+    }
+
+    // 2. 密码加密(实际应该存储加密后的密码)
+    String hashedPassword = hashPassword(password);
+
+    // 3. 预编译查询
+    String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+    return jdbcTemplate.queryForObject(sql,
+        new Object[]{username, hashedPassword}, User.class);
+}
+```
+
+**案例2: 动态排序字段防注入**
+
+```java
+// ❌ 危险代码: 直接拼接排序字段
+public List<User> getUsers(String sortField) {
+    String sql = "SELECT * FROM users ORDER BY " + sortField;
+    // sortField = "id; DROP TABLE users; --" 会导致SQL注入!
+    return jdbcTemplate.query(sql, new UserRowMapper());
+}
+
+// ✅ 安全代码: 白名单验证
+public List<User> getUsers(String sortField) {
+    // 1. 白名单验证
+    List<String> allowedFields = Arrays.asList("id", "username", "create_time");
+    if (!allowedFields.contains(sortField)) {
+        sortField = "id";  // 默认排序字段
+    }
+
+    // 2. 拼接SQL(已通过白名单验证,安全)
+    String sql = "SELECT * FROM users ORDER BY " + sortField;
+    return jdbcTemplate.query(sql, new UserRowMapper());
+}
+```
+
+**检测SQL注入的方法**:
+
+```sql
+-- 1. 手动测试常见注入payload
+' OR '1'='1
+' OR 1=1 --
+' UNION SELECT NULL --
+'; DROP TABLE users; --
+admin'--
+
+-- 2. 使用工具
+-- SQLMap: 自动化SQL注入工具
+sqlmap -u "http://example.com/user?id=1" --dbs
+
+-- 3. 代码审计
+-- 搜索字符串拼接SQL的代码
+grep -r "String sql = .*+.*" src/
+```
+
+#### 关键要点
+
+- **SQL注入**:通过恶意输入改变SQL逻辑,获取/篡改/删除数据
+- **核心防护**:使用预编译语句(PreparedStatement)
+- **ORM框架**:MyBatis用#{}不用${},JPA用:param
+- **输入验证**:白名单验证,限制格式和长度
+- **最小权限**:应用账号不使用root,只授予必要权限
+- **不要拼接**:永远不要直接拼接用户输入
+- **多层防护**:预编译+输入验证+最小权限+WAF
+
+#### 记忆口诀
+
+**"预编译第一,参数化占位,输入必校验,权限要最小"**
+- 预编译:PreparedStatement
+- 参数化:#{},?,:param
+- 校验:白名单验证
+- 权限:最小权限原则
+
 29. 什么是 SQL 注入？如何防止？
-30. 大表如何优化？
+
+### 30. 大表如何优化?
+
+#### 核心答案
+
+**大表定义**:通常指单表数据量超过百万级(如500万+),查询和写入性能明显下降的表。
+
+**优化策略**:
+1. **垂直拆分**:按列拆分,分离冷热数据
+2. **水平拆分**:按行拆分(分库分表),分散数据压力
+3. **索引优化**:建立合适索引,定期维护
+4. **历史数据归档**:冷数据迁移到归档表
+5. **读写分离**:主库写,从库读
+6. **缓存**:热点数据放Redis
+
+#### 详细说明
+
+<svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg">
+<text x="450" y="30" text-anchor="middle" font-size="24" font-weight="bold" fill="#1e293b">大表优化策略全景</text>
+<rect x="50" y="70" width="800" height="100" fill="#dbeafe" stroke="#2563eb" stroke-width="2" rx="8"/>
+<text x="450" y="100" text-anchor="middle" font-size="18" fill="#1e40af" font-weight="bold">什么是大表?</text>
+<text x="70" y="130" font-size="14" fill="#334155">• 数据量: 单表超过 500万-1000万 行</text>
+<text x="70" y="155" font-size="14" fill="#334155">• 性能表现: 查询变慢(>1秒)、写入TPS下降、锁等待增加</text>
+<rect x="50" y="190" width="260" height="180" fill="#dcfce7" stroke="#22c55e" stroke-width="2" rx="8"/>
+<text x="180" y="220" text-anchor="middle" font-size="16" font-weight="bold" fill="#15803d">垂直拆分 (按列)</text>
+<rect x="70" y="240" width="220" height="120" fill="#ffffff" stroke="#94a3b8" stroke-width="1" rx="5"/>
+<text x="80" y="260" font-size="13" fill="#334155" font-weight="bold">用户表拆分:</text>
+<text x="90" y="280" font-size="12" fill="#475569">主表: id, name, phone</text>
+<text x="90" y="300" font-size="12" fill="#475569">详情表: id, address, bio</text>
+<text x="90" y="320" font-size="12" fill="#475569">统计表: id, login_count</text>
+<text x="90" y="340" font-size="11" fill="#059669">✓ 减少单表字段数</text>
+<text x="90" y="355" font-size="11" fill="#059669">✓ 分离冷热数据</text>
+<rect x="330" y="190" width="260" height="180" fill="#fef3c7" stroke="#f59e0b" stroke-width="2" rx="8"/>
+<text x="460" y="220" text-anchor="middle" font-size="16" font-weight="bold" fill="#d97706">水平拆分 (按行)</text>
+<rect x="350" y="240" width="220" height="120" fill="#ffffff" stroke="#94a3b8" stroke-width="1" rx="5"/>
+<text x="360" y="260" font-size="13" fill="#334155" font-weight="bold">订单表拆分:</text>
+<text x="370" y="280" font-size="12" fill="#475569">orders_2023 (历史)</text>
+<text x="370" y="300" font-size="12" fill="#475569">orders_2024 (当前)</text>
+<text x="370" y="320" font-size="12" fill="#475569">或按 user_id % 10 分表</text>
+<text x="370" y="340" font-size="11" fill="#f59e0b">✓ 降低单表数据量</text>
+<text x="370" y="355" font-size="11" fill="#f59e0b">✓ 提升查询性能</text>
+<rect x="610" y="190" width="240" height="180" fill="#fee2e2" stroke="#dc2626" stroke-width="2" rx="8"/>
+<text x="730" y="220" text-anchor="middle" font-size="16" font-weight="bold" fill="#b91c1c">历史数据归档</text>
+<rect x="630" y="240" width="200" height="120" fill="#ffffff" stroke="#94a3b8" stroke-width="1" rx="5"/>
+<text x="640" y="260" font-size="13" fill="#334155" font-weight="bold">按时间归档:</text>
+<text x="650" y="280" font-size="12" fill="#475569">活跃表: 近3个月</text>
+<text x="650" y="300" font-size="12" fill="#475569">归档表: 3个月前</text>
+<text x="650" y="320" font-size="12" fill="#475569">定期迁移冷数据</text>
+<text x="650" y="340" font-size="11" fill="#dc2626">✓ 保持主表精简</text>
+<text x="650" y="355" font-size="11" fill="#dc2626">✓ 冷数据可压缩</text>
+<rect x="50" y="390" width="800" height="190" fill="#f0f4f8" stroke="#64748b" stroke-width="2" rx="8"/>
+<text x="450" y="420" text-anchor="middle" font-size="18" font-weight="bold" fill="#1e293b">大表优化的6大方法</text>
+<rect x="70" y="440" width="250" height="130" fill="#ffffff" stroke="#94a3b8" stroke-width="1" rx="5"/>
+<text x="195" y="465" text-anchor="middle" font-size="15" fill="#1e40af" font-weight="bold">结构优化</text>
+<text x="80" y="490" font-size="13" fill="#334155">1. 垂直拆分(按列)</text>
+<text x="80" y="510" font-size="13" fill="#334155">2. 水平拆分(按行)</text>
+<text x="80" y="530" font-size="13" fill="#334155">3. 历史数据归档</text>
+<text x="80" y="550" font-size="13" fill="#334155">4. 字段类型优化</text>
+<rect x="340" y="440" width="250" height="130" fill="#ffffff" stroke="#94a3b8" stroke-width="1" rx="5"/>
+<text x="465" y="465" text-anchor="middle" font-size="15" fill="#15803d" font-weight="bold">性能优化</text>
+<text x="350" y="490" font-size="13" fill="#334155">5. 添加合适索引</text>
+<text x="350" y="510" font-size="13" fill="#334155">6. 定期维护表(OPTIMIZE)</text>
+<text x="350" y="530" font-size="13" fill="#334155">7. 读写分离</text>
+<text x="350" y="550" font-size="13" fill="#334155">8. 使用缓存(Redis)</text>
+<rect x="610" y="440" width="220" height="130" fill="#ffffff" stroke="#94a3b8" stroke-width="1" rx="5"/>
+<text x="720" y="465" text-anchor="middle" font-size="15" fill="#d97706" font-weight="bold">应用层优化</text>
+<text x="620" y="490" font-size="13" fill="#334155">9. 分页优化</text>
+<text x="620" y="510" font-size="13" fill="#334155">10. 异步处理</text>
+<text x="620" y="530" font-size="13" fill="#334155">11. 批量操作</text>
+<text x="620" y="550" font-size="13" fill="#334155">12. 限流降级</text>
+</svg>
+
+**大表优化的12种方法**:
+
+**1. 垂直拆分(按列拆分)**
+
+将一张宽表(字段多)拆分成多张表,按业务维度分离。
+
+```sql
+-- 原表: 用户表有50个字段
+CREATE TABLE users (
+    id INT PRIMARY KEY,
+    username VARCHAR(50),
+    password VARCHAR(100),
+    email VARCHAR(100),
+    phone VARCHAR(20),
+    -- ... 基本信息
+    address TEXT,            -- 详细地址
+    bio TEXT,                -- 个人简介
+    preferences JSON,        -- 偏好设置
+    -- ... 详细信息
+    login_count INT,         -- 登录次数
+    last_login_time DATETIME,-- 最后登录
+    -- ... 统计信息
+);
+
+-- ✅ 拆分后: 3张表
+-- 主表: 高频访问的核心字段
+CREATE TABLE users (
+    id INT PRIMARY KEY,
+    username VARCHAR(50),
+    password VARCHAR(100),
+    email VARCHAR(100),
+    phone VARCHAR(20),
+    status TINYINT,
+    create_time DATETIME
+);
+
+-- 详情表: 低频访问的大字段
+CREATE TABLE user_profiles (
+    user_id INT PRIMARY KEY,
+    address TEXT,
+    bio TEXT,
+    preferences JSON,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- 统计表: 经常变化的统计字段
+CREATE TABLE user_stats (
+    user_id INT PRIMARY KEY,
+    login_count INT,
+    last_login_time DATETIME,
+    view_count INT,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- 优点:
+-- 1. 主表更小,查询更快
+-- 2. 分离冷热数据,提升缓存命中率
+-- 3. 大字段不影响主表性能
+```
+
+**2. 水平拆分(按行拆分/分库分表)**
+
+将一张大表的数据分散到多张表或多个数据库。
+
+```sql
+-- 方式1: 按时间分表
+CREATE TABLE orders_2023 (
+    id BIGINT PRIMARY KEY,
+    user_id INT,
+    amount DECIMAL(10,2),
+    create_time DATETIME
+    -- WHERE create_time >= '2023-01-01' AND create_time < '2024-01-01'
+);
+
+CREATE TABLE orders_2024 (
+    id BIGINT PRIMARY KEY,
+    user_id INT,
+    amount DECIMAL(10,2),
+    create_time DATETIME
+    -- WHERE create_time >= '2024-01-01'
+);
+
+-- 方式2: 按哈希分表(user_id % 10)
+CREATE TABLE orders_0 (...);  -- user_id % 10 = 0
+CREATE TABLE orders_1 (...);  -- user_id % 10 = 1
+...
+CREATE TABLE orders_9 (...);  -- user_id % 10 = 9
+
+-- 优点:
+-- 1. 每张表数据量小,查询快
+-- 2. 并发写入分散,提升TPS
+-- 3. 可以分散到不同数据库服务器
+```
+
+**3. 历史数据归档**
+
+将历史冷数据迁移到归档表,保持主表精简。
+
+```sql
+-- 主表: 只保留近期数据
+CREATE TABLE orders (
+    id BIGINT PRIMARY KEY,
+    user_id INT,
+    amount DECIMAL(10,2),
+    create_time DATETIME,
+    INDEX idx_create_time (create_time)
+);
+
+-- 归档表: 存储历史数据
+CREATE TABLE orders_archive (
+    id BIGINT PRIMARY KEY,
+    user_id INT,
+    amount DECIMAL(10,2),
+    create_time DATETIME,
+    archive_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_create_time (create_time)
+) ENGINE=Archive;  -- Archive引擎高压缩比
+
+-- 定期归档脚本(每月执行)
+-- 1. 迁移3个月前的数据
+INSERT INTO orders_archive
+SELECT *, NOW() FROM orders
+WHERE create_time < DATE_SUB(NOW(), INTERVAL 3 MONTH);
+
+-- 2. 删除已归档的数据
+DELETE FROM orders
+WHERE create_time < DATE_SUB(NOW(), INTERVAL 3 MONTH);
+
+-- 3. 优化表
+OPTIMIZE TABLE orders;
+
+-- 查询时联合查询
+SELECT * FROM orders WHERE id = 123
+UNION ALL
+SELECT * FROM orders_archive WHERE id = 123;
+```
+
+**4. 索引优化**
+
+```sql
+-- 检查缺失索引
+-- 查看慢查询日志,找出全表扫描的SQL
+SHOW VARIABLES LIKE 'slow_query_log';
+SHOW VARIABLES LIKE 'long_query_time';
+
+-- 添加合适的索引
+CREATE INDEX idx_user_create ON orders(user_id, create_time);
+CREATE INDEX idx_status ON orders(status);
+
+-- 删除冗余索引
+-- 如果有 INDEX(a, b),就不需要单独的 INDEX(a)
+SHOW INDEX FROM orders;
+DROP INDEX redundant_index ON orders;
+
+-- 定期维护索引
+ANALYZE TABLE orders;  -- 更新统计信息
+OPTIMIZE TABLE orders; -- 重建表,消除碎片
+```
+
+**5. 字段类型优化**
+
+```sql
+-- ❌ 不合理的字段类型
+CREATE TABLE users (
+    id VARCHAR(50),        -- 使用字符串做主键
+    age VARCHAR(10),       -- 数字用字符串
+    status VARCHAR(20),    -- 只有几个状态值
+    is_vip VARCHAR(5)      -- 布尔值用字符串
+);
+
+-- ✅ 优化后的字段类型
+CREATE TABLE users (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,  -- 整数主键
+    age TINYINT UNSIGNED,                  -- 0-255,节省空间
+    status ENUM('pending', 'active', 'inactive'),  -- 枚举
+    is_vip BOOLEAN                         -- 布尔值
+);
+
+-- 节省空间:
+-- VARCHAR(50) → BIGINT: 50字节 → 8字节
+-- VARCHAR(10) → TINYINT: 10字节 → 1字节
+```
+
+**6. 读写分离**
+
+```
+主库 (Master) → 写操作
+    ↓ 复制
+从库 (Slave1) → 读操作
+从库 (Slave2) → 读操作
+从库 (Slave3) → 读操作
+
+写操作: INSERT/UPDATE/DELETE → 主库
+读操作: SELECT → 从库(负载均衡)
+```
+
+**7. 使用缓存**
+
+```java
+// 热点数据使用Redis缓存
+public User getUser(int userId) {
+    // 1. 先查缓存
+    String cacheKey = "user:" + userId;
+    User user = redisTemplate.opsForValue().get(cacheKey);
+
+    if (user != null) {
+        return user;  // 缓存命中
+    }
+
+    // 2. 查数据库
+    user = userMapper.selectById(userId);
+
+    // 3. 写入缓存
+    if (user != null) {
+        redisTemplate.opsForValue().set(cacheKey, user, 1, TimeUnit.HOURS);
+    }
+
+    return user;
+}
+```
+
+**8. 定期维护表**
+
+```sql
+-- 查看表状态
+SHOW TABLE STATUS LIKE 'orders';
+-- 关注: Data_length(数据大小)、Index_length(索引大小)、Data_free(碎片)
+
+-- 优化表(消除碎片,重建索引)
+OPTIMIZE TABLE orders;
+-- 注意: 会锁表,在业务低峰期执行
+
+-- 分析表(更新统计信息)
+ANALYZE TABLE orders;
+-- 不会锁表,可以经常执行
+
+-- 检查表
+CHECK TABLE orders;
+-- 检查表是否有错误
+```
+
+**9. 分页优化**
+
+```sql
+-- ❌ 深度分页很慢
+SELECT * FROM orders ORDER BY id LIMIT 1000000, 20;
+-- 需要扫描前100万行
+
+-- ✅ 优化: 使用上次查询的最大ID
+SELECT * FROM orders
+WHERE id > 999999  -- 上次查询的最后一个ID
+ORDER BY id LIMIT 20;
+
+-- 或使用子查询
+SELECT * FROM orders
+WHERE id >= (SELECT id FROM orders ORDER BY id LIMIT 1000000, 1)
+ORDER BY id LIMIT 20;
+```
+
+**10. 批量操作代替逐条操作**
+
+```sql
+-- ❌ 逐条插入
+INSERT INTO logs VALUES (1, 'log1');
+INSERT INTO logs VALUES (2, 'log2');
+...
+-- 1000次SQL,很慢
+
+-- ✅ 批量插入
+INSERT INTO logs VALUES
+(1, 'log1'),
+(2, 'log2'),
+...
+(1000, 'log1000');
+-- 1次SQL,快很多
+
+-- 批量更新
+UPDATE orders
+SET status = 'shipped'
+WHERE id IN (1, 2, 3, ..., 1000);
+```
+
+**11. 异步处理**
+
+```java
+// 大批量操作异步处理
+@Async
+public void batchUpdateOrders(List<Integer> orderIds) {
+    // 分批处理,每批1000条
+    for (int i = 0; i < orderIds.size(); i += 1000) {
+        List<Integer> batch = orderIds.subList(i, Math.min(i + 1000, orderIds.size()));
+        orderMapper.batchUpdate(batch);
+        Thread.sleep(100);  // 避免长时间占用连接
+    }
+}
+```
+
+**12. 限流降级**
+
+```java
+// 大表查询加限流
+@RateLimiter(value = 10, timeout = 1000)  // 每秒最多10次
+public List<Order> queryOrders(OrderQuery query) {
+    // 限制返回数量
+    if (query.getPageSize() > 100) {
+        query.setPageSize(100);
+    }
+
+    return orderMapper.selectList(query);
+}
+```
+
+**大表优化决策树**:
+
+```
+大表性能问题?
+├─ 数据量问题(千万级+)
+│  ├─ 历史数据多 → 归档冷数据
+│  ├─ 字段多 → 垂直拆分
+│  └─ 查询慢 → 水平拆分/分库分表
+├─ 查询慢
+│  ├─ 无索引 → 添加索引
+│  ├─ 索引失效 → 优化SQL
+│  └─ 深度分页 → 分页优化
+├─ 写入慢
+│  ├─ 锁等待 → 读写分离
+│  ├─ 单条插入 → 批量操作
+│  └─ 并发高 → 分库分表
+└─ 磁盘占用大
+   ├─ 冗余数据 → 清理/归档
+   ├─ 大字段 → 垂直拆分
+   └─ 碎片多 → OPTIMIZE TABLE
+```
+
+**实战案例**:
+
+**案例1: 订单表优化(从3000万到300万)**
+
+```sql
+-- 原表: 3000万条订单
+CREATE TABLE orders (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    order_no VARCHAR(32),
+    amount DECIMAL(10,2),
+    status VARCHAR(20),
+    remark TEXT,              -- 大字段
+    create_time DATETIME,
+    update_time DATETIME
+);
+
+-- 问题:
+-- 1. 查询慢: SELECT平均2-3秒
+-- 2. 写入慢: INSERT平均500ms
+-- 3. 磁盘占用: 100GB
+
+-- 优化方案:
+-- 1. 历史数据归档(保留1年内数据)
+CREATE TABLE orders_archive LIKE orders;
+INSERT INTO orders_archive
+SELECT * FROM orders WHERE create_time < '2023-01-01';
+DELETE FROM orders WHERE create_time < '2023-01-01';
+-- 数据量: 3000万 → 300万
+
+-- 2. 垂直拆分(分离大字段)
+CREATE TABLE orders (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    order_no VARCHAR(32),
+    amount DECIMAL(10,2),
+    status VARCHAR(20),
+    create_time DATETIME,
+    update_time DATETIME,
+    INDEX idx_user_create (user_id, create_time),
+    INDEX idx_status (status)
+);
+
+CREATE TABLE order_details (
+    order_id BIGINT PRIMARY KEY,
+    remark TEXT,
+    FOREIGN KEY (order_id) REFERENCES orders(id)
+);
+
+-- 3. 状态字段优化
+ALTER TABLE orders MODIFY status ENUM('pending', 'paid', 'shipped', 'completed', 'cancelled');
+
+-- 4. 添加缓存
+-- 热点订单(1小时内)缓存到Redis
+
+-- 优化效果:
+-- 查询速度: 2-3秒 → 0.1秒 (20-30倍提升)
+-- 写入速度: 500ms → 50ms (10倍提升)
+-- 磁盘占用: 100GB → 20GB (节省80%)
+```
+
+**案例2: 用户表优化(千万级用户)**
+
+```sql
+-- 原表: 1000万用户,100个字段
+CREATE TABLE users (
+    id INT PRIMARY KEY,
+    -- 基本信息(20个字段)
+    username VARCHAR(50),
+    password VARCHAR(100),
+    ...
+    -- 详细信息(50个字段)
+    address TEXT,
+    bio TEXT,
+    ...
+    -- 统计信息(30个字段)
+    login_count INT,
+    view_count INT,
+    ...
+);
+
+-- 优化方案: 垂直拆分成3张表
+-- 1. 用户主表(高频访问)
+CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) NOT NULL,
+    password VARCHAR(100) NOT NULL,
+    email VARCHAR(100),
+    phone VARCHAR(20),
+    status TINYINT,
+    create_time DATETIME,
+    UNIQUE INDEX idx_username (username),
+    UNIQUE INDEX idx_email (email)
+) ENGINE=InnoDB;
+
+-- 2. 用户详情表(低频访问)
+CREATE TABLE user_profiles (
+    user_id INT PRIMARY KEY,
+    real_name VARCHAR(50),
+    address TEXT,
+    bio TEXT,
+    preferences JSON,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+) ENGINE=InnoDB;
+
+-- 3. 用户统计表(频繁更新)
+CREATE TABLE user_stats (
+    user_id INT PRIMARY KEY,
+    login_count INT DEFAULT 0,
+    view_count INT DEFAULT 0,
+    last_login_time DATETIME,
+    last_login_ip VARCHAR(50),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+) ENGINE=InnoDB;
+
+-- 查询优化:
+-- 登录查询: 只查主表
+SELECT id, username, password, status FROM users WHERE username = ?;
+
+-- 个人中心: JOIN查询
+SELECT u.*, p.real_name, p.address, s.login_count
+FROM users u
+LEFT JOIN user_profiles p ON u.id = p.user_id
+LEFT JOIN user_stats s ON u.id = s.user_id
+WHERE u.id = ?;
+
+-- 更新登录次数: 只更新统计表
+UPDATE user_stats SET login_count = login_count + 1 WHERE user_id = ?;
+
+-- 优化效果:
+-- 主表大小: 5GB → 500MB (10倍减小)
+-- 登录查询: 300ms → 10ms (30倍提升)
+-- 缓存命中率: 30% → 80% (主表小,更易缓存)
+```
+
+**大表优化对比表**:
+
+| 优化方法 | 适用场景 | 复杂度 | 效果 | 缺点 |
+|---------|---------|-------|------|------|
+| **垂直拆分** | 字段多,冷热分明 | ⭐⭐ | ⭐⭐⭐⭐ | 需要JOIN |
+| **水平拆分** | 数据量大(千万+) | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | 复杂度高,跨库问题 |
+| **历史归档** | 历史数据多 | ⭐⭐ | ⭐⭐⭐⭐ | 查询需要联合 |
+| **索引优化** | 查询慢 | ⭐ | ⭐⭐⭐⭐ | 占用空间,影响写入 |
+| **读写分离** | 读多写少 | ⭐⭐⭐ | ⭐⭐⭐⭐ | 主从延迟 |
+| **缓存** | 热点数据 | ⭐⭐ | ⭐⭐⭐⭐⭐ | 缓存一致性 |
+
+#### 关键要点
+
+- **垂直拆分**:按列拆分,分离冷热数据,减少单表字段
+- **水平拆分**:按行拆分(分库分表),降低单表数据量
+- **历史归档**:定期迁移冷数据,保持主表精简
+- **索引优化**:添加合适索引,定期维护
+- **读写分离**:主库写,从库读,分散压力
+- **缓存**:热点数据缓存到Redis
+- **批量操作**:减少SQL执行次数
+- **分页优化**:避免深度分页
+- **字段优化**:选择合适的数据类型
+- **定期维护**:OPTIMIZE TABLE消除碎片
+
+#### 记忆口诀
+
+**"垂直按列横按行,归档历史索引优,读写分离加缓存,批量异步定期维"**
+- 垂直:按列拆分
+- 横:按行拆分(分库分表)
+- 归档:历史数据归档
+- 索引优:索引优化
+- 读写分离:主从分离
+- 缓存:Redis缓存
+- 批量异步:提升写入
+- 定期维:表维护
+
 31. 如何优化 INSERT 语句？
 32. 如何优化分页查询？
 33. 什么是子查询？什么情况下用 JOIN 替代子查询？
@@ -1770,4 +4575,2068 @@ UPDATE users SET name = 'Bob' WHERE name = 'Alice';
 47. MySQL 的架构是怎样的？
 48. 什么是 MVCC？如何实现？
 49. COUNT(*) 和 COUNT(1) 和 COUNT(列名) 的区别？
+50. 如何设计一个高性能的数据库表？31. 如何优化 INSERT 语句？
+
+### 核心答案
+批量插入、禁用索引检查、使用事务、优化表结构。
+
+### 详细说明
+
+#### 1. 批量插入数据
+- **使用多值插入**
+  ```sql
+  -- 不推荐:每次插入一条
+  INSERT INTO users VALUES (1, 'Alice');
+  INSERT INTO users VALUES (2, 'Bob');
+
+  -- 推荐:批量插入
+  INSERT INTO users VALUES
+    (1, 'Alice'),
+    (2, 'Bob'),
+    (3, 'Charlie');
+  ```
+- **使用 LOAD DATA INFILE**
+  ```sql
+  LOAD DATA INFILE '/path/to/data.csv'
+  INTO TABLE users
+  FIELDS TERMINATED BY ','
+  LINES TERMINATED BY '\n';
+  ```
+
+#### 2. 关闭自动提交,使用事务
+```sql
+SET autocommit = 0;
+BEGIN;
+INSERT INTO users VALUES (1, 'Alice');
+INSERT INTO users VALUES (2, 'Bob');
+-- ... 更多插入
+COMMIT;
+SET autocommit = 1;
+```
+
+#### 3. 主键顺序插入
+- 使用自增主键避免页分裂
+- 顺序插入比随机插入快
+
+#### 4. 临时禁用索引和约束检查
+```sql
+-- 禁用唯一性检查
+SET unique_checks = 0;
+-- 禁用外键检查
+SET foreign_key_checks = 0;
+
+-- 批量插入数据
+INSERT INTO users VALUES ...;
+
+-- 恢复检查
+SET unique_checks = 1;
+SET foreign_key_checks = 1;
+```
+
+#### 5. 调整参数
+- `innodb_buffer_pool_size`:增大缓冲池
+- `innodb_log_file_size`:增大日志文件
+- `bulk_insert_buffer_size`:调整批量插入缓冲区
+
+<svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+<rect x="50" y="30" width="700" height="60" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
+<text x="400" y="65" text-anchor="middle" font-size="18" font-weight="bold" fill="#1976d2">INSERT 优化策略对比</text>
+<rect x="100" y="120" width="280" height="80" fill="#ffebee" stroke="#c62828" stroke-width="2" rx="5"/>
+<text x="240" y="145" text-anchor="middle" font-size="14" font-weight="bold" fill="#c62828">❌ 低效方式</text>
+<text x="240" y="170" text-anchor="middle" font-size="12" fill="#333">逐条插入 + 自动提交</text>
+<text x="240" y="190" text-anchor="middle" font-size="12" fill="#666">100,000条 ≈ 300秒</text>
+<rect x="420" y="120" width="280" height="80" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2" rx="5"/>
+<text x="560" y="145" text-anchor="middle" font-size="14" font-weight="bold" fill="#2e7d32">✓ 高效方式</text>
+<text x="560" y="170" text-anchor="middle" font-size="12" fill="#333">批量插入 + 事务</text>
+<text x="560" y="190" text-anchor="middle" font-size="12" fill="#666">100,000条 ≈ 3秒</text>
+<path d="M 240 210 L 240 250" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowred)"/>
+<path d="M 560 210 L 560 250" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrowgreen)"/>
+<rect x="80" y="250" width="320" height="220" fill="#fff3e0" stroke="#ef6c00" stroke-width="2" rx="5"/>
+<text x="240" y="275" text-anchor="middle" font-size="14" font-weight="bold" fill="#ef6c00">性能杀手</text>
+<text x="110" y="300" font-size="12" fill="#333">• 每条SQL独立执行</text>
+<text x="110" y="325" font-size="12" fill="#333">• 每次都要提交事务</text>
+<text x="110" y="350" font-size="12" fill="#333">• 重复解析SQL语句</text>
+<text x="110" y="375" font-size="12" fill="#333">• 频繁刷新磁盘</text>
+<text x="110" y="400" font-size="12" fill="#333">• 索引每次都更新</text>
+<text x="110" y="425" font-size="12" fill="#333">• 锁竞争激烈</text>
+<text x="240" y="455" font-size="11" fill="#666" font-style="italic">性能提升空间:100倍+</text>
+<rect x="420" y="250" width="340" height="220" fill="#f3e5f5" stroke="#6a1b9a" stroke-width="2" rx="5"/>
+<text x="590" y="275" text-anchor="middle" font-size="14" font-weight="bold" fill="#6a1b9a">优化技巧</text>
+<text x="450" y="300" font-size="12" fill="#333">1. 批量插入(每批1000-5000条)</text>
+<text x="450" y="325" font-size="12" fill="#333">2. 关闭autocommit,手动事务</text>
+<text x="450" y="350" font-size="12" fill="#333">3. 主键顺序插入(避免页分裂)</text>
+<text x="450" y="375" font-size="12" fill="#333">4. 禁用索引检查(大批量时)</text>
+<text x="450" y="400" font-size="12" fill="#333">5. 使用LOAD DATA(CSV导入)</text>
+<text x="450" y="425" font-size="12" fill="#333">6. 调大buffer_pool_size</text>
+<text x="590" y="455" font-size="11" fill="#666" font-style="italic">合理组合可达最佳性能</text>
+<defs>
+<marker id="arrowred" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+<path d="M0,0 L0,6 L9,3 z" fill="#c62828"/>
+</marker>
+<marker id="arrowgreen" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+<path d="M0,0 L0,6 L9,3 z" fill="#2e7d32"/>
+</marker>
+</defs>
+</svg>
+
+### 关键要点
+1. **批量插入**:减少网络开销和SQL解析
+2. **使用事务**:减少磁盘刷新次数
+3. **顺序插入**:利用聚簇索引特性
+4. **禁用检查**:大批量导入时临时禁用
+5. **调整参数**:根据业务调整MySQL参数
+
+### 记忆口诀
+**"批事顺禁调"**
+- **批**:批量插入
+- **事**:使用事务
+- **顺**:顺序插入
+- **禁**:禁用检查
+- **调**:调整参数
+
+32. 如何优化分页查询？
+
+### 核心答案
+使用延迟关联、子查询优化、基于游标的分页、避免大偏移量。
+
+### 详细说明
+
+#### 1. 深度分页问题
+```sql
+-- 问题:越往后翻页越慢
+SELECT * FROM users ORDER BY id LIMIT 1000000, 10;
+-- MySQL需要扫描1000010行,丢弃前1000000行
+```
+
+#### 2. 优化方案
+
+**方案一:延迟关联(覆盖索引)**
+```sql
+-- 原始慢查询
+SELECT * FROM users ORDER BY id LIMIT 1000000, 10;
+
+-- 优化:先查ID,再关联
+SELECT u.* FROM users u
+INNER JOIN (
+  SELECT id FROM users ORDER BY id LIMIT 1000000, 10
+) AS t ON u.id = t.id;
+-- 子查询只需要扫描索引,不需要回表
+```
+
+**方案二:基于游标(记录上次位置)**
+```sql
+-- 第一页
+SELECT * FROM users WHERE id > 0 ORDER BY id LIMIT 10;
+-- 返回最后一条id=10
+
+-- 第二页(基于上一页最后一条记录)
+SELECT * FROM users WHERE id > 10 ORDER BY id LIMIT 10;
+-- 无需OFFSET,性能稳定
+```
+
+**方案三:使用BETWEEN**
+```sql
+-- 如果能计算出ID范围
+SELECT * FROM users WHERE id BETWEEN 1000000 AND 1000010 ORDER BY id;
+```
+
+#### 3. 业务层优化
+- **限制最大页码**:如只允许查看前100页
+- **使用ES等搜索引擎**:深度分页场景
+- **缓存热点数据**:前几页数据
+
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+<rect x="50" y="20" width="700" height="60" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
+<text x="400" y="55" text-anchor="middle" font-size="18" font-weight="bold" fill="#1976d2">分页查询性能对比</text>
+<rect x="80" y="100" width="320" height="220" fill="#ffebee" stroke="#c62828" stroke-width="2" rx="5"/>
+<text x="240" y="130" text-anchor="middle" font-size="16" font-weight="bold" fill="#c62828">❌ 传统LIMIT分页</text>
+<text x="110" y="160" font-size="13" fill="#333" font-weight="bold">查询方式:</text>
+<text x="110" y="185" font-size="12" fill="#555">SELECT * FROM users</text>
+<text x="110" y="205" font-size="12" fill="#555">ORDER BY id</text>
+<text x="110" y="225" font-size="12" fill="#555">LIMIT 1000000, 10;</text>
+<text x="110" y="255" font-size="13" fill="#333" font-weight="bold">性能表现:</text>
+<text x="120" y="280" font-size="11" fill="#d32f2f">• 扫描:1000010 行</text>
+<text x="120" y="300" font-size="11" fill="#d32f2f">• 耗时:随偏移量线性增长</text>
+<rect x="420" y="100" width="340" height="220" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2" rx="5"/>
+<text x="590" y="130" text-anchor="middle" font-size="16" font-weight="bold" fill="#2e7d32">✓ 延迟关联优化</text>
+<text x="450" y="160" font-size="13" fill="#333" font-weight="bold">查询方式:</text>
+<text x="450" y="185" font-size="12" fill="#555">SELECT u.* FROM users u JOIN (</text>
+<text x="460" y="205" font-size="12" fill="#555">SELECT id FROM users</text>
+<text x="460" y="225" font-size="12" fill="#555">ORDER BY id LIMIT 1000000,10</text>
+<text x="450" y="245" font-size="12" fill="#555">) t ON u.id = t.id;</text>
+<text x="450" y="275" font-size="13" fill="#333" font-weight="bold">性能表现:</text>
+<text x="460" y="300" font-size="11" fill="#2e7d32">• 扫描:1000010 索引(无回表)</text>
+<text x="460" y="320" font-size="11" fill="#2e7d32">• 耗时:减少60%-80%</text>
+<rect x="80" y="340" width="320" height="220" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="5"/>
+<text x="240" y="370" text-anchor="middle" font-size="16" font-weight="bold" fill="#f57c00">⚡ 游标分页(最佳)</text>
+<text x="110" y="400" font-size="13" fill="#333" font-weight="bold">查询方式:</text>
+<text x="110" y="425" font-size="12" fill="#555">SELECT * FROM users</text>
+<text x="110" y="445" font-size="12" fill="#555">WHERE id > last_id</text>
+<text x="110" y="465" font-size="12" fill="#555">ORDER BY id LIMIT 10;</text>
+<text x="110" y="495" font-size="13" fill="#333" font-weight="bold">性能表现:</text>
+<text x="120" y="520" font-size="11" fill="#e65100">• 扫描:仅10行</text>
+<text x="120" y="540" font-size="11" fill="#e65100">• 耗时:恒定(不随页数增长)</text>
+<rect x="420" y="340" width="340" height="220" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="2" rx="5"/>
+<text x="590" y="370" text-anchor="middle" font-size="16" font-weight="bold" fill="#7b1fa2">性能数据对比</text>
+<line x1="450" y1="390" x2="730" y2="390" stroke="#7b1fa2" stroke-width="1"/>
+<text x="460" y="415" font-size="12" fill="#333" font-weight="bold">第1页(LIMIT 0,10):</text>
+<text x="470" y="435" font-size="11" fill="#555">传统:0.01s | 优化:0.01s</text>
+<text x="460" y="460" font-size="12" fill="#333" font-weight="bold">第100页(LIMIT 1000,10):</text>
+<text x="470" y="480" font-size="11" fill="#555">传统:0.05s | 优化:0.02s</text>
+<text x="460" y="505" font-size="12" fill="#333" font-weight="bold">第10万页(LIMIT 1000000,10):</text>
+<text x="470" y="525" font-size="11" fill="#d32f2f">传统:5.2s | </text>
+<text x="570" y="525" font-size="11" fill="#2e7d32">优化:1.5s | </text>
+<text x="470" y="545" font-size="11" fill="#e65100">游标:0.01s</text>
+</svg>
+
+### 关键要点
+1. **延迟关联**:利用覆盖索引减少回表
+2. **游标分页**:WHERE id > last_id,性能最优
+3. **限制深度**:业务上限制最大页码
+4. **使用索引**:ORDER BY字段必须有索引
+5. **ES替代**:深度分页用搜索引擎
+
+### 记忆口诀
+**"延游限索引"**
+- **延**:延迟关联
+- **游**:游标分页
+- **限**:限制深度
+- **索**:索引优化
+- **引**:引入ES
+
+33. 什么是子查询？什么情况下用 JOIN 替代子查询？
+
+### 核心答案
+子查询是嵌套在其他SQL语句中的SELECT查询。当子查询返回大量数据或被多次执行时,应该用JOIN替代以提升性能。
+
+### 详细说明
+
+#### 1. 什么是子查询
+子查询是嵌套在主查询中的查询语句,可以出现在SELECT、FROM、WHERE等子句中。
+
+**分类:**
+- **标量子查询**:返回单个值
+- **列子查询**:返回一列值
+- **行子查询**:返回一行值
+- **表子查询**:返回临时表
+
+```sql
+-- WHERE子查询
+SELECT * FROM users WHERE dept_id IN (
+  SELECT id FROM departments WHERE name = 'IT'
+);
+
+-- FROM子查询
+SELECT * FROM (
+  SELECT name, age FROM users WHERE age > 18
+) AS adults;
+
+-- SELECT子查询
+SELECT name, (SELECT COUNT(*) FROM orders WHERE user_id = u.id) AS order_count
+FROM users u;
+```
+
+#### 2. JOIN vs 子查询
+
+**性能对比:**
+
+```sql
+-- 子查询(可能性能差)
+SELECT * FROM orders WHERE user_id IN (
+  SELECT id FROM users WHERE city = 'Beijing'
+);
+
+-- JOIN替代(通常更快)
+SELECT o.* FROM orders o
+INNER JOIN users u ON o.user_id = u.id
+WHERE u.city = 'Beijing';
+```
+
+#### 3. 何时用JOIN替代子查询
+
+**应该用JOIN的场景:**
+
+1. **IN子查询返回大量数据**
+   ```sql
+   -- ❌ 子查询返回百万级数据
+   SELECT * FROM orders WHERE user_id IN (
+     SELECT id FROM users WHERE status = 'active'
+   );
+
+   -- ✓ 用JOIN替代
+   SELECT o.* FROM orders o
+   INNER JOIN users u ON o.user_id = u.id
+   WHERE u.status = 'active';
+   ```
+
+2. **相关子查询(会被执行多次)**
+   ```sql
+   -- ❌ 每行都执行一次子查询
+   SELECT name, (
+     SELECT COUNT(*) FROM orders WHERE user_id = u.id
+   ) AS order_count FROM users u;
+
+   -- ✓ 用LEFT JOIN + GROUP BY
+   SELECT u.name, COUNT(o.id) AS order_count
+   FROM users u
+   LEFT JOIN orders o ON u.id = o.user_id
+   GROUP BY u.id;
+   ```
+
+3. **需要关联多个表**
+
+**可以保留子查询的场景:**
+
+1. **EXISTS/NOT EXISTS**(通常比JOIN快)
+   ```sql
+   -- ✓ EXISTS性能好
+   SELECT * FROM users u WHERE EXISTS (
+     SELECT 1 FROM orders o WHERE o.user_id = u.id
+   );
+   ```
+
+2. **聚合函数结果作为过滤条件**
+   ```sql
+   -- ✓ 子查询更清晰
+   SELECT * FROM users WHERE age > (
+     SELECT AVG(age) FROM users
+   );
+   ```
+
+<svg viewBox="0 0 800 550" xmlns="http://www.w3.org/2000/svg">
+<rect x="50" y="20" width="700" height="60" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
+<text x="400" y="55" text-anchor="middle" font-size="18" font-weight="bold" fill="#1976d2">子查询 vs JOIN 性能对比</text>
+<rect x="80" y="100" width="320" height="200" fill="#ffebee" stroke="#c62828" stroke-width="2" rx="5"/>
+<text x="240" y="130" text-anchor="middle" font-size="16" font-weight="bold" fill="#c62828">❌ IN子查询(慢)</text>
+<text x="110" y="160" font-size="12" fill="#333" font-weight="bold">执行过程:</text>
+<text x="120" y="185" font-size="11" fill="#555">1. 执行子查询,返回100万ID</text>
+<text x="120" y="205" font-size="11" fill="#555">2. 主查询逐行比对IN列表</text>
+<text x="120" y="225" font-size="11" fill="#555">3. 临时表存储中间结果</text>
+<text x="110" y="255" font-size="12" fill="#333" font-weight="bold">性能问题:</text>
+<text x="120" y="280" font-size="11" fill="#d32f2f">• 内存占用大</text>
+<text x="240" y="280" font-size="11" fill="#d32f2f">• 比对效率低</text>
+<rect x="420" y="100" width="340" height="200" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2" rx="5"/>
+<text x="590" y="130" text-anchor="middle" font-size="16" font-weight="bold" fill="#2e7d32">✓ INNER JOIN(快)</text>
+<text x="450" y="160" font-size="12" fill="#333" font-weight="bold">执行过程:</text>
+<text x="460" y="185" font-size="11" fill="#555">1. 优化器选择驱动表</text>
+<text x="460" y="205" font-size="11" fill="#555">2. 使用索引快速关联</text>
+<text x="460" y="225" font-size="11" fill="#555">3. 流式处理,无需临时表</text>
+<text x="450" y="255" font-size="12" fill="#333" font-weight="bold">性能优势:</text>
+<text x="460" y="280" font-size="11" fill="#2e7d32">• 利用索引 • 流式处理 • 优化器智能</text>
+<rect x="80" y="320" width="320" height="200" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="5"/>
+<text x="240" y="350" text-anchor="middle" font-size="16" font-weight="bold" fill="#f57c00">⚡ EXISTS子查询(推荐)</text>
+<text x="110" y="380" font-size="12" fill="#333" font-weight="bold">特点:</text>
+<text x="120" y="405" font-size="11" fill="#555">• 找到第一个匹配即停止</text>
+<text x="120" y="425" font-size="11" fill="#555">• 不返回数据,只返回TRUE/FALSE</text>
+<text x="120" y="445" font-size="11" fill="#555">• 适合判断存在性</text>
+<text x="110" y="475" font-size="12" fill="#333" font-weight="bold">使用场景:</text>
+<text x="120" y="500" font-size="11" fill="#e65100">检查关联数据是否存在</text>
+<rect x="420" y="320" width="340" height="200" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="2" rx="5"/>
+<text x="590" y="350" text-anchor="middle" font-size="16" font-weight="bold" fill="#7b1fa2">选择建议</text>
+<text x="450" y="380" font-size="12" fill="#333" font-weight="bold">用JOIN的场景:</text>
+<text x="460" y="400" font-size="11" fill="#555">• IN子查询返回大量数据</text>
+<text x="460" y="420" font-size="11" fill="#555">• 相关子查询(每行执行一次)</text>
+<text x="460" y="440" font-size="11" fill="#555">• 需要关联查询结果集</text>
+<text x="450" y="470" font-size="12" fill="#333" font-weight="bold">用子查询的场景:</text>
+<text x="460" y="490" font-size="11" fill="#555">• EXISTS/NOT EXISTS判断</text>
+<text x="460" y="510" font-size="11" fill="#555">• 聚合函数作为过滤条件</text>
+</svg>
+
+### 关键要点
+1. **IN子查询**:大量数据时用JOIN替代
+2. **相关子查询**:每行都执行,用JOIN优化
+3. **EXISTS**:判断存在性时优于JOIN
+4. **聚合过滤**:子查询更清晰
+5. **优化器**:现代MySQL优化器会自动优化部分子查询
+
+### 记忆口诀
+**"大量相关用JOIN,存在聚合用子查"**
+- **大量**:IN返回大量数据用JOIN
+- **相关**:相关子查询用JOIN
+- **存在**:EXISTS判断保留
+- **聚合**:聚合过滤保留
+
+## 日志
+
+34. MySQL 有哪些日志文件？
+
+### 核心答案
+MySQL主要有四类日志:错误日志、二进制日志(binlog)、查询日志、慢查询日志,以及InnoDB特有的redo log和undo log。
+
+### 详细说明
+
+#### 1. 错误日志(Error Log)
+- **作用**:记录MySQL启动、运行、停止过程中的错误信息
+- **位置**:`show variables like 'log_error';`
+- **内容**:启动/关闭信息、错误信息、警告信息
+
+#### 2. 二进制日志(Binary Log / binlog)
+- **作用**:记录所有修改数据库的SQL语句(DDL和DML)
+- **用途**:
+  - 主从复制
+  - 数据恢复
+  - 审计追踪
+- **格式**:STATEMENT、ROW、MIXED
+- **开启**:`log_bin = ON`
+
+#### 3. 查询日志(General Query Log)
+- **作用**:记录所有SQL语句(包括SELECT)
+- **特点**:性能开销大,生产环境通常关闭
+- **开启**:`general_log = ON`
+
+#### 4. 慢查询日志(Slow Query Log)
+- **作用**:记录执行时间超过阈值的SQL
+- **用途**:性能分析和优化
+- **配置**:
+  ```sql
+  slow_query_log = ON
+  long_query_time = 2  -- 超过2秒记录
+  ```
+
+#### 5. Redo Log(重做日志)
+- **层级**:InnoDB存储引擎层
+- **作用**:崩溃恢复,保证事务持久性(D)
+- **特点**:循环写入,固定大小
+- **写入时机**:事务提交前
+
+#### 6. Undo Log(回滚日志)
+- **层级**:InnoDB存储引擎层
+- **作用**:
+  - 事务回滚
+  - MVCC多版本并发控制
+- **特点**:逻辑日志,记录相反操作
+
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+<rect x="50" y="20" width="700" height="60" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
+<text x="400" y="55" text-anchor="middle" font-size="18" font-weight="bold" fill="#1976d2">MySQL 日志体系架构</text>
+<rect x="70" y="100" width="660" height="120" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="5"/>
+<text x="400" y="125" text-anchor="middle" font-size="16" font-weight="bold" fill="#f57c00">Server层日志</text>
+<rect x="90" y="140" width="140" height="65" fill="#ffebee" stroke="#d32f2f" stroke-width="1" rx="3"/>
+<text x="160" y="163" text-anchor="middle" font-size="13" font-weight="bold" fill="#d32f2f">错误日志</text>
+<text x="160" y="183" text-anchor="middle" font-size="10" fill="#555">Error Log</text>
+<text x="160" y="200" text-anchor="middle" font-size="9" fill="#666">启动/错误/警告</text>
+<rect x="250" y="140" width="140" height="65" fill="#e3f2fd" stroke="#1976d2" stroke-width="1" rx="3"/>
+<text x="320" y="163" text-anchor="middle" font-size="13" font-weight="bold" fill="#1976d2">二进制日志</text>
+<text x="320" y="183" text-anchor="middle" font-size="10" fill="#555">Binary Log</text>
+<text x="320" y="200" text-anchor="middle" font-size="9" fill="#666">复制/恢复</text>
+<rect x="410" y="140" width="140" height="65" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1" rx="3"/>
+<text x="480" y="163" text-anchor="middle" font-size="13" font-weight="bold" fill="#7b1fa2">查询日志</text>
+<text x="480" y="183" text-anchor="middle" font-size="10" fill="#555">General Log</text>
+<text x="480" y="200" text-anchor="middle" font-size="9" fill="#666">所有SQL</text>
+<rect x="570" y="140" width="140" height="65" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1" rx="3"/>
+<text x="640" y="163" text-anchor="middle" font-size="13" font-weight="bold" fill="#2e7d32">慢查询日志</text>
+<text x="640" y="183" text-anchor="middle" font-size="10" fill="#555">Slow Query</text>
+<text x="640" y="200" text-anchor="middle" font-size="9" fill="#666">性能分析</text>
+<rect x="70" y="250" width="660" height="280" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2" rx="5"/>
+<text x="400" y="275" text-anchor="middle" font-size="16" font-weight="bold" fill="#2e7d32">InnoDB存储引擎层日志</text>
+<rect x="120" y="300" width="260" height="210" fill="#fff3e0" stroke="#ef6c00" stroke-width="2" rx="5"/>
+<text x="250" y="330" text-anchor="middle" font-size="15" font-weight="bold" fill="#ef6c00">Redo Log (重做日志)</text>
+<text x="140" y="360" font-size="12" fill="#333" font-weight="bold">作用:</text>
+<text x="150" y="380" font-size="11" fill="#555">• 崩溃恢复(Crash Recovery)</text>
+<text x="150" y="400" font-size="11" fill="#555">• 保证持久性(D in ACID)</text>
+<text x="140" y="425" font-size="12" fill="#333" font-weight="bold">特点:</text>
+<text x="150" y="445" font-size="11" fill="#555">• 物理日志(记录数据页变化)</text>
+<text x="150" y="465" font-size="11" fill="#555">• 循环写入(固定大小)</text>
+<text x="150" y="485" font-size="11" fill="#555">• WAL机制(Write-Ahead Log)</text>
+<rect x="420" y="300" width="260" height="210" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
+<text x="550" y="330" text-anchor="middle" font-size="15" font-weight="bold" fill="#1976d2">Undo Log (回滚日志)</text>
+<text x="440" y="360" font-size="12" fill="#333" font-weight="bold">作用:</text>
+<text x="450" y="380" font-size="11" fill="#555">• 事务回滚</text>
+<text x="450" y="400" font-size="11" fill="#555">• MVCC(多版本并发控制)</text>
+<text x="440" y="425" font-size="12" fill="#333" font-weight="bold">特点:</text>
+<text x="450" y="445" font-size="11" fill="#555">• 逻辑日志(记录相反操作)</text>
+<text x="450" y="465" font-size="11" fill="#555">• INSERT→DELETE</text>
+<text x="450" y="485" font-size="11" fill="#555">• UPDATE→反向UPDATE</text>
+<rect x="80" y="550" width="640" height="35" fill="#fff9c4" stroke="#f57f17" stroke-width="1" rx="3"/>
+<text x="400" y="573" text-anchor="middle" font-size="12" fill="#333">💡 记忆:Server层负责通用功能,InnoDB层负责事务和崩溃恢复</text>
+</svg>
+
+### 关键要点
+1. **Server层**:错误、binlog、查询、慢查询
+2. **InnoDB层**:redo log(持久性)、undo log(原子性+MVCC)
+3. **binlog vs redo log**:一个在Server层,一个在引擎层
+4. **慢查询日志**:性能优化的关键工具
+5. **Redo Log**:循环写,固定大小;Undo Log:随事务增长
+
+### 记忆口诀
+**"错二查慢,重回持原"**
+- **错**:错误日志
+- **二**:二进制日志(binlog)
+- **查**:查询日志
+- **慢**:慢查询日志
+- **重**:Redo Log(重做)
+- **回**:Undo Log(回滚)
+- **持**:持久性(Redo)
+- **原**:原子性(Undo)
+
+35. 什么是 binlog？有什么作用？
+
+### 核心答案
+binlog(Binary Log)是MySQL Server层的二进制日志,记录所有修改数据的SQL语句,主要用于主从复制和数据恢复。
+
+### 详细说明
+
+#### 1. binlog基本概念
+- **层级**:MySQL Server层(所有存储引擎都有)
+- **内容**:记录所有DDL和DML语句(不记录SELECT)
+- **格式**:二进制格式,需要mysqlbinlog工具解析
+
+#### 2. binlog三种格式
+
+**STATEMENT模式**
+- 记录SQL语句原文
+- 优点:日志量小
+- 缺点:某些函数(NOW()、UUID())会导致主从不一致
+
+**ROW模式**(推荐)
+- 记录每行数据的变化
+- 优点:数据准确,不会不一致
+- 缺点:日志量大
+
+**MIXED模式**
+- 混合使用STATEMENT和ROW
+- MySQL自动选择
+
+```sql
+-- 查看binlog格式
+SHOW VARIABLES LIKE 'binlog_format';
+
+-- 设置ROW格式
+SET GLOBAL binlog_format = 'ROW';
+```
+
+#### 3. binlog的作用
+
+**主从复制**
+- 主库写入binlog
+- 从库读取并重放binlog
+- 实现数据同步
+
+**数据恢复**
+```bash
+# 恢复某个时间点的数据
+mysqlbinlog --stop-datetime="2024-01-01 10:00:00" \
+  mysql-bin.000001 | mysql -u root -p
+```
+
+**审计追踪**
+- 查看谁在什么时候修改了数据
+
+#### 4. binlog相关配置
+
+```sql
+-- 开启binlog
+log_bin = ON
+
+-- binlog文件大小(超过后自动轮转)
+max_binlog_size = 1G
+
+-- binlog保留时间(秒)
+binlog_expire_logs_seconds = 2592000  -- 30天
+
+-- 同步策略
+sync_binlog = 1  -- 每次提交都刷盘(最安全)
+```
+
+#### 5. binlog写入时机
+1. 事务执行过程中,先写入binlog cache
+2. 事务提交时,将cache写入binlog文件
+3. 根据`sync_binlog`决定何时刷盘
+
+<svg viewBox="0 0 800 650" xmlns="http://www.w3.org/2000/svg">
+<rect x="50" y="20" width="700" height="60" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
+<text x="400" y="55" text-anchor="middle" font-size="18" font-weight="bold" fill="#1976d2">Binlog 工作原理与应用</text>
+<rect x="70" y="100" width="660" height="180" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="5"/>
+<text x="400" y="130" text-anchor="middle" font-size="16" font-weight="bold" fill="#f57c00">Binlog 三种格式对比</text>
+<rect x="90" y="150" width="200" height="115" fill="#ffebee" stroke="#d32f2f" stroke-width="1" rx="3"/>
+<text x="190" y="175" text-anchor="middle" font-size="13" font-weight="bold" fill="#d32f2f">STATEMENT</text>
+<text x="110" y="200" font-size="11" fill="#555">记录:SQL语句原文</text>
+<text x="110" y="220" font-size="10" fill="#2e7d32">✓ 日志量小</text>
+<text x="110" y="240" font-size="10" fill="#d32f2f">✗ NOW()等函数不一致</text>
+<text x="190" y="260" font-size="9" fill="#666" font-style="italic">适合:确定性SQL</text>
+<rect x="310" y="150" width="200" height="115" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1" rx="3"/>
+<text x="410" y="175" text-anchor="middle" font-size="13" font-weight="bold" fill="#2e7d32">ROW (推荐)</text>
+<text x="330" y="200" font-size="11" fill="#555">记录:每行数据变化</text>
+<text x="330" y="220" font-size="10" fill="#2e7d32">✓ 数据准确</text>
+<text x="330" y="240" font-size="10" fill="#d32f2f">✗ 日志量大</text>
+<text x="410" y="260" font-size="9" fill="#666" font-style="italic">适合:生产环境</text>
+<rect x="530" y="150" width="180" height="115" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1" rx="3"/>
+<text x="620" y="175" text-anchor="middle" font-size="13" font-weight="bold" fill="#7b1fa2">MIXED</text>
+<text x="550" y="200" font-size="11" fill="#555">自动切换</text>
+<text x="550" y="220" font-size="10" fill="#2e7d32">✓ 平衡两者</text>
+<text x="550" y="240" font-size="10" fill="#666">MySQL自动选择</text>
+<text x="620" y="260" font-size="9" fill="#666" font-style="italic">适合:兼容场景</text>
+<rect x="70" y="300" width="320" height="320" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
+<text x="230" y="330" text-anchor="middle" font-size="16" font-weight="bold" fill="#1976d2">主从复制流程</text>
+<rect x="100" y="350" width="260" height="50" fill="#fff3e0" stroke="#ef6c00" stroke-width="1" rx="3"/>
+<text x="230" y="380" text-anchor="middle" font-size="12" fill="#333">1. 主库执行SQL并写入binlog</text>
+<path d="M 230 400 L 230 420" stroke="#1976d2" stroke-width="2" marker-end="url(#arrow1)"/>
+<rect x="100" y="420" width="260" height="50" fill="#fff3e0" stroke="#ef6c00" stroke-width="1" rx="3"/>
+<text x="230" y="450" text-anchor="middle" font-size="12" fill="#333">2. 从库IO线程读取binlog</text>
+<path d="M 230 470 L 230 490" stroke="#1976d2" stroke-width="2" marker-end="url(#arrow1)"/>
+<rect x="100" y="490" width="260" height="50" fill="#fff3e0" stroke="#ef6c00" stroke-width="1" rx="3"/>
+<text x="230" y="520" text-anchor="middle" font-size="12" fill="#333">3. 写入从库relay log</text>
+<path d="M 230 540 L 230 560" stroke="#1976d2" stroke-width="2" marker-end="url(#arrow1)"/>
+<rect x="100" y="560" width="260" height="50" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1" rx="3"/>
+<text x="230" y="590" text-anchor="middle" font-size="12" fill="#333">4. SQL线程重放relay log</text>
+<rect x="410" y="300" width="320" height="320" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2" rx="5"/>
+<text x="570" y="330" text-anchor="middle" font-size="16" font-weight="bold" fill="#2e7d32">Binlog 核心应用</text>
+<rect x="430" y="350" width="280" height="80" fill="#fff9c4" stroke="#f57f17" stroke-width="1" rx="3"/>
+<text x="570" y="375" text-anchor="middle" font-size="13" font-weight="bold" fill="#333">数据恢复</text>
+<text x="450" y="395" font-size="11" fill="#555">• 全量备份 + binlog增量</text>
+<text x="450" y="415" font-size="11" fill="#555">• 误删数据恢复到指定时间点</text>
+<rect x="430" y="445" width="280" height="80" fill="#e1f5fe" stroke="#0277bd" stroke-width="1" rx="3"/>
+<text x="570" y="470" text-anchor="middle" font-size="13" font-weight="bold" fill="#333">审计追踪</text>
+<text x="450" y="490" font-size="11" fill="#555">• 查看谁修改了数据</text>
+<text x="450" y="510" font-size="11" fill="#555">• 分析数据变更历史</text>
+<rect x="430" y="540" width="280" height="70" fill="#fce4ec" stroke="#c2185b" stroke-width="1" rx="3"/>
+<text x="570" y="565" text-anchor="middle" font-size="13" font-weight="bold" fill="#333">实时同步</text>
+<text x="450" y="585" font-size="11" fill="#555">• Canal等中间件解析binlog</text>
+<text x="450" y="602" font-size="11" fill="#555">• 同步到ES、Redis等</text>
+<defs>
+<marker id="arrow1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+<path d="M0,0 L0,6 L9,3 z" fill="#1976d2"/>
+</marker>
+</defs>
+</svg>
+
+### 关键要点
+1. **位置**:Server层,所有引擎共享
+2. **格式**:STATEMENT、ROW(推荐)、MIXED
+3. **用途**:主从复制、数据恢复、审计
+4. **安全性**:`sync_binlog=1`每次提交都刷盘
+5. **与redo log配合**:两阶段提交保证一致性
+
+### 记忆口诀
+**"服务复恢审,行格最安全"**
+- **服务**:Server层
+- **复**:复制
+- **恢**:恢复
+- **审**:审计
+- **行格**:ROW格式
+- **安全**:sync_binlog=1
+
+36. 什么是 redo log 和 undo log？
+
+### 核心答案
+- **Redo Log**:InnoDB重做日志,记录物理数据页的修改,用于崩溃恢复,保证持久性(D)
+- **Undo Log**:InnoDB回滚日志,记录逻辑相反操作,用于事务回滚和MVCC,保证原子性(A)
+
+### 详细说明
+
+#### 1. Redo Log(重做日志)
+
+**作用:**
+- 崩溃恢复:MySQL宕机后,通过redo log恢复未刷盘的数据
+- 保证持久性:实现WAL(Write-Ahead Logging)机制
+
+**特点:**
+- **物理日志**:记录数据页的物理修改("在页X的偏移Y处写入Z")
+- **循环写入**:固定大小,写满后从头覆盖
+- **顺序IO**:顺序写入,性能高
+
+**写入流程:**
+1. 更新内存中的数据页(Buffer Pool)
+2. 写入redo log buffer
+3. 事务提交时,将redo log刷盘
+4. 后台线程异步将脏页刷盘
+
+```sql
+-- 配置redo log
+innodb_log_file_size = 512M  -- 单个文件大小
+innodb_log_files_in_group = 2  -- 文件个数
+innodb_flush_log_at_trx_commit = 1  -- 每次提交都刷盘
+```
+
+#### 2. Undo Log(回滚日志)
+
+**作用:**
+- 事务回滚:ROLLBACK时根据undo log执行相反操作
+- MVCC:ReadView通过undo log读取历史版本
+
+**特点:**
+- **逻辑日志**:记录逻辑操作(INSERT对应DELETE)
+- **随事务增长**:每个事务生成undo log,事务结束后清理
+- **存储在表空间**:undo表空间
+
+**记录内容:**
+```sql
+-- INSERT操作 → 记录DELETE的信息(主键)
+INSERT INTO users VALUES (1, 'Alice');
+-- Undo: DELETE FROM users WHERE id = 1;
+
+-- DELETE操作 → 记录INSERT的完整信息
+DELETE FROM users WHERE id = 1;
+-- Undo: INSERT INTO users VALUES (1, 'Alice');
+
+-- UPDATE操作 → 记录旧值
+UPDATE users SET name = 'Bob' WHERE id = 1;
+-- Undo: UPDATE users SET name = 'Alice' WHERE id = 1;
+```
+
+#### 3. Redo Log vs Undo Log
+
+| 对比项 | Redo Log | Undo Log |
+|--------|----------|----------|
+| **作用** | 崩溃恢复,保证持久性 | 事务回滚,MVCC |
+| **记录内容** | 物理修改(数据页变化) | 逻辑操作(相反操作) |
+| **写入方式** | 循环写入,固定大小 | 随事务增长 |
+| **使用时机** | MySQL崩溃重启时 | ROLLBACK或读历史版本 |
+| **ACID保证** | 持久性(D) | 原子性(A) |
+
+<svg viewBox="0 0 800 700" xmlns="http://www.w3.org/2000/svg">
+<rect x="50" y="20" width="700" height="60" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
+<text x="400" y="55" text-anchor="middle" font-size="18" font-weight="bold" fill="#1976d2">Redo Log vs Undo Log</text>
+<rect x="80" y="100" width="320" height="560" fill="#fff3e0" stroke="#ef6c00" stroke-width="2" rx="5"/>
+<text x="240" y="135" text-anchor="middle" font-size="16" font-weight="bold" fill="#ef6c00">Redo Log (重做日志)</text>
+<rect x="100" y="155" width="280" height="80" fill="#ffebee" stroke="#d32f2f" stroke-width="1" rx="3"/>
+<text x="240" y="180" text-anchor="middle" font-size="13" font-weight="bold" fill="#d32f2f">核心目的</text>
+<text x="120" y="200" font-size="11" fill="#555">• 崩溃恢复(Crash Recovery)</text>
+<text x="120" y="220" font-size="11" fill="#555">• 保证持久性(Durability)</text>
+<rect x="100" y="250" width="280" height="90" fill="#e1f5fe" stroke="#0277bd" stroke-width="1" rx="3"/>
+<text x="240" y="275" text-anchor="middle" font-size="13" font-weight="bold" fill="#0277bd">特点</text>
+<text x="120" y="295" font-size="11" fill="#555">• 物理日志(记录页面变化)</text>
+<text x="120" y="315" font-size="11" fill="#555">• 循环写入(固定大小512MB*2)</text>
+<text x="120" y="333" font-size="11" fill="#555">• WAL机制(先写日志后写数据)</text>
+<rect x="100" y="355" width="280" height="140" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1" rx="3"/>
+<text x="240" y="380" text-anchor="middle" font-size="13" font-weight="bold" fill="#7b1fa2">工作流程</text>
+<text x="120" y="405" font-size="11" fill="#555">1. 修改Buffer Pool中的数据页</text>
+<text x="120" y="425" font-size="11" fill="#555">2. 记录redo log(内存)</text>
+<text x="120" y="445" font-size="11" fill="#555">3. 提交时redo log刷盘</text>
+<text x="120" y="465" font-size="11" fill="#555">4. 后台线程将脏页刷盘</text>
+<text x="120" y="485" font-size="10" fill="#d32f2f" font-style="italic">→ 即使宕机,redo log也能恢复</text>
+<rect x="100" y="510" width="280" height="135" fill="#fff9c4" stroke="#f57f17" stroke-width="1" rx="3"/>
+<text x="240" y="535" text-anchor="middle" font-size="13" font-weight="bold" fill="#f57f17">记录示例</text>
+<text x="120" y="560" font-size="10" fill="#333" font-family="monospace">redo: 在表空间1的</text>
+<text x="120" y="578" font-size="10" fill="#333" font-family="monospace">      页100偏移200处</text>
+<text x="120" y="596" font-size="10" fill="#333" font-family="monospace">      写入0x1234ABCD</text>
+<text x="240" y="625" font-size="9" fill="#666" font-style="italic">(物理层面的精确位置和值)</text>
+<rect x="420" y="100" width="320" height="560" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2" rx="5"/>
+<text x="580" y="135" text-anchor="middle" font-size="16" font-weight="bold" fill="#2e7d32">Undo Log (回滚日志)</text>
+<rect x="440" y="155" width="280" height="80" fill="#ffebee" stroke="#d32f2f" stroke-width="1" rx="3"/>
+<text x="580" y="180" text-anchor="middle" font-size="13" font-weight="bold" fill="#d32f2f">核心目的</text>
+<text x="460" y="200" font-size="11" fill="#555">• 事务回滚(ROLLBACK)</text>
+<text x="460" y="220" font-size="11" fill="#555">• MVCC(多版本并发控制)</text>
+<rect x="440" y="250" width="280" height="90" fill="#e1f5fe" stroke="#0277bd" stroke-width="1" rx="3"/>
+<text x="580" y="275" text-anchor="middle" font-size="13" font-weight="bold" fill="#0277bd">特点</text>
+<text x="460" y="295" font-size="11" fill="#555">• 逻辑日志(记录相反操作)</text>
+<text x="460" y="315" font-size="11" fill="#555">• 随事务增长(事务越多越大)</text>
+<text x="460" y="333" font-size="11" fill="#555">• 存储在undo表空间</text>
+<rect x="440" y="355" width="280" height="140" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1" rx="3"/>
+<text x="580" y="380" text-anchor="middle" font-size="13" font-weight="bold" fill="#7b1fa2">工作流程</text>
+<text x="460" y="405" font-size="11" fill="#555">1. 执行SQL前,记录undo log</text>
+<text x="460" y="425" font-size="11" fill="#555">2. 执行SQL,修改数据</text>
+<text x="460" y="445" font-size="11" fill="#555">3. 提交:清理undo log</text>
+<text x="460" y="465" font-size="11" fill="#555">4. 回滚:根据undo log恢复</text>
+<text x="460" y="485" font-size="10" fill="#2e7d32" font-style="italic">→ MVCC通过undo log读历史版本</text>
+<rect x="440" y="510" width="280" height="135" fill="#fff9c4" stroke="#f57f17" stroke-width="1" rx="3"/>
+<text x="580" y="535" text-anchor="middle" font-size="13" font-weight="bold" fill="#f57f17">记录示例</text>
+<text x="460" y="560" font-size="10" fill="#333" font-family="monospace">UPDATE id=1 name='Bob'</text>
+<text x="460" y="578" font-size="10" fill="#333" font-family="monospace">undo: UPDATE id=1</text>
+<text x="460" y="596" font-size="10" fill="#333" font-family="monospace">      name='Alice'</text>
+<text x="580" y="625" font-size="9" fill="#666" font-style="italic">(逻辑层面的相反操作)</text>
+</svg>
+
+### 关键要点
+1. **Redo Log**:崩溃恢复,物理日志,循环写,保证持久性
+2. **Undo Log**:事务回滚,逻辑日志,MVCC,保证原子性
+3. **WAL机制**:先写redo log,后写数据页
+4. **协同工作**:Redo保证不丢,Undo保证可回滚
+5. **配置关键**:`innodb_flush_log_at_trx_commit=1`保证安全
+
+### 记忆口诀
+**"重做持久物循环,回滚原子逻版本"**
+- **重做**:Redo Log
+- **持久**:持久性
+- **物**:物理日志
+- **循环**:循环写入
+- **回滚**:Undo Log
+- **原子**:原子性
+- **逻**:逻辑日志
+- **版本**:MVCC多版本
+
+37. binlog 和 redo log 的区别是什么？
+
+### 核心答案
+binlog是MySQL Server层的逻辑日志,用于复制和恢复;redo log是InnoDB引擎层的物理日志,用于崩溃恢复。两者通过两阶段提交保证一致性。
+
+### 详细说明
+
+#### 主要区别对比
+
+| 对比维度 | Binlog | Redo Log |
+|---------|--------|----------|
+| **层级** | MySQL Server层 | InnoDB引擎层 |
+| **作用** | 主从复制、数据恢复 | 崩溃恢复 |
+| **日志类型** | 逻辑日志(SQL或行变化) | 物理日志(页面修改) |
+| **写入方式** | 追加写(append),文件写满后新建 | 循环写(circular),固定大小 |
+| **引擎支持** | 所有存储引擎 | 仅InnoDB |
+| **日志格式** | STATEMENT/ROW/MIXED | 固定格式 |
+| **刷盘时机** | 事务提交时(可配置) | 事务提交时(可配置) |
+| **数据恢复** | 可恢复到任意时间点 | 只能恢复到最近checkpoint |
+
+#### 为什么需要两份日志?
+
+**各司其职**:
+- **Binlog**:用于数据备份和主从复制,是MySQL的核心功能
+- **Redo Log**:用于InnoDB的崩溃恢复,提供ACID中的持久性
+
+**历史原因**:
+- MySQL最初没有InnoDB引擎,binlog是MySQL自带的
+- InnoDB作为第三方引擎加入MySQL,自带redo log
+- 两者配合使用,通过两阶段提交保证一致性
+
+#### 写入时机
+
+```sql
+-- Binlog刷盘策略
+sync_binlog = 0  -- OS决定何时刷盘(性能最好,可能丢数据)
+sync_binlog = 1  -- 每次提交都刷盘(最安全,推荐)
+sync_binlog = N  -- 每N个事务刷盘(折中)
+
+-- Redo Log刷盘策略
+innodb_flush_log_at_trx_commit = 0  -- 每秒刷盘(性能好,可能丢1秒)
+innodb_flush_log_at_trx_commit = 1  -- 每次提交都刷盘(最安全,推荐)
+innodb_flush_log_at_trx_commit = 2  -- 写OS cache,每秒刷盘(折中)
+```
+
+<svg viewBox="0 0 850 650" xmlns="http://www.w3.org/2000/svg">
+<rect x="50" y="20" width="750" height="60" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
+<text x="425" y="55" text-anchor="middle" font-size="18" font-weight="bold" fill="#1976d2">Binlog vs Redo Log 全面对比</text>
+<rect x="80" y="100" width="340" height="520" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="5"/>
+<text x="250" y="135" text-anchor="middle" font-size="16" font-weight="bold" fill="#f57c00">Binlog (二进制日志)</text>
+<rect x="100" y="155" width="300" height="70" fill="#ffebee" stroke="#d32f2f" stroke-width="1" rx="3"/>
+<text x="250" y="180" text-anchor="middle" font-size="13" font-weight="bold" fill="#d32f2f">基本信息</text>
+<text x="120" y="200" font-size="11" fill="#555">• 层级: MySQL Server层</text>
+<text x="120" y="218" font-size="11" fill="#555">• 范围: 所有存储引擎</text>
+<rect x="100" y="240" width="300" height="90" fill="#e1f5fe" stroke="#0277bd" stroke-width="1" rx="3"/>
+<text x="250" y="265" text-anchor="middle" font-size="13" font-weight="bold" fill="#0277bd">日志特性</text>
+<text x="120" y="285" font-size="11" fill="#555">• 类型: 逻辑日志</text>
+<text x="120" y="303" font-size="11" fill="#555">• 格式: STATEMENT/ROW/MIXED</text>
+<text x="120" y="321" font-size="11" fill="#555">• 写入: 追加写,无限增长</text>
+<rect x="100" y="345" width="300" height="90" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1" rx="3"/>
+<text x="250" y="370" text-anchor="middle" font-size="13" font-weight="bold" fill="#7b1fa2">核心作用</text>
+<text x="120" y="390" font-size="11" fill="#555">• 主从复制</text>
+<text x="120" y="408" font-size="11" fill="#555">• 数据恢复(任意时间点)</text>
+<text x="120" y="426" font-size="11" fill="#555">• 审计追踪</text>
+<rect x="100" y="450" width="300" height="80" fill="#fff9c4" stroke="#f57f17" stroke-width="1" rx="3"/>
+<text x="250" y="475" text-anchor="middle" font-size="13" font-weight="bold" fill="#f57f17">记录示例</text>
+<text x="120" y="495" font-size="10" fill="#333" font-family="monospace">UPDATE users SET</text>
+<text x="120" y="513" font-size="10" fill="#333" font-family="monospace">  name='Bob' WHERE id=1;</text>
+<rect x="100" y="545" width="300" height="60" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1" rx="3"/>
+<text x="120" y="570" font-size="11" fill="#333">配置: sync_binlog=1</text>
+<text x="120" y="590" font-size="10" fill="#666">每次提交都刷盘</text>
+<rect x="440" y="100" width="340" height="520" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2" rx="5"/>
+<text x="610" y="135" text-anchor="middle" font-size="16" font-weight="bold" fill="#2e7d32">Redo Log (重做日志)</text>
+<rect x="460" y="155" width="300" height="70" fill="#ffebee" stroke="#d32f2f" stroke-width="1" rx="3"/>
+<text x="610" y="180" text-anchor="middle" font-size="13" font-weight="bold" fill="#d32f2f">基本信息</text>
+<text x="480" y="200" font-size="11" fill="#555">• 层级: InnoDB引擎层</text>
+<text x="480" y="218" font-size="11" fill="#555">• 范围: 仅InnoDB</text>
+<rect x="460" y="240" width="300" height="90" fill="#e1f5fe" stroke="#0277bd" stroke-width="1" rx="3"/>
+<text x="610" y="265" text-anchor="middle" font-size="13" font-weight="bold" fill="#0277bd">日志特性</text>
+<text x="480" y="285" font-size="11" fill="#555">• 类型: 物理日志</text>
+<text x="480" y="303" font-size="11" fill="#555">• 格式: 固定二进制格式</text>
+<text x="480" y="321" font-size="11" fill="#555">• 写入: 循环写,固定大小</text>
+<rect x="460" y="345" width="300" height="90" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1" rx="3"/>
+<text x="610" y="370" text-anchor="middle" font-size="13" font-weight="bold" fill="#7b1fa2">核心作用</text>
+<text x="480" y="390" font-size="11" fill="#555">• 崩溃恢复(Crash Recovery)</text>
+<text x="480" y="408" font-size="11" fill="#555">• 保证持久性(ACID-D)</text>
+<text x="480" y="426" font-size="11" fill="#555">• WAL机制(Write-Ahead Log)</text>
+<rect x="460" y="450" width="300" height="80" fill="#fff9c4" stroke="#f57f17" stroke-width="1" rx="3"/>
+<text x="610" y="475" text-anchor="middle" font-size="13" font-weight="bold" fill="#f57f17">记录示例</text>
+<text x="480" y="495" font-size="10" fill="#333" font-family="monospace">在表空间1,页100,</text>
+<text x="480" y="513" font-size="10" fill="#333" font-family="monospace">偏移200,写入0xABCD</text>
+<rect x="460" y="545" width="300" height="60" fill="#ffebee" stroke="#d32f2f" stroke-width="1" rx="3"/>
+<text x="480" y="570" font-size="11" fill="#333">配置: innodb_flush_</text>
+<text x="480" y="590" font-size="10" fill="#666">log_at_trx_commit=1</text>
+</svg>
+
+### 关键要点
+1. **层级不同**:binlog在Server层,redo log在InnoDB层
+2. **用途不同**:binlog用于复制恢复,redo log用于崩溃恢复
+3. **格式不同**:binlog是逻辑日志,redo log是物理日志
+4. **写入不同**:binlog追加写,redo log循环写
+5. **配合使用**:两阶段提交保证一致性
+
+### 记忆口诀
+**"服逻追复,引物循崩"**
+- **服**:Server层(binlog)
+- **逻**:逻辑日志(binlog)
+- **追**:追加写(binlog)
+- **复**:复制(binlog)
+- **引**:引擎层(redo log)
+- **物**:物理日志(redo log)
+- **循**:循环写(redo log)
+- **崩**:崩溃恢复(redo log)
+
+38. 什么是两阶段提交？
+
+### 核心答案
+两阶段提交(Two-Phase Commit)是MySQL为保证binlog和redo log一致性而采用的提交协议,分为prepare和commit两个阶段。
+
+### 详细说明
+
+#### 1. 为什么需要两阶段提交?
+
+如果不用两阶段提交,可能出现binlog和redo log不一致:
+
+**场景1:先写redo log,后写binlog**
+1. 写入redo log成功
+2. MySQL崩溃
+3. 重启后通过redo log恢复数据(有这条记录)
+4. 但binlog没有这条记录,主从复制时从库没有这条数据
+5. **结果:主库有,从库没有,数据不一致**
+
+**场景2:先写binlog,后写redo log**
+1. 写入binlog成功
+2. MySQL崩溃
+3. 重启后没有redo log,这条记录丢失(主库没有)
+4. 但binlog有这条记录,从库会执行(从库有)
+5. **结果:主库没有,从库有,数据不一致**
+
+#### 2. 两阶段提交流程
+
+<svg viewBox="0 0 800 550" xmlns="http://www.w3.org/2000/svg">
+<rect x="50" y="20" width="700" height="60" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
+<text x="400" y="55" text-anchor="middle" font-size="18" font-weight="bold" fill="#1976d2">两阶段提交流程</text>
+<rect x="100" y="110" width="600" height="70" fill="#fff3e0" stroke="#ef6c00" stroke-width="2" rx="5"/>
+<text x="400" y="145" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">阶段1: Prepare (准备阶段)</text>
+<text x="150" y="168" font-size="12" fill="#555">1. 写入redo log,标记为prepare状态</text>
+<path d="M 400 180 L 400 210" stroke="#1976d2" stroke-width="3" marker-end="url(#arrow2)"/>
+<rect x="100" y="210" width="600" height="70" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
+<text x="400" y="245" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">阶段2: Write Binlog (写binlog)</text>
+<text x="150" y="268" font-size="12" fill="#555">2. 写入binlog到磁盘</text>
+<path d="M 400 280 L 400 310" stroke="#1976d2" stroke-width="3" marker-end="url(#arrow2)"/>
+<rect x="100" y="310" width="600" height="70" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2" rx="5"/>
+<text x="400" y="345" text-anchor="middle" font-size="14" font-weight="bold" fill="#333">阶段3: Commit (提交阶段)</text>
+<text x="150" y="368" font-size="12" fill="#555">3. 将redo log状态改为commit</text>
+<rect x="100" y="410" width="280" height="120" fill="#ffebee" stroke="#d32f2f" stroke-width="2" rx="5"/>
+<text x="240" y="440" text-anchor="middle" font-size="13" font-weight="bold" fill="#d32f2f">崩溃恢复场景</text>
+<text x="120" y="465" font-size="11" fill="#555">• 若在prepare前崩溃: 事务未开始,丢弃</text>
+<text x="120" y="488" font-size="11" fill="#555">• 若prepare后,binlog前崩溃: 回滚</text>
+<text x="120" y="511" font-size="11" fill="#555">• 若binlog后,commit前崩溃: 提交</text>
+<rect x="420" y="410" width="280" height="120" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2" rx="5"/>
+<text x="560" y="440" text-anchor="middle" font-size="13" font-weight="bold" fill="#2e7d32">一致性保证</text>
+<text x="440" y="465" font-size="11" fill="#555">• Prepare状态的redo log</text>
+<text x="440" y="488" font-size="11" fill="#555">• 如果binlog有对应记录→提交</text>
+<text x="440" y="511" font-size="11" fill="#555">• 如果binlog无对应记录→回滚</text>
+<defs>
+<marker id="arrow2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+<path d="M0,0 L0,6 L9,3 z" fill="#1976d2"/>
+</marker>
+</defs>
+</svg>
+
+#### 3. 崩溃恢复逻辑
+
+MySQL重启后的恢复策略:
+1. 扫描redo log,找到所有prepare状态的事务
+2. 对于每个prepare事务,检查binlog是否有对应的完整记录
+3. **如果binlog有完整记录**:提交该事务(将redo log改为commit)
+4. **如果binlog没有记录**:回滚该事务
+
+#### 4. 如何判断binlog是否完整?
+
+- **STATEMENT格式**:查看是否有完整的COMMIT语句
+- **ROW格式**:查看是否有XID_EVENT事件(事务ID)
+
+### 关键要点
+1. **目的**:保证binlog和redo log的一致性
+2. **阶段**:Prepare(写redo log) → Write Binlog → Commit
+3. **恢复**:根据binlog是否完整决定提交或回滚
+4. **代价**:多一次fsync,但保证了一致性
+5. **配置**:两个参数都设为1最安全
+
+### 记忆口诀
+**"准写提,日志双保险"**
+- **准**:Prepare阶段
+- **写**:Write Binlog
+- **提**:Commit阶段
+- **双保险**:binlog和redo log都完整才提交
+
+## 高可用与性能
+
+39. 什么是主从复制？如何实现？
+
+### 核心答案
+主从复制是MySQL通过binlog将主库数据变更同步到从库的机制,实现数据备份和读写分离。流程:主库写binlog → 从库IO线程读取 → 写入relay log → SQL线程重放。
+
+### 详细说明
+
+#### 1. 主从复制原理
+
+**三线程模型**:
+- **主库binlog dump线程**:读取binlog发送给从库
+- **从库IO线程**:接收binlog写入relay log
+- **从库SQL线程**:读取relay log执行SQL
+
+**复制流程**:
+1. 主库执行SQL,记录到binlog
+2. 从库IO线程连接主库,请求binlog
+3. 主库binlog dump线程读取binlog发送给从库
+4. 从库IO线程接收后写入relay log
+5. 从库SQL线程读取relay log,重放SQL
+
+#### 2. 配置步骤
+
+**主库配置**:
+```sql
+-- my.cnf
+[mysqld]
+server-id = 1  -- 唯一ID
+log-bin = mysql-bin  -- 开启binlog
+binlog-format = ROW  -- ROW格式
+
+-- 创建复制用户
+CREATE USER 'repl'@'%' IDENTIFIED BY 'password';
+GRANT REPLICATION SLAVE ON *.* TO 'repl'@'%';
+
+-- 查看主库状态
+SHOW MASTER STATUS;
+-- 记录File和Position
+```
+
+**从库配置**:
+```sql
+-- my.cnf
+[mysqld]
+server-id = 2  -- 唯一ID,不同于主库
+relay-log = relay-bin  -- relay log文件名
+
+-- 配置主库信息
+CHANGE MASTER TO
+  MASTER_HOST='192.168.1.100',
+  MASTER_USER='repl',
+  MASTER_PASSWORD='password',
+  MASTER_LOG_FILE='mysql-bin.000001',  -- 主库binlog文件
+  MASTER_LOG_POS=154;  -- binlog位置
+
+-- 启动复制
+START SLAVE;
+
+-- 查看从库状态
+SHOW SLAVE STATUS\G
+-- 确认 Slave_IO_Running: Yes
+-- 确认 Slave_SQL_Running: Yes
+```
+
+<svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+<rect x="50" y="20" width="700" height="60" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
+<text x="400" y="55" text-anchor="middle" font-size="18" font-weight="bold" fill="#1976d2">MySQL 主从复制流程</text>
+<rect x="80" y="110" width="280" height="350" fill="#fff3e0" stroke="#ef6c00" stroke-width="2" rx="5"/>
+<text x="220" y="145" text-anchor="middle" font-size="16" font-weight="bold" fill="#ef6c00">主库 (Master)</text>
+<rect x="100" y="170" width="240" height="60" fill="#ffebee" stroke="#d32f2f" stroke-width="1" rx="3"/>
+<text x="220" y="195" text-anchor="middle" font-size="13" fill="#333">1. 执行SQL(INSERT/UPDATE)</text>
+<text x="220" y="218" text-anchor="middle" font-size="11" fill="#666">↓</text>
+<rect x="100" y="245" width="240" height="60" fill="#e3f2fd" stroke="#1976d2" stroke-width="1" rx="3"/>
+<text x="220" y="270" text-anchor="middle" font-size="13" fill="#333">2. 写入Binary Log</text>
+<text x="220" y="293" text-anchor="middle" font-size="11" fill="#666">↓</text>
+<rect x="100" y="320" width="240" height="60" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1" rx="3"/>
+<text x="220" y="345" text-anchor="middle" font-size="13" fill="#333">3. Binlog Dump线程</text>
+<text x="220" y="365" text-anchor="middle" font-size="10" fill="#666">读取binlog发送给从库</text>
+<path d="M 360 350 L 420 280" stroke="#2e7d32" stroke-width="3" stroke-dasharray="5,5" marker-end="url(#arrow3)"/>
+<text x="385" y="310" font-size="11" fill="#2e7d32" font-weight="bold">发送binlog</text>
+<rect x="440" y="110" width="280" height="350" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2" rx="5"/>
+<text x="580" y="145" text-anchor="middle" font-size="16" font-weight="bold" fill="#2e7d32">从库 (Slave)</text>
+<rect x="460" y="170" width="240" height="60" fill="#e1f5fe" stroke="#0277bd" stroke-width="1" rx="3"/>
+<text x="580" y="195" text-anchor="middle" font-size="13" fill="#333">4. IO线程接收binlog</text>
+<text x="580" y="218" text-anchor="middle" font-size="11" fill="#666">↓</text>
+<rect x="460" y="245" width="240" height="60" fill="#fff9c4" stroke="#f57f17" stroke-width="1" rx="3"/>
+<text x="580" y="270" text-anchor="middle" font-size="13" fill="#333">5. 写入Relay Log</text>
+<text x="580" y="293" text-anchor="middle" font-size="11" fill="#666">↓</text>
+<rect x="460" y="320" width="240" height="60" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1" rx="3"/>
+<text x="580" y="345" text-anchor="middle" font-size="13" fill="#333">6. SQL线程读取relay log</text>
+<text x="580" y="365" text-anchor="middle" font-size="10" fill="#666">重放SQL,执行数据变更</text>
+<rect x="460" y="395" width="240" height="50" fill="#c8e6c9" stroke="#388e3c" stroke-width="1" rx="3"/>
+<text x="580" y="425" text-anchor="middle" font-size="12" fill="#333" font-weight="bold">✓ 数据同步完成</text>
+<defs>
+<marker id="arrow3" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+<path d="M0,0 L0,6 L9,3 z" fill="#2e7d32"/>
+</marker>
+</defs>
+</svg>
+
+### 关键要点
+1. **binlog是核心**:主从复制依赖binlog
+2. **三线程模型**:dump、IO、SQL线程
+3. **异步复制**:主库不等从库,有延迟
+4. **server-id唯一**:每个MySQL实例需不同ID
+5. **监控指标**:Seconds_Behind_Master(延迟时间)
+
+### 记忆口诀
+**"主写从读,三线日志"**
+- **主写**:主库写binlog
+- **从读**:从库读binlog
+- **三线**:dump、IO、SQL三个线程
+- **日志**:binlog和relay log
+
+40. 主从复制有哪些模式？
+41. 什么是读写分离？
+42. 如何保证主从一致性？
+43. 什么是分库分表？什么时候需要分库分表？
+44. 垂直分库和水平分库的区别是什么？
+45. 分库分表后如何解决跨库查询、事务问题？
+
+## 其他
+
+46. MySQL 如何实现排序？filesort 和 index sort 的区别？
+47. MySQL 的架构是怎样的？
+48. 什么是 MVCC？如何实现？
+49. COUNT(*) 和 COUNT(1) 和 COUNT(列名) 的区别？
 50. 如何设计一个高性能的数据库表？
+
+### 40. 主从复制有哪些模式？
+
+#### 核心答案
+MySQL主从复制有三种模式:异步复制(默认)、半同步复制、全同步复制(MGR)。
+
+#### 详细说明
+
+**1. 异步复制(Asynchronous Replication - 默认)**
+- 主库执行完事务立即返回,不等从库
+- 优点:性能最好
+- 缺点:可能丢数据(主库宕机时从库未同步)
+
+**2. 半同步复制(Semi-Synchronous Replication)**
+- 主库等待至少一个从库接收binlog后才返回
+- 配置:
+  ```sql
+  -- 主库安装插件
+  INSTALL PLUGIN rpl_semi_sync_master SONAME 'semisync_master.so';
+  SET GLOBAL rpl_semi_sync_master_enabled = 1;
+
+  -- 从库安装插件
+  INSTALL PLUGIN rpl_semi_sync_slave SONAME 'semisync_slave.so';
+  SET GLOBAL rpl_semi_sync_slave_enabled = 1;
+  ```
+- 优点:数据更安全
+- 缺点:性能略降
+
+**3. 全同步复制/组复制(Group Replication - MGR)**
+- MySQL 5.7.17+推出
+- 基于Paxos协议的强一致性
+- 所有节点都写入才算成功
+
+#### 对比表格
+
+| 模式 | 数据安全性 | 性能 | 延迟 | 使用场景 |
+|------|-----------|------|------|---------|
+| 异步复制 | 低 | 高 | 有延迟 | 读多写少,允许少量丢失 |
+| 半同步复制 | 中 | 中 | 轻微延迟 | 对数据一致性有要求 |
+| 组复制(MGR) | 高 | 低 | 基本无延迟 | 金融等强一致性场景 |
+
+#### 关键要点
+1. **异步**:默认模式,性能最好但可能丢数据
+2. **半同步**:主库等至少一个从库确认
+3. **MGR**:强一致性,类似分布式数据库
+4. **选择依据**:根据业务对一致性和性能的要求
+
+#### 记忆口诀
+**"异快半稳,组最强"**
+- **异快**:异步复制快
+- **半稳**:半同步稳定
+- **组最强**:组复制最强
+
+---
+
+### 41. 什么是读写分离？
+
+#### 核心答案
+读写分离是将写操作发送到主库,读操作发送到从库,利用主从复制实现负载均衡,提升数据库性能。
+
+#### 详细说明
+
+**1. 读写分离架构**
+```
+Client
+  ↓
+中间件(MyCat/ProxySQL/ShardingSphere)
+  ↓                    ↓
+Master(写)       Slave1、Slave2...(读)
+```
+
+**2. 实现方式**
+
+**方式一:应用层实现**
+```java
+//伪代码
+if (isWriteOperation()) {
+    dataSource = masterDataSource;
+} else {
+    dataSource = slaveDataSource;  // 可以有多个从库负载均衡
+}
+```
+
+**方式二:中间件实现**
+- MyCat
+- ProxySQL
+- ShardingSphere
+- MySQL Router
+
+**3. 优缺点**
+
+**优点**:
+- 降低主库压力
+- 提升查询性能
+- 读操作可水平扩展
+
+**缺点**:
+- 主从延迟问题
+- 数据可能不一致
+- 架构复杂度增加
+
+**4. 延迟问题解决**
+- 强一致性读主库
+- 写后读从主库
+- 延迟监控告警
+- 缓存辅助
+
+#### 关键要点
+1. **核心**:主库写,从库读
+2. **前提**:主从复制
+3. **实现**:应用层或中间件
+4. **问题**:主从延迟
+5. **适用**:读多写少场景
+
+#### 记忆口诀
+**"主写从读,分流提速"**
+
+---
+
+### 42. 如何保证主从一致性？
+
+#### 核心答案
+通过半同步复制、延迟监控、强制读主、并行复制等方式减少主从不一致。
+
+#### 详细说明
+
+**1. 主从不一致的原因**
+- 网络延迟
+- 从库负载高
+- 从库单线程回放慢
+- 大事务执行慢
+
+**2. 解决方案**
+
+**方案一:半同步复制**
+- 主库等从库确认,减少数据丢失
+
+**方案二:并行复制**
+```sql
+-- MySQL 5.7+
+slave-parallel-type = LOGICAL_CLOCK
+slave-parallel-workers = 4  -- 并行线程数
+```
+
+**方案三:强一致性读**
+- 写后读必须读主库
+- 实时性要求高的读主库
+
+**方案四:延迟监控**
+```sql
+-- 查看主从延迟
+SHOW SLAVE STATUS\G
+-- Seconds_Behind_Master: 延迟秒数
+```
+
+**方案五:业务层控制**
+- 写完后等待一段时间再读
+- 使用缓存减少读库压力
+
+**3. 延迟监控指标**
+- `Seconds_Behind_Master`:延迟时间
+- IO线程和SQL线程状态
+- relay log积压情况
+
+#### 关键要点
+1. **半同步**:主库等从库确认
+2. **并行复制**:多线程回放提速
+3. **读主策略**:重要数据读主库
+4. **延迟监控**:及时发现问题
+5. **业务容忍**:设计时考虑最终一致性
+
+#### 记忆口诀
+**"半并读主监,一致靠设计"**
+- **半**:半同步
+- **并**:并行复制
+- **读主**:强一致读主
+- **监**:监控延迟
+
+---
+
+### 43. 什么是分库分表？什么时候需要分库分表？
+
+#### 核心答案
+分库分表是将大表数据拆分到多个数据库或表中,解决单表数据量过大导致的性能问题。当单表超过1000万行或单库QPS过高时考虑分库分表。
+
+#### 详细说明
+
+**1. 为什么要分库分表**
+
+**单表问题**:
+- 数据量过大(千万级以上),查询慢
+- 索引占用内存大
+- DDL操作耗时长
+
+**单库问题**:
+- QPS/TPS达到瓶颈
+- 磁盘IO饱和
+- 连接数不够
+
+**2. 分库分表策略**
+
+**垂直拆分**:
+- 按业务模块拆分(用户库、订单库、商品库)
+- 按字段拆分(热数据、冷数据分离)
+
+**水平拆分**:
+- 按范围:user_0(1-100万)、user_1(100-200万)
+- 按哈希:user_id % 10
+- 按时间:order_2024_01、order_2024_02
+
+**3. 何时分库分表**
+
+**分表时机**:
+- 单表行数超过1000万
+- 表数据文件超过10GB
+- 查询性能明显下降
+
+**分库时机**:
+- 单库QPS超过3000
+- 单库连接数不够
+- 磁盘IO达到瓶颈
+
+**4. 分库分表中间件**
+- ShardingSphere
+- MyCat
+- Vitess
+
+#### 关键要点
+1. **目的**:解决单表/单库性能瓶颈
+2. **垂直**:按业务或字段拆
+3. **水平**:按数据行拆
+4. **时机**:千万级数据或高QPS
+5. **代价**:复杂度大幅增加
+
+#### 记忆口诀
+**"千万行,三千QPS,该分了"**
+
+---
+
+### 44. 垂直分库和水平分库的区别是什么？
+
+#### 核心答案
+垂直分库按业务模块拆分(用户库、订单库),水平分库按数据行拆分(user_0、user_1)。垂直解决业务耦合,水平解决数据量问题。
+
+#### 详细说明
+
+**1. 垂直分库(Vertical Sharding)**
+
+**定义**:按业务功能将表分配到不同数据库
+
+**示例**:
+```
+原来单库:
+- users表
+- orders表
+- products表
+- payments表
+
+垂直分库后:
+- 用户库: users表
+- 订单库: orders表
+- 商品库: products表
+- 支付库: payments表
+```
+
+**优点**:
+- 业务隔离,互不影响
+- 可针对不同业务优化
+- 降低单库压力
+
+**缺点**:
+- 跨库JOIN困难
+- 分布式事务问题
+- 不解决单表数据量问题
+
+**2. 水平分库(Horizontal Sharding)**
+
+**定义**:将同一个表的数据拆分到多个数据库
+
+**示例**:
+```
+原来: users表(1亿条数据)
+
+水平分库后:
+- db_0: users表(user_id % 10 = 0)
+- db_1: users表(user_id % 10 = 1)
+...
+- db_9: users表(user_id % 10 = 9)
+```
+
+**分片策略**:
+- 范围分片:0-1000万在db_0,1000-2000万在db_1
+- 哈希分片:user_id % N
+- 时间分片:按月份、年份
+- 地理分片:按地区
+
+**优点**:
+- 解决单表数据量问题
+- 可线性扩展
+- 提升并发能力
+
+**缺点**:
+- 路由复杂
+- 跨分片查询困难
+- 扩容需要数据迁移
+
+**3. 对比表格**
+
+| 维度 | 垂直分库 | 水平分库 |
+|------|---------|---------|
+| 拆分依据 | 按业务/表 | 按数据行 |
+| 解决问题 | 业务耦合、单库压力 | 单表数据量大 |
+| JOIN | 跨库JOIN困难 | 同分片可JOIN |
+| 扩展性 | 受业务数量限制 | 可线性扩展 |
+| 复杂度 | 中 | 高 |
+| 路由策略 | 按表名路由 | 按分片键路由 |
+
+#### 关键要点
+1. **垂直**:按业务拆库拆表
+2. **水平**:同一表数据拆分
+3. **垂直先行**:先垂直再水平
+4. **水平解数据**:解决数据量问题
+5. **组合使用**:实际中两者结合
+
+#### 记忆口诀
+**"垂直分业务,水平分数据"**
+
+---
+
+### 45. 分库分表后如何解决跨库查询、事务问题？
+
+#### 核心答案
+跨库查询通过应用层聚合、ES等搜索引擎、冗余设计解决;分布式事务通过最终一致性、TCC、Seata等方案解决。
+
+#### 详细说明
+
+**1. 跨库查询问题**
+
+**问题**:
+- 分片后数据分散在多个库
+- 无法使用JOIN
+- 分页、排序困难
+
+**解决方案**:
+
+**方案一:应用层聚合**
+```java
+// 查询所有分片
+List<User> shard0 = queryFromDB0();
+List<User> shard1 = queryFromDB1();
+// 内存中合并、排序、分页
+List<User> result = merge(shard0, shard1);
+```
+
+**方案二:ES等搜索引擎**
+- 数据同步到ES
+- 复杂查询走ES
+- MySQL只负责写入和简单查询
+
+**方案三:冗余设计**
+- 订单表冗余用户名称
+- 避免JOIN查询用户表
+
+**方案四:全局表**
+- 字典表、配置表等小表
+- 每个分片都保存一份
+
+**2. 分布式事务问题**
+
+**问题**:
+- 跨库操作无法用本地事务
+- ACID特性难以保证
+
+**解决方案**:
+
+**方案一:最终一致性(推荐)**
+- 本地消息表
+- 消息队列(RocketMQ、Kafka)
+- 定时任务补偿
+
+**方案二:TCC(Try-Confirm-Cancel)**
+- Try:预留资源
+- Confirm:确认提交
+- Cancel:取消释放资源
+
+**方案三:Seata分布式事务**
+- AT模式:自动补偿
+- TCC模式
+- SAGA模式
+
+**方案四:业务设计避免**
+- 尽量单库事务
+- 业务流程拆分
+- 先本地后远程
+
+**3. 其他问题解决**
+
+**全局ID生成**:
+- 雪花算法(Snowflake)
+- Redis INCR
+- UUID
+- 数据库号段模式
+
+**扩容缩容**:
+- 双倍扩容(2->4->8)
+- 数据迁移工具
+- 停服迁移vs在线迁移
+
+#### 关键要点
+1. **跨库查询**:ES、应用聚合、冗余
+2. **分布式事务**:最终一致性为主
+3. **全局ID**:雪花算法等
+4. **业务设计**:避免跨库操作
+5. **中间件**:ShardingSphere、Seata
+
+#### 记忆口诀
+**"查用ES,事务靠补偿,ID用雪花"**
+
+---
+
+### 46. MySQL 如何实现排序？filesort 和 index sort 的区别？
+
+#### 核心答案
+MySQL排序有两种方式:index sort(利用索引有序性)和filesort(内存或磁盘排序)。index sort性能最好,filesort在数据量大时需要磁盘临时文件。
+
+#### 详细说明
+
+**1. Index Sort(索引排序)**
+
+**原理**:
+- 利用索引的有序性
+- 直接按索引顺序读取数据
+- 无需额外排序
+
+**条件**:
+- ORDER BY字段有索引
+- WHERE和ORDER BY使用同一个索引
+- 扫描方式按索引顺序
+
+**示例**:
+```sql
+-- 假设age字段有索引
+SELECT * FROM users ORDER BY age;
+-- 走索引,直接有序返回
+
+EXPLAIN结果:
+Extra: Using index
+```
+
+**2. Filesort(文件排序)**
+
+**原理**:
+- 无法使用索引排序时
+- 在内存(sort_buffer)中排序
+- 内存不够时使用磁盘临时文件
+
+**触发条件**:
+- ORDER BY字段无索引
+- 排序字段和索引顺序不一致
+- 使用了SELECT *导致回表
+
+**Filesort算法**:
+
+**单路排序**:
+- 一次性读取所有需要的列
+- 在sort_buffer中排序
+- 优点:只需一次扫描
+- 缺点:占用内存大
+
+**双路排序**:
+- 先读取排序字段和主键
+- 排序后再回表查其他字段
+- 优点:占用内存小
+- 缺点:需要两次扫描
+
+**3. 优化建议**
+
+**使用索引排序**:
+```sql
+-- 创建合适的索引
+CREATE INDEX idx_age_name ON users(age, name);
+
+-- ORDER BY使用索引
+SELECT * FROM users WHERE age > 18 ORDER BY age, name;
+```
+
+**增大sort_buffer_size**:
+```sql
+SET SESSION sort_buffer_size = 2097152;  -- 2MB
+```
+
+**减少SELECT字段**:
+```sql
+-- 不好:SELECT *需要所有字段,占用内存
+SELECT * FROM users ORDER BY age;
+
+-- 好:只查需要的字段
+SELECT id, name, age FROM users ORDER BY age;
+```
+
+**4. 如何判断使用了什么排序**
+
+```sql
+EXPLAIN SELECT * FROM users ORDER BY age;
+
+-- Extra字段:
+-- Using index: 使用索引排序
+-- Using filesort: 使用文件排序
+```
+
+#### 关键要点
+1. **Index Sort**:利用索引,性能最好
+2. **Filesort**:内存/磁盘排序,性能较差
+3. **优化**:创建合适索引,减少SELECT字段
+4. **配置**:调整sort_buffer_size
+5. **EXPLAIN**:通过Extra字段判断
+
+#### 记忆口诀
+**"索引排最快,文件排要慢,加索引优先"**
+
+---
+
+### 47. MySQL 的架构是怎样的？
+
+#### 核心答案
+MySQL采用分层架构:连接层(管理连接)、服务层(SQL解析优化)、引擎层(存储数据)、存储层(文件系统)。
+
+#### 详细说明
+
+**MySQL架构四层**:
+
+**1. 连接层(Connection Layer)**
+- 客户端连接管理
+- 身份验证
+- 权限校验
+- 连接池管理
+
+**2. 服务层(SQL Layer / Server Layer)**
+- 查询缓存(MySQL 8.0已移除)
+- SQL解析器(Parser)
+- SQL优化器(Optimizer)
+- 执行器(Executor)
+
+**组件说明**:
+- **Parser**:词法分析、语法分析,生成解析树
+- **Optimizer**:选择最优执行计划,决定使用哪个索引
+- **Executor**:调用存储引擎API执行查询
+
+**3. 存储引擎层(Storage Engine Layer)**
+- InnoDB:默认引擎,支持事务、行锁、外键
+- MyISAM:只支持表锁,不支持事务
+- Memory:内存引擎,速度快但数据易失
+- Archive:归档引擎,高压缩比
+
+**4. 存储层(File System)**
+- 数据文件(.ibd)
+- 日志文件(binlog、redo log、undo log)
+- 配置文件(my.cnf)
+
+**SQL执行流程**:
+```
+1. 客户端连接
+   ↓
+2. 权限验证
+   ↓
+3. 查询缓存(8.0已移除)
+   ↓
+4. 解析器(Parser) - 生成语法树
+   ↓
+5. 预处理器 - 检查表、字段是否存在
+   ↓
+6. 优化器(Optimizer) - 生成执行计划
+   ↓
+7. 执行器 - 调用存储引擎
+   ↓
+8. 存储引擎 - 返回数据
+   ↓
+9. 返回结果给客户端
+```
+
+#### 关键要点
+1. **分层架构**:连接、服务、引擎、存储
+2. **核心**:服务层负责SQL处理
+3. **可插拔**:存储引擎可替换
+4. **优化器**:决定执行计划
+5. **InnoDB**:默认且推荐的引擎
+
+#### 记忆口诀
+**"连服引存,层层分明"**
+- **连**:连接层
+- **服**:服务层
+- **引**:引擎层
+- **存**:存储层
+
+---
+
+### 48. 什么是 MVCC？如何实现？
+
+#### 核心答案
+MVCC(多版本并发控制)通过保存数据的历史版本,实现读写不阻塞。基于undo log、隐藏字段(trx_id、roll_pointer)和ReadView实现。
+
+#### 详细说明
+
+**1. MVCC概念**
+
+**什么是MVCC**:
+- Multi-Version Concurrency Control
+- 一种并发控制方法
+- 读不加锁,读写不冲突
+- 快照读vs当前读
+
+**解决问题**:
+- 提升并发性能
+- 避免读写互相阻塞
+- 实现非锁定读
+
+**2. MVCC实现原理**
+
+**三大组件**:
+
+**①隐藏字段**:
+每行记录包含:
+- `DB_TRX_ID`:最后修改该行的事务ID(6字节)
+- `DB_ROLL_PTR`:回滚指针,指向undo log(7字节)
+- `DB_ROW_ID`:隐藏主键(6字节,无主键时)
+
+**②Undo Log版本链**:
+```
+最新版本: name='Bob', trx_id=100, roll_ptr->
+    ↓
+旧版本1: name='Alice', trx_id=99, roll_ptr->
+    ↓
+旧版本2: name='Tom', trx_id=98, roll_ptr=NULL
+```
+
+**③ReadView(读视图)**:
+快照读时生成,包含:
+- `m_ids`:当前活跃事务ID列表
+- `min_trx_id`:最小活跃事务ID
+- `max_trx_id`:下一个要分配的事务ID
+- `creator_trx_id`:当前事务ID
+
+**3. 可见性判断规则**
+
+对于版本链中的某个版本,判断是否可见:
+```
+1. trx_id == creator_trx_id: 可见(自己修改的)
+2. trx_id < min_trx_id: 可见(已提交的老事务)
+3. trx_id >= max_trx_id: 不可见(未来事务)
+4. min_trx_id <= trx_id < max_trx_id:
+   - 如果trx_id在m_ids中: 不可见(未提交)
+   - 如果trx_id不在m_ids中: 可见(已提交)
+```
+
+**4. RC vs RR的ReadView差异**
+
+**READ COMMITTED(RC)**:
+- 每次SELECT都生成新的ReadView
+- 能读到其他事务已提交的最新数据
+- 不可重复读
+
+**REPEATABLE READ(RR)**:
+- 事务开始时生成ReadView
+- 整个事务期间使用同一个ReadView
+- 可重复读
+
+**5. 快照读vs当前读**
+
+**快照读(Snapshot Read)**:
+```sql
+SELECT * FROM users WHERE id = 1;
+-- 使用MVCC,不加锁
+```
+
+**当前读(Locking Read)**:
+```sql
+SELECT * FROM users WHERE id = 1 FOR UPDATE;  -- 排他锁
+SELECT * FROM users WHERE id = 1 LOCK IN SHARE MODE;  -- 共享锁
+INSERT / UPDATE / DELETE;  -- 都是当前读
+-- 读最新版本,加锁
+```
+
+#### 关键要点
+1. **目的**:读写不阻塞,提升并发
+2. **基础**:undo log版本链
+3. **核心**:ReadView可见性判断
+4. **隔离级别**:RC每次生成,RR一次生成
+5. **快照读**:用MVCC;当前读:加锁
+
+#### 记忆口诀
+**"版本链,读视图,可见性判断"**
+
+---
+
+### 49. COUNT(*) 和 COUNT(1) 和 COUNT(列名) 的区别？
+
+#### 核心答案
+COUNT(*)和COUNT(1)效果相同,MySQL会优化为COUNT(*);COUNT(列名)不统计NULL值。InnoDB中COUNT(*)需全表扫描,MyISAM有计数器直接返回。
+
+#### 详细说明
+
+**1. 三种COUNT的区别**
+
+**COUNT(*)**:
+- 统计结果集的行数
+- 不忽略NULL
+- MySQL优化器会选最小的索引扫描
+
+**COUNT(1)**:
+- 效果同COUNT(*)
+- MySQL内部会转换为COUNT(*)
+- 不会真的给每行赋值1
+
+**COUNT(列名)**:
+- 统计该列非NULL的行数
+- NULL值不计入
+- 如果列有NOT NULL约束,等同于COUNT(*)
+
+**示例**:
+```sql
+-- 表数据
+id | name
+---|-----
+1  | Alice
+2  | Bob
+3  | NULL
+
+COUNT(*):       3  -- 统计所有行
+COUNT(1):       3  -- 等同于COUNT(*)
+COUNT(name):    2  -- NULL不计入
+```
+
+**2. 性能对比**
+
+**InnoDB引擎**:
+```sql
+-- 三种写法性能相同
+SELECT COUNT(*) FROM users;
+SELECT COUNT(1) FROM users;
+-- 除非有NOT NULL约束,否则COUNT(列名)需要判断NULL,略慢
+```
+
+InnoDB优化:
+- 优化器选择最小的索引
+- 二级索引比主键索引小
+- 如果有二级索引,会选二级索引扫描
+
+**MyISAM引擎**:
+- 维护了一个表行数计数器
+- COUNT(*)直接返回,O(1)
+- 但有WHERE条件时仍需扫描
+
+**3. COUNT(*)优化方案**
+
+**问题**:
+- InnoDB没有计数器
+- 全表扫描很慢
+
+**解决方案**:
+
+**方案一:近似值**
+```sql
+-- 使用统计信息(不精确)
+SELECT table_rows FROM information_schema.tables
+WHERE table_schema = 'db_name' AND table_name = 'users';
+```
+
+**方案二:单独计数表**
+```sql
+-- 创建计数表
+CREATE TABLE count_table (
+  table_name VARCHAR(50),
+  count INT
+);
+
+-- 插入时+1,删除时-1
+BEGIN;
+INSERT INTO users VALUES (...);
+UPDATE count_table SET count = count + 1 WHERE table_name = 'users';
+COMMIT;
+```
+
+**方案三:Redis计数**
+```
+INCR user_count  -- 新增用户
+DECR user_count  -- 删除用户
+GET user_count   -- 获取总数
+```
+
+**4. 最佳实践**
+
+- 如果不需要精确值,用`SHOW TABLE STATUS`或统计信息
+- 需要精确值且MyISAM,用`COUNT(*)`
+- 需要精确值且InnoDB:
+  - 小表直接`COUNT(*)`
+  - 大表用Redis/计数表
+- 不要用`COUNT(主键)`,用`COUNT(*)`
+
+#### 关键要点
+1. **COUNT(*)和COUNT(1)**:效果相同,推荐用COUNT(*)
+2. **COUNT(列名)**:不统计NULL
+3. **InnoDB**:需要扫描,慢
+4. **MyISAM**:有计数器,快
+5. **优化**:Redis计数或计数表
+
+#### 记忆口诀
+**"星和一相同,列名去NULL,InnoDB慢用Redis"**
+
+---
+
+### 50. 如何设计一个高性能的数据库表？
+
+#### 核心答案
+高性能表设计遵循:选对存储引擎(InnoDB)、合理字段类型、恰当索引、适度范式、避免大字段、考虑分区分表。
+
+#### 详细说明
+
+**1. 选择存储引擎**
+- 优先InnoDB:事务、行锁、崩溃恢复
+- 特殊场景:Memory(临时数据)、Archive(日志归档)
+
+**2. 字段设计原则**
+
+**①选择合适的数据类型**:
+```sql
+-- 不好: VARCHAR(255)存储1-2个字符
+name VARCHAR(255)
+
+-- 好: 根据实际需求
+name VARCHAR(50)
+
+-- 整数类型选择
+TINYINT:   1字节, -128~127
+INT:       4字节, -21亿~21亿
+BIGINT:    8字节
+
+-- 时间类型
+DATETIME:  8字节, 1000-9999年
+TIMESTAMP: 4字节, 1970-2038年, 自动时区转换
+```
+
+**②遵循原则**:
+- 更小的通常更好(节省空间和内存)
+- 简单就好(整数比字符串好)
+- 避免NULL(NULL需要额外空间和特殊处理)
+- 固定长度优于可变长度
+
+**3. 索引设计**
+
+**①创建合适的索引**:
+```sql
+-- 高频查询字段
+CREATE INDEX idx_email ON users(email);
+
+-- 组合索引遵循最左前缀
+CREATE INDEX idx_name_age ON users(name, age);
+
+-- 覆盖索引
+CREATE INDEX idx_name_age_city ON users(name, age, city);
+```
+
+**②索引设计原则**:
+- WHERE、ORDER BY、GROUP BY字段加索引
+- 区分度高的字段加索引
+- 不要过多索引(影响写入性能)
+- 联合索引代替多个单列索引
+- 字符串使用前缀索引
+
+**4. 范式与反范式**
+
+**三范式**:
+- 1NF:列不可分
+- 2NF:消除部分依赖
+- 3NF:消除传递依赖
+
+**适度反范式**:
+```sql
+-- 订单表冗余用户名,避免JOIN
+CREATE TABLE orders (
+  id INT PRIMARY KEY,
+  user_id INT,
+  user_name VARCHAR(50),  -- 冗余字段
+  amount DECIMAL(10,2)
+);
+```
+
+**5. 其他设计要点**
+
+**①避免大字段**:
+```sql
+-- 不好: 大文本和常用字段混在一起
+CREATE TABLE articles (
+  id INT,
+  title VARCHAR(200),
+  content TEXT,  -- 大字段
+  created_at DATETIME
+);
+
+-- 好: 拆分大字段到扩展表
+CREATE TABLE articles (
+  id INT,
+  title VARCHAR(200),
+  created_at DATETIME
+);
+
+CREATE TABLE article_content (
+  article_id INT,
+  content TEXT
+);
+```
+
+**②合理使用分区**:
+```sql
+-- 按时间分区
+CREATE TABLE logs (
+  id INT,
+  log_time DATETIME,
+  content TEXT
+) PARTITION BY RANGE (YEAR(log_time)) (
+  PARTITION p2022 VALUES LESS THAN (2023),
+  PARTITION p2023 VALUES LESS THAN (2024),
+  PARTITION p2024 VALUES LESS THAN (2025)
+);
+```
+
+**③设置合理的主键**:
+- 优先自增主键
+- 避免UUID作为主键(无序,页分裂)
+- 主键尽量小(INT比BIGINT好)
+
+**6. 性能检查清单**
+
+✅ 使用InnoDB引擎
+✅ 字段类型够用即可,不浪费
+✅ 尽量NOT NULL
+✅ 高频查询字段有索引
+✅ 避免过多索引(一般不超过5个)
+✅ 大字段独立存储
+✅ 适度冗余减少JOIN
+✅ 千万级数据考虑分区/分表
+✅ 有自增主键
+✅ 使用合适的字符集(utf8mb4)
+
+#### 关键要点
+1. **字段类型**:够用就好,越小越好
+2. **索引**:精准创建,不贪多
+3. **范式**:适度反范式,减少JOIN
+4. **大字段**:分离存储
+5. **分区分表**:千万级数据考虑
+
+#### 记忆口诀
+**"类型小,索引精,冷热分,适度冗"**
+- **类型小**:字段类型尽量小
+- **索引精**:精准创建索引
+- **冷热分**:冷热数据分离
+- **适度冗**:适度冗余字段
