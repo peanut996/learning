@@ -420,45 +420,71 @@ Java 没有强制停止线程的安全方法，使用**协作式中断机制**�
 
 **对比图示**：
 
-<svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
-<text x="400" y="25" text-anchor="middle" font-size="16" font-weight="bold">用户线程 vs 守护线程</text>
-<rect x="50" y="50" width="320" height="180" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
-<text x="210" y="80" text-anchor="middle" font-size="14" font-weight="bold">用户线程 (User Thread)</text>
-<text x="70" y="110" font-size="12">特点：</text>
-<text x="70" y="135" font-size="11">• JVM 会等待其执行完毕</text>
-<text x="70" y="155" font-size="11">• 默认创建的都是用户线程</text>
-<text x="70" y="175" font-size="11">• 主要执行业务逻辑</text>
-<text x="70" y="195" font-size="11">• main 线程是用户线程</text>
-<text x="70" y="215" font-size="11" fill="#1976d2" font-weight="bold">✓ JVM 等待执行完成</text>
-<rect x="430" y="50" width="320" height="180" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="5"/>
-<text x="590" y="80" text-anchor="middle" font-size="14" font-weight="bold">守护线程 (Daemon Thread)</text>
-<text x="450" y="110" font-size="12">特点：</text>
-<text x="450" y="135" font-size="11">• JVM 不等待其执行完毕</text>
-<text x="450" y="155" font-size="11">• 需要手动设置 setDaemon(true)</text>
-<text x="450" y="175" font-size="11">• 提供后台服务</text>
-<text x="450" y="195" font-size="11">• GC 线程是守护线程</text>
-<text x="450" y="215" font-size="11" fill="#f57c00" font-weight="bold">✓ 用户线程结束即终止</text>
+<svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+  <!-- 标题 -->
+  <text x="400" y="25" text-anchor="middle" font-size="16" font-weight="bold">用户线程 vs 守护线程</text>
+
+  <!-- 用户线程卡片 -->
+  <rect x="50" y="50" width="320" height="180" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
+  <text x="210" y="75" text-anchor="middle" font-size="14" font-weight="bold">用户线程 (User Thread)</text>
+  <text x="70" y="100" font-size="12">特点：</text>
+  <text x="70" y="120" font-size="11">• JVM 会等待其执行完毕</text>
+  <text x="70" y="138" font-size="11">• 默认创建的都是用户线程</text>
+  <text x="70" y="156" font-size="11">• 主要执行业务逻辑</text>
+  <text x="70" y="174" font-size="11">• main 线程是用户线程</text>
+  <text x="70" y="200" font-size="11" fill="#1976d2" font-weight="bold">✓ JVM 等待执行完成</text>
+
+  <!-- 守护线程卡片 -->
+  <rect x="430" y="50" width="320" height="180" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="5"/>
+  <text x="590" y="75" text-anchor="middle" font-size="14" font-weight="bold">守护线程 (Daemon Thread)</text>
+  <text x="450" y="100" font-size="12">特点：</text>
+  <text x="450" y="120" font-size="11">• JVM 不等待其执行完毕</text>
+  <text x="450" y="138" font-size="11">• 需要手动设置 setDaemon(true)</text>
+  <text x="450" y="156" font-size="11">• 提供后台服务</text>
+  <text x="450" y="174" font-size="11">• GC 线程是守护线程</text>
+  <text x="450" y="200" font-size="11" fill="#f57c00" font-weight="bold">✓ 用户线程结束即终止</text>
+
+  <!-- 执行流程对比标题 -->
 <text x="50" y="260" font-size="13" font-weight="bold">执行流程对比：</text>
-<rect x="50" y="275" width="700" height="150" fill="#f5f5f5" stroke="#666" stroke-width="1" rx="5"/>
-<line x1="100" y1="300" x2="100" y2="400" stroke="#333" stroke-width="2"/>
-<line x1="100" y1="400" x2="700" y2="400" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
-<text x="720" y="405" font-size="11">时间</text>
-<rect x="120" y="310" width="150" height="30" fill="#1976d2" stroke="#0d47a1" stroke-width="1" rx="3"/>
-<text x="195" y="330" text-anchor="middle" font-size="11" fill="#fff">主线程（用户线程）</text>
-<rect x="120" y="350" width="200" height="30" fill="#4caf50" stroke="#2e7d32" stroke-width="1" rx="3"/>
-<text x="220" y="370" text-anchor="middle" font-size="11" fill="#fff">子线程（用户线程）</text>
-<rect x="120" y="390" width="400" height="2" fill="#f57c00"/>
-<text x="540" y="395" font-size="11" fill="#f57c00">守护线程（被终止）</text>
-<path d="M 270 340 L 270 350" stroke="#c62828" stroke-width="3" stroke-dasharray="5,5"/>
-<text x="275" y="345" font-size="10" fill="#c62828">主线程结束</text>
-<path d="M 320 380 L 320 390" stroke="#c62828" stroke-width="3" stroke-dasharray="5,5"/>
-<text x="325" y="385" font-size="10" fill="#c62828">所有用户线程结束</text>
-<text x="325" y="395" font-size="10" fill="#c62828" font-weight="bold">→ JVM 退出</text>
-<defs>
-<marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
-<path d="M0,0 L0,6 L9,3 z" fill="#666"/>
-</marker>
-</defs>
+
+  <!-- 时间轴容器 -->
+  <rect x="50" y="275" width="700" height="200" fill="#f5f5f5" stroke="#666" stroke-width="1" rx="5"/>
+
+  <!-- 坐标轴 -->
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#666"/>
+    </marker>
+  </defs>
+
+  <line x1="80" y1="300" x2="80" y2="450" stroke="#333" stroke-width="2"/>
+  <line x1="80" y1="450" x2="720" y2="450" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="725" y="455" font-size="11">时间</text>
+
+  <!-- 主线程 -->
+  <rect x="100" y="310" width="150" height="28" fill="#1976d2" stroke="#0d47a1" stroke-width="1" rx="3"/>
+  <text x="175" y="328" text-anchor="middle" font-size="11" fill="#fff">主线程（用户线程）</text>
+
+  <!-- 子线程 -->
+  <rect x="100" y="350" width="200" height="28" fill="#4caf50" stroke="#2e7d32" stroke-width="1" rx="3"/>
+  <text x="200" y="368" text-anchor="middle" font-size="11" fill="#fff">子线程（用户线程）</text>
+
+  <!-- 守护线程 -->
+  <rect x="100" y="390" width="400" height="28" fill="#f57c00" stroke="#e65100" stroke-width="1" rx="3"/>
+  <text x="300" y="408" text-anchor="middle" font-size="11" fill="#fff">守护线程（运行中...）</text>
+
+  <!-- 守护线程被终止部分 -->
+  <rect x="300" y="390" width="200" height="28" fill="#ffccbc" stroke="#e65100" stroke-width="1" stroke-dasharray="5,3" rx="3"/>
+  <text x="400" y="408" text-anchor="middle" font-size="11" fill="#bf360c">被强制终止 ✗</text>
+
+  <!-- 主线程结束标记 -->
+  <line x1="250" y1="340" x2="250" y2="430" stroke="#c62828" stroke-width="2" stroke-dasharray="5,5"/>
+  <text x="255" y="335" font-size="10" fill="#c62828">主线程结束</text>
+
+  <!-- 所有用户线程结束标记 -->
+  <line x1="300" y1="380" x2="300" y2="430" stroke="#c62828" stroke-width="3" stroke-dasharray="5,5"/>
+  <text x="305" y="375" font-size="10" fill="#c62828" font-weight="bold">所有用户线程结束</text>
+  <text x="305" y="440" font-size="11" fill="#c62828" font-weight="bold">→ JVM 退出，守护线程被终止</text>
 </svg>
 
 **典型应用场景**：
@@ -669,54 +695,80 @@ threadLocal.remove();
 
 **内存泄漏产生原因**：
 
-<svg viewBox="0 0 800 550" xmlns="http://www.w3.org/2000/svg">
-<text x="400" y="25" text-anchor="middle" font-size="16" font-weight="bold">ThreadLocal 内存泄漏机制</text>
-<rect x="50" y="50" width="700" height="220" fill="#fff9c4" stroke="#f57f17" stroke-width="2" rx="5"/>
-<text x="400" y="75" text-anchor="middle" font-size="14" font-weight="bold" fill="#c62828">问题场景：线程池复用线程</text>
-<rect x="80" y="90" width="200" height="160" fill="#fff" stroke="#1976d2" stroke-width="2" rx="5"/>
-<text x="180" y="115" text-anchor="middle" font-size="13" font-weight="bold">Thread（长期存活）</text>
-<rect x="100" y="130" width="160" height="100" fill="#e3f2fd" stroke="#1976d2" stroke-width="1" rx="3"/>
-<text x="180" y="150" text-anchor="middle" font-size="12">ThreadLocalMap</text>
-<rect x="110" y="160" width="140" height="50" fill="#ffebee" stroke="#c62828" stroke-width="2" rx="2"/>
-<text x="120" y="180" font-size="10">key: null</text>
-<text x="120" y="195" font-size="10" fill="#c62828" font-weight="bold">value: 大对象 ⚠</text>
-<text x="120" y="210" font-size="9" fill="#666">(无法被 GC)</text>
-<rect x="350" y="90" width="180" height="160" fill="#fff" stroke="#388e3c" stroke-width="2" rx="5"/>
-<text x="440" y="115" text-anchor="middle" font-size="13" font-weight="bold">ThreadLocal 对象</text>
-<rect x="370" y="130" width="140" height="50" fill="#e8f5e9" stroke="#388e3c" stroke-width="1" rx="3"/>
-<text x="440" y="155" text-anchor="middle" font-size="11">已被 GC 回收</text>
-<path d="M 280 190 L 350 150" stroke="#666" stroke-width="2" stroke-dasharray="5,5" fill="none"/>
-<text x="300" y="165" font-size="10" fill="#c62828">弱引用被回收</text>
-<text x="300" y="180" font-size="10" fill="#c62828">key → null</text>
-<rect x="580" y="90" width="150" height="160" fill="#fff" stroke="#f57c00" stroke-width="2" rx="5"/>
-<text x="655" y="115" text-anchor="middle" font-size="13" font-weight="bold">大对象</text>
-<rect x="600" y="130" width="110" height="100" fill="#fff3e0" stroke="#f57c00" stroke-width="1" rx="3"/>
-<text x="655" y="155" text-anchor="middle" font-size="11">仍被强引用</text>
-<text x="655" y="175" text-anchor="middle" font-size="11" fill="#c62828">无法被 GC</text>
-<text x="655" y="195" text-anchor="middle" font-size="11" fill="#c62828">造成内存泄漏</text>
-<path d="M 250 185 L 580 185" stroke="#f57c00" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
-<text x="400" y="175" font-size="11" fill="#f57c00" font-weight="bold">强引用</text>
+<svg viewBox="0 0 800 570" xmlns="http://www.w3.org/2000/svg">
+  <!-- 标题 -->
+  <text x="400" y="25" text-anchor="middle" font-size="16" font-weight="bold">ThreadLocal 内存泄漏机制</text>
+
+  <!-- 问题场景容器 -->
+  <rect x="50" y="50" width="700" height="220" fill="#fff9c4" stroke="#f57f17" stroke-width="2" rx="5"/>
+  <text x="400" y="75" text-anchor="middle" font-size="14" font-weight="bold" fill="#c62828">问题场景：线程池复用线程</text>
+
+  <!-- Thread 对象 -->
+  <rect x="80" y="90" width="200" height="160" fill="#fff" stroke="#1976d2" stroke-width="2" rx="5"/>
+  <text x="180" y="115" text-anchor="middle" font-size="13" font-weight="bold">Thread（长期存活）</text>
+
+  <rect x="100" y="130" width="160" height="100" fill="#e3f2fd" stroke="#1976d2" stroke-width="1" rx="3"/>
+  <text x="180" y="150" text-anchor="middle" font-size="12">ThreadLocalMap</text>
+
+  <rect x="110" y="160" width="140" height="55" fill="#ffebee" stroke="#c62828" stroke-width="2" rx="2"/>
+  <text x="120" y="180" font-size="10">key: null</text>
+  <text x="120" y="195" font-size="10" fill="#c62828" font-weight="bold">value: 大对象 ⚠</text>
+  <text x="120" y="210" font-size="9" fill="#666">(无法被 GC)</text>
+
+  <!-- ThreadLocal 对象 -->
+  <rect x="350" y="90" width="180" height="160" fill="#fff" stroke="#388e3c" stroke-width="2" rx="5"/>
+  <text x="440" y="115" text-anchor="middle" font-size="13" font-weight="bold">ThreadLocal 对象</text>
+
+  <rect x="370" y="130" width="140" height="50" fill="#e8f5e9" stroke="#388e3c" stroke-width="1" rx="3"/>
+  <text x="440" y="155" text-anchor="middle" font-size="11">已被 GC 回收</text>
+
+  <!-- 弱引用箭头 -->
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#f57c00"/>
+    </marker>
+  </defs>
+
+  <path d="M 280 190 L 350 150" stroke="#666" stroke-width="2" stroke-dasharray="5,5" fill="none"/>
+  <text x="300" y="165" font-size="10" fill="#c62828">弱引用被回收</text>
+  <text x="300" y="180" font-size="10" fill="#c62828">key → null</text>
+
+  <!-- 大对象 -->
+  <rect x="580" y="90" width="150" height="160" fill="#fff" stroke="#f57c00" stroke-width="2" rx="5"/>
+  <text x="655" y="115" text-anchor="middle" font-size="13" font-weight="bold">大对象</text>
+
+  <rect x="600" y="130" width="110" height="100" fill="#fff3e0" stroke="#f57c00" stroke-width="1" rx="3"/>
+  <text x="655" y="155" text-anchor="middle" font-size="11">仍被强引用</text>
+  <text x="655" y="175" text-anchor="middle" font-size="11" fill="#c62828">无法被 GC</text>
+  <text x="655" y="195" text-anchor="middle" font-size="11" fill="#c62828">造成内存泄漏</text>
+
+  <!-- 强引用箭头 -->
+  <path d="M 250 185 L 580 185" stroke="#f57c00" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <text x="400" y="175" font-size="11" fill="#f57c00" font-weight="bold">强引用</text>
+
+  <!-- 内存泄漏的三个条件 -->
 <text x="60" y="290" font-size="13" font-weight="bold">内存泄漏的三个条件：</text>
-<rect x="60" y="305" width="680" height="80" fill="#ffebee" stroke="#c62828" stroke-width="1" rx="5"/>
-<text x="80" y="330" font-size="12">① <text font-weight="bold">ThreadLocal 对象被回收</text> → Entry 的 key 变为 null（弱引用）</text>
-<text x="80" y="355" font-size="12">② <text font-weight="bold">线程长期存活</text> → 线程池复用线程，Thread 对象不被回收</text>
-<text x="80" y="380" font-size="12">③ <text font-weight="bold">没有调用 remove()</text> → value 的强引用一直存在，导致大对象无法回收</text>
-<text x="60" y="410" font-size="13" font-weight="bold">解决方案：</text>
-<rect x="60" y="425" width="330" height="100" fill="#e8f5e9" stroke="#388e3c" stroke-width="2" rx="5"/>
-<text x="225" y="450" text-anchor="middle" font-size="13" font-weight="bold" fill="#388e3c">✓ 最佳实践</text>
-<text x="80" y="475" font-size="11">1. 使用完后<text font-weight="bold" fill="#388e3c">立即调用 remove()</text></text>
-<text x="80" y="495" font-size="11">2. 使用 try-finally 确保清理</text>
-<text x="80" y="515" font-size="11">3. 避免存储大对象</text>
-<rect x="410" y="425" width="330" height="100" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
-<text x="575" y="450" text-anchor="middle" font-size="13" font-weight="bold" fill="#1976d2">⚠ 自动清理机制</text>
-<text x="430" y="475" font-size="11">• get/set 时会清理 key 为 null 的 Entry</text>
-<text x="430" y="495" font-size="11">• 但<text fill="#c62828" font-weight="bold">不保证及时清理</text></text>
-<text x="430" y="515" font-size="11">• <text fill="#c62828" font-weight="bold">必须主动 remove()</text></text>
-<defs>
-<marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
-<path d="M0,0 L0,6 L9,3 z" fill="#666"/>
-</marker>
-</defs>
+<rect x="60" y="305" width="680" height="85" fill="#ffebee" stroke="#c62828" stroke-width="1" rx="5"/>
+<text x="80" y="330" font-size="12">① <tspan font-weight="bold">ThreadLocal 对象被回收</tspan> → Entry 的 key 变为 null（弱引用）</text>
+<text x="80" y="355" font-size="12">② <tspan font-weight="bold">线程长期存活</tspan> → 线程池复用线程，Thread 对象不被回收</text>
+<text x="80" y="380" font-size="12">③ <tspan font-weight="bold">没有调用 remove()</tspan> → value 的强引用一直存在，导致大对象无法回收</text>
+
+  <!-- 解决方案 -->
+<text x="60" y="415" font-size="13" font-weight="bold">解决方案：</text>
+
+  <!-- 最佳实践卡片 -->
+  <rect x="60" y="430" width="330" height="115" fill="#e8f5e9" stroke="#388e3c" stroke-width="2" rx="5"/>
+  <text x="225" y="455" text-anchor="middle" font-size="13" font-weight="bold" fill="#388e3c">✓ 最佳实践</text>
+  <text x="80" y="480" font-size="11">1. 使用完后<tspan font-weight="bold" fill="#388e3c">立即调用 remove()</tspan></text>
+  <text x="80" y="500" font-size="11">2. 使用 try-finally 确保清理</text>
+  <text x="80" y="520" font-size="11">3. 避免存储大对象</text>
+
+  <!-- 自动清理机制卡片 -->
+  <rect x="410" y="430" width="330" height="115" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
+  <text x="575" y="455" text-anchor="middle" font-size="13" font-weight="bold" fill="#1976d2">⚠ 自动清理机制</text>
+  <text x="430" y="480" font-size="11">• get/set 时会清理 key 为 null 的 Entry</text>
+  <text x="430" y="500" font-size="11">• 但<tspan fill="#c62828" font-weight="bold">不保证及时清理</tspan></text>
+  <text x="430" y="520" font-size="11">• <tspan fill="#c62828" font-weight="bold">必须主动 remove()</tspan></text>
 </svg>
 
 **标准使用模式**：
