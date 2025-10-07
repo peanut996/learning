@@ -1047,51 +1047,96 @@ public ThreadPoolExecutor(
 
 **执行流程图**：
 
-<svg viewBox="0 0 800 550" xmlns="http://www.w3.org/2000/svg">
-<text x="400" y="25" text-anchor="middle" font-size="16" font-weight="bold">线程池执行流程</text>
-<rect x="300" y="50" width="200" height="60" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
-<text x="400" y="85" text-anchor="middle" font-size="14" font-weight="bold">提交任务</text>
-<rect x="300" y="140" width="200" height="60" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="5"/>
-<text x="400" y="165" text-anchor="middle" font-size="12">线程数 &lt; corePoolSize?</text>
-<text x="400" y="185" text-anchor="middle" font-size="11">(当前线程数 &lt; 核心线程数)</text>
-<rect x="50" y="240" width="180" height="60" fill="#e8f5e9" stroke="#388e3c" stroke-width="2" rx="5"/>
-<text x="140" y="265" text-anchor="middle" font-size="12" font-weight="bold">创建核心线程</text>
-<text x="140" y="285" text-anchor="middle" font-size="11">执行任务</text>
-<rect x="310" y="240" width="180" height="60" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="5"/>
-<text x="400" y="265" text-anchor="middle" font-size="12">队列是否已满?</text>
-<text x="400" y="285" text-anchor="middle" font-size="11">(workQueue.offer)</text>
-<rect x="260" y="340" width="120" height="60" fill="#e8f5e9" stroke="#388e3c" stroke-width="2" rx="5"/>
-<text x="320" y="365" text-anchor="middle" font-size="12" font-weight="bold">加入队列</text>
-<text x="320" y="385" text-anchor="middle" font-size="11">等待执行</text>
-<rect x="420" y="340" width="180" height="60" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="5"/>
-<text x="510" y="365" text-anchor="middle" font-size="11">线程数 &lt; maximumPoolSize?</text>
-<text x="510" y="385" text-anchor="middle" font-size="11">(当前 &lt; 最大线程数)</text>
-<rect x="420" y="440" width="180" height="60" fill="#e8f5e9" stroke="#388e3c" stroke-width="2" rx="5"/>
-<text x="510" y="465" text-anchor="middle" font-size="12" font-weight="bold">创建非核心线程</text>
-<text x="510" y="485" text-anchor="middle" font-size="11">执行任务</text>
-<rect x="640" y="440" width="140" height="60" fill="#ffebee" stroke="#c62828" stroke-width="2" rx="5"/>
-<text x="710" y="465" text-anchor="middle" font-size="12" font-weight="bold">执行拒绝策略</text>
-<text x="710" y="485" text-anchor="middle" font-size="11">handler.reject</text>
-<path d="M 400 110 L 400 140" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-<path d="M 300 170 L 140 240" stroke="#388e3c" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-<text x="200" y="210" font-size="11" fill="#388e3c" font-weight="bold">是</text>
-<path d="M 400 200 L 400 240" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-<text x="420" y="225" font-size="11" fill="#666" font-weight="bold">否</text>
-<path d="M 310 270 L 230 270" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-<text x="270" y="265" font-size="11" fill="#666">否</text>
-<path d="M 400 300 L 320 340" stroke="#388e3c" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-<text x="350" y="325" font-size="11" fill="#388e3c" font-weight="bold">否</text>
-<path d="M 490 270 L 510 340" stroke="#666" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-<text x="515" y="310" font-size="11" fill="#666" font-weight="bold">是</text>
-<path d="M 510 400 L 510 440" stroke="#388e3c" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-<text x="530" y="425" font-size="11" fill="#388e3c" font-weight="bold">是</text>
-<path d="M 600 370 L 710 440" stroke="#c62828" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-<text x="670" y="410" font-size="11" fill="#c62828" font-weight="bold">否</text>
-<defs>
-<marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
-<path d="M0,0 L0,6 L9,3 z" fill="#666"/>
-</marker>
-</defs>
+<svg viewBox="0 0 800 650" xmlns="http://www.w3.org/2000/svg">
+  <!-- 标题 -->
+  <text x="400" y="25" text-anchor="middle" font-size="16" font-weight="bold">线程池执行流程（正确逻辑）</text>
+
+  <!-- 1. 提交任务 -->
+  <rect x="300" y="50" width="200" height="60" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
+  <text x="400" y="85" text-anchor="middle" font-size="14" font-weight="bold">提交任务</text>
+
+  <!-- 2. 判断核心线程数 -->
+  <rect x="300" y="140" width="200" height="60" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="5"/>
+  <text x="400" y="165" text-anchor="middle" font-size="12">线程数 &lt; corePoolSize?</text>
+  <text x="400" y="185" text-anchor="middle" font-size="11">(当前线程数 &lt; 核心线程数)</text>
+
+  <!-- 3a. 创建核心线程 -->
+  <rect x="50" y="240" width="180" height="60" fill="#e8f5e9" stroke="#388e3c" stroke-width="2" rx="5"/>
+  <text x="140" y="265" text-anchor="middle" font-size="12" font-weight="bold">创建核心线程</text>
+  <text x="140" y="285" text-anchor="middle" font-size="11">立即执行任务</text>
+
+  <!-- 3b. 判断队列是否已满 -->
+  <rect x="310" y="270" width="180" height="60" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="5"/>
+  <text x="400" y="295" text-anchor="middle" font-size="12">队列是否已满?</text>
+  <text x="400" y="315" text-anchor="middle" font-size="11">(workQueue.offer)</text>
+
+  <!-- 4a. 加入队列（左分支） -->
+  <rect x="50" y="360" width="180" height="60" fill="#e8f5e9" stroke="#388e3c" stroke-width="2" rx="5"/>
+  <text x="140" y="385" text-anchor="middle" font-size="12" font-weight="bold">加入队列</text>
+  <text x="140" y="405" text-anchor="middle" font-size="11">等待空闲线程执行</text>
+
+  <!-- 4b. 判断最大线程数（右分支） -->
+  <rect x="570" y="360" width="180" height="60" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="5"/>
+  <text x="660" y="385" text-anchor="middle" font-size="11">线程数 &lt; maximumPoolSize?</text>
+  <text x="660" y="405" text-anchor="middle" font-size="11">(当前 &lt; 最大线程数)</text>
+
+  <!-- 5a. 创建非核心线程 -->
+  <rect x="440" y="480" width="180" height="60" fill="#e8f5e9" stroke="#388e3c" stroke-width="2" rx="5"/>
+  <text x="530" y="505" text-anchor="middle" font-size="12" font-weight="bold">创建非核心线程</text>
+  <text x="530" y="525" text-anchor="middle" font-size="11">立即执行任务</text>
+
+  <!-- 5b. 执行拒绝策略 -->
+  <rect x="660" y="480" width="120" height="60" fill="#ffebee" stroke="#c62828" stroke-width="2" rx="5"/>
+  <text x="720" y="505" text-anchor="middle" font-size="12" font-weight="bold">拒绝策略</text>
+  <text x="720" y="525" text-anchor="middle" font-size="10">handler.reject</text>
+
+  <!-- 箭头定义 -->
+  <defs>
+    <marker id="arrow-green" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#388e3c"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#c62828"/>
+    </marker>
+    <marker id="arrow-gray" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#666"/>
+    </marker>
+  </defs>
+
+  <!-- 连接线 -->
+  <!-- 提交任务 -> 判断核心线程数 -->
+  <path d="M 400 110 L 400 140" stroke="#666" stroke-width="2" marker-end="url(#arrow-gray)"/>
+
+  <!-- 判断核心线程数 -> 创建核心线程 (是) -->
+  <path d="M 300 170 L 140 240" stroke="#388e3c" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <text x="200" y="200" font-size="11" fill="#388e3c" font-weight="bold">是</text>
+
+  <!-- 判断核心线程数 -> 判断队列是否已满 (否) -->
+  <path d="M 400 200 L 400 270" stroke="#666" stroke-width="2" marker-end="url(#arrow-gray)"/>
+  <text x="420" y="240" font-size="11" fill="#666" font-weight="bold">否</text>
+
+  <!-- 判断队列是否已满 -> 加入队列 (否，队列未满) - 左分支 -->
+  <path d="M 310 300 L 140 360" stroke="#388e3c" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <text x="200" y="325" font-size="11" fill="#388e3c" font-weight="bold">否（未满）</text>
+
+  <!-- 判断队列是否已满 -> 判断最大线程数 (是，队列已满) - 右分支 -->
+  <path d="M 490 300 L 660 360" stroke="#666" stroke-width="2" marker-end="url(#arrow-gray)"/>
+  <text x="600" y="325" font-size="11" fill="#666" font-weight="bold">是（已满）</text>
+
+  <!-- 判断最大线程数 -> 创建非核心线程 (是) -->
+  <path d="M 620 420 L 530 480" stroke="#388e3c" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <text x="560" y="445" font-size="11" fill="#388e3c" font-weight="bold">是</text>
+
+  <!-- 判断最大线程数 -> 执行拒绝策略 (否) -->
+  <path d="M 690 420 L 720 480" stroke="#c62828" stroke-width="2" marker-end="url(#arrow-red)"/>
+  <text x="710" y="445" font-size="11" fill="#c62828" font-weight="bold">否</text>
+
+  <!-- 说明文字 -->
+  <rect x="50" y="570" width="700" height="60" fill="#f5f5f5" stroke="#999" stroke-width="1" rx="5"/>
+  <text x="400" y="592" text-anchor="middle" font-size="11" font-weight="bold">执行顺序总结：</text>
+  <text x="400" y="612" text-anchor="middle" font-size="10">
+    ① 核心线程未满 → 创建核心线程　② 核心线程已满 → 尝试加入队列　③ 队列已满 → 创建非核心线程　④ 达到最大线程数 → 执行拒绝策略
+  </text>
 </svg>
 
 **详细流程说明**：
