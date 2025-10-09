@@ -12,7 +12,7 @@
     "postbuild": "pagefind --site .next/server/app --output-path public/_pagefind",
     "start": "next start",
     "types:check": "tsc --noEmit",
-    "deploy": "pnpm build && vercel deploy --prebuilt --prod --confirm"
+    "deploy": "vercel build --prod && vercel deploy --prebuilt --prod --yes"
   },
   "dependencies": {
     "@svgr/webpack": "^8.1.0",
