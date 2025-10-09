@@ -733,48 +733,76 @@ imageCache.put("key", new SoftReference<>(bitmap));
 
 ### 15. 标记-清除算法的原理？优缺点？
 
-**标记-清除算法（Mark-Sweep）**是最基础的垃圾收集算法，分为两个阶段：
+**标记-清除算法（Mark-Sweep）** 是最基础的垃圾收集算法，分为两个阶段：
 
-<svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
-<text x="400" y="25" text-anchor="middle" font-size="20" font-weight="bold">标记-清除算法</text>
+<svg viewBox="0 0 850 400" xmlns="http://www.w3.org/2000/svg">
+<text x="425" y="25" text-anchor="middle" font-size="20" font-weight="bold">标记-清除算法</text>
+
+<!-- 阶段1：标记 -->
 <text x="200" y="60" text-anchor="middle" font-size="16" font-weight="bold">阶段 1：标记</text>
+
 <rect x="50" y="80" width="60" height="50" fill="#4caf50" stroke="#2e7d32" stroke-width="2"/>
 <text x="80" y="110" text-anchor="middle" font-size="11" fill="white">存活</text>
+
 <rect x="120" y="80" width="60" height="50" fill="#f44336" stroke="#c62828" stroke-width="2"/>
 <text x="150" y="110" text-anchor="middle" font-size="11" fill="white">垃圾</text>
+
 <rect x="190" y="80" width="60" height="50" fill="#4caf50" stroke="#2e7d32" stroke-width="2"/>
 <text x="220" y="110" text-anchor="middle" font-size="11" fill="white">存活</text>
+
 <rect x="260" y="80" width="60" height="50" fill="#f44336" stroke="#c62828" stroke-width="2"/>
 <text x="290" y="110" text-anchor="middle" font-size="11" fill="white">垃圾</text>
+
 <rect x="330" y="80" width="60" height="50" fill="#4caf50" stroke="#2e7d32" stroke-width="2"/>
 <text x="360" y="110" text-anchor="middle" font-size="11" fill="white">存活</text>
-<path d="M 200 150 L 200 180" stroke="#666" stroke-width="3" marker-end="url(#arrowdown)"/>
-<text x="200" y="205" text-anchor="middle" font-size="14">清除垃圾对象</text>
-<text x="600" y="60" text-anchor="middle" font-size="16" font-weight="bold">阶段 2：清除</text>
-<rect x="450" y="80" width="60" height="50" fill="#4caf50" stroke="#2e7d32" stroke-width="2"/>
-<text x="480" y="110" text-anchor="middle" font-size="11" fill="white">存活</text>
-<rect x="520" y="80" width="60" height="50" fill="#e0e0e0" stroke="#9e9e9e" stroke-width="1" stroke-dasharray="3,3"/>
-<text x="550" y="110" text-anchor="middle" font-size="11" fill="#666">空闲</text>
-<rect x="590" y="80" width="60" height="50" fill="#4caf50" stroke="#2e7d32" stroke-width="2"/>
-<text x="620" y="110" text-anchor="middle" font-size="11" fill="white">存活</text>
-<rect x="660" y="80" width="60" height="50" fill="#e0e0e0" stroke="#9e9e9e" stroke-width="1" stroke-dasharray="3,3"/>
-<text x="690" y="110" text-anchor="middle" font-size="11" fill="#666">空闲</text>
-<rect x="730" y="80" width="60" height="50" fill="#4caf50" stroke="#2e7d32" stroke-width="2"/>
-<text x="760" y="110" text-anchor="middle" font-size="11" fill="white">存活</text>
-<text x="640" y="155" text-anchor="middle" font-size="12" fill="#d32f2f" font-weight="bold">⚠ 产生内存碎片</text>
-<defs><marker id="arrowdown" markerWidth="10" markerHeight="10" refX="5" refY="9" orient="auto"><path d="M0,0 L10,0 L5,9 z" fill="#666"/></marker></defs>
-<rect x="50" y="240" width="340" height="140" fill="#c8e6c9" stroke="#2e7d32" stroke-width="2"/>
+
+<!-- 箭头标记定义 -->
+<defs>
+  <marker id="arrowright" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+    <path d="M0,0 L0,6 L9,3 z" fill="#666"/>
+  </marker>
+</defs>
+
+<!-- 从阶段1指向阶段2的箭头（加长） -->
+<path d="M 400 105 L 500 105" stroke="#666" stroke-width="3" marker-end="url(#arrowright)"/>
+<text x="450" y="95" text-anchor="middle" font-size="12" fill="#666" font-weight="bold">清除垃圾</text>
+
+<!-- 阶段2：清除 -->
+<text x="650" y="60" text-anchor="middle" font-size="16" font-weight="bold">阶段 2：清除</text>
+
+<rect x="510" y="80" width="60" height="50" fill="#4caf50" stroke="#2e7d32" stroke-width="2"/>
+<text x="540" y="110" text-anchor="middle" font-size="11" fill="white">存活</text>
+
+<rect x="580" y="80" width="60" height="50" fill="#e0e0e0" stroke="#9e9e9e" stroke-width="1" stroke-dasharray="3,3"/>
+<text x="610" y="110" text-anchor="middle" font-size="11" fill="#666">空闲</text>
+
+<rect x="650" y="80" width="60" height="50" fill="#4caf50" stroke="#2e7d32" stroke-width="2"/>
+<text x="680" y="110" text-anchor="middle" font-size="11" fill="white">存活</text>
+
+<rect x="720" y="80" width="60" height="50" fill="#e0e0e0" stroke="#9e9e9e" stroke-width="1" stroke-dasharray="3,3"/>
+<text x="750" y="110" text-anchor="middle" font-size="11" fill="#666">空闲</text>
+
+<rect x="790" y="80" width="60" height="50" fill="#4caf50" stroke="#2e7d32" stroke-width="2"/>
+<text x="820" y="110" text-anchor="middle" font-size="11" fill="white">存活</text>
+
+<!-- 内存碎片提示 -->
+<text x="680" y="155" text-anchor="middle" font-size="12" fill="#d32f2f" font-weight="bold">⚠ 产生内存碎片</text>
+
+<!-- 优点 -->
+<rect x="50" y="240" width="340" height="140" fill="#c8e6c9" stroke="#2e7d32" stroke-width="2" rx="5"/>
 <text x="220" y="265" text-anchor="middle" font-size="14" font-weight="bold">优点</text>
-<text x="220" y="290" text-anchor="middle" font-size="12">• 实现简单</text>
-<text x="220" y="310" text-anchor="middle" font-size="12">• 不需要移动对象</text>
-<text x="220" y="330" text-anchor="middle" font-size="12">• 适合存活对象多的场景</text>
-<text x="220" y="350" text-anchor="middle" font-size="12">（老年代）</text>
-<rect x="410" y="240" width="340" height="140" fill="#ffcdd2" stroke="#c62828" stroke-width="2"/>
-<text x="580" y="265" text-anchor="middle" font-size="14" font-weight="bold">缺点</text>
-<text x="580" y="290" text-anchor="middle" font-size="12">• 效率不稳定（对象多时慢）</text>
-<text x="580" y="310" text-anchor="middle" font-size="12">• 产生内存碎片</text>
-<text x="580" y="330" text-anchor="middle" font-size="12">• 需要维护空闲列表</text>
-<text x="580" y="350" text-anchor="middle" font-size="12">• 分配大对象时可能失败</text>
+<text x="70" y="290" font-size="12">• 实现简单</text>
+<text x="70" y="310" font-size="12">• 不需要移动对象</text>
+<text x="70" y="330" font-size="12">• 适合存活对象多的场景</text>
+<text x="85" y="350" font-size="12">（老年代）</text>
+
+<!-- 缺点 -->
+<rect x="460" y="240" width="340" height="140" fill="#ffcdd2" stroke="#c62828" stroke-width="2" rx="5"/>
+<text x="630" y="265" text-anchor="middle" font-size="14" font-weight="bold">缺点</text>
+<text x="480" y="290" font-size="12">• 效率不稳定（对象多时慢）</text>
+<text x="480" y="310" font-size="12">• 产生内存碎片</text>
+<text x="480" y="330" font-size="12">• 需要维护空闲列表</text>
+<text x="480" y="350" font-size="12">• 分配大对象时可能失败</text>
 </svg>
 
 **核心问题：内存碎片**
