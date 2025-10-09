@@ -12,50 +12,7 @@ JMM 不是物理上的内存模型，而是一套**并发编程规范**，解决
 
 **JMM 抽象模型**：
 
-<svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
-<text x="400" y="25" text-anchor="middle" font-size="16" font-weight="bold">Java 内存模型（JMM）</text>
-<rect x="250" y="60" width="300" height="80" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/>
-<text x="400" y="95" text-anchor="middle" font-size="14" font-weight="bold">主内存 (Main Memory)</text>
-<text x="400" y="115" text-anchor="middle" font-size="11">所有线程共享的变量</text>
-<text x="400" y="130" text-anchor="middle" font-size="11">堆内存、方法区</text>
-<rect x="50" y="200" width="200" height="180" fill="#e8f5e9" stroke="#388e3c" stroke-width="2" rx="5"/>
-<text x="150" y="230" text-anchor="middle" font-size="13" font-weight="bold">线程 A</text>
-<rect x="70" y="250" width="160" height="110" fill="#fff" stroke="#388e3c" stroke-width="1" rx="3"/>
-<text x="150" y="275" text-anchor="middle" font-size="12">工作内存</text>
-<text x="80" y="300" font-size="10">• 变量副本</text>
-<text x="80" y="320" font-size="10">• 本地缓存</text>
-<text x="80" y="340" font-size="10">• CPU缓存/寄存器</text>
-<rect x="300" y="200" width="200" height="180" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="5"/>
-<text x="400" y="230" text-anchor="middle" font-size="13" font-weight="bold">线程 B</text>
-<rect x="320" y="250" width="160" height="110" fill="#fff" stroke="#f57c00" stroke-width="1" rx="3"/>
-<text x="400" y="275" text-anchor="middle" font-size="12">工作内存</text>
-<text x="330" y="300" font-size="10">• 变量副本</text>
-<text x="330" y="320" font-size="10">• 本地缓存</text>
-<text x="330" y="340" font-size="10">• CPU缓存/寄存器</text>
-<rect x="550" y="200" width="200" height="180" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="2" rx="5"/>
-<text x="650" y="230" text-anchor="middle" font-size="13" font-weight="bold">线程 C</text>
-<rect x="570" y="250" width="160" height="110" fill="#fff" stroke="#7b1fa2" stroke-width="1" rx="3"/>
-<text x="650" y="275" text-anchor="middle" font-size="12">工作内存</text>
-<text x="580" y="300" font-size="10">• 变量副本</text>
-<text x="580" y="320" font-size="10">• 本地缓存</text>
-<text x="580" y="340" font-size="10">• CPU缓存/寄存器</text>
-<path d="M 150 200 L 300 140" stroke="#388e3c" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-<text x="210" y="165" font-size="10" fill="#388e3c">read/write</text>
-<path d="M 320 140 L 150 200" stroke="#1976d2" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-<path d="M 400 200 L 430 140" stroke="#f57c00" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-<text x="420" y="165" font-size="10" fill="#f57c00">read/write</text>
-<path d="M 460 140 L 400 200" stroke="#1976d2" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-<path d="M 650 200 L 500 140" stroke="#7b1fa2" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-<text x="570" y="165" font-size="10" fill="#7b1fa2">read/write</text>
-<path d="M 480 140 L 650 200" stroke="#1976d2" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-<text x="50" y="410" font-size="12" font-weight="bold">核心问题：</text>
-<text x="50" y="430" font-size="11">线程间通过主内存通信，工作内存的变量副本可能不一致，需要 JMM 规范保证正确性</text>
-<defs>
-<marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
-<path d="M0,0 L0,6 L9,3 z" fill="#666"/>
-</marker>
-</defs>
-</svg>
+<svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg"><text x="400" y="25" text-anchor="middle" font-size="16" font-weight="bold">Java 内存模型（JMM）</text><rect x="250" y="60" width="300" height="80" fill="#e3f2fd" stroke="#1976d2" stroke-width="2" rx="5"/><text x="400" y="95" text-anchor="middle" font-size="14" font-weight="bold">主内存 (Main Memory)</text><text x="400" y="115" text-anchor="middle" font-size="11">所有线程共享的变量</text><text x="400" y="130" text-anchor="middle" font-size="11">堆内存、方法区</text><rect x="50" y="200" width="200" height="180" fill="#e8f5e9" stroke="#388e3c" stroke-width="2" rx="5"/><text x="150" y="230" text-anchor="middle" font-size="13" font-weight="bold">线程 A</text><rect x="70" y="250" width="160" height="110" fill="#fff" stroke="#388e3c" stroke-width="1" rx="3"/><text x="150" y="275" text-anchor="middle" font-size="12">工作内存</text><text x="80" y="300" font-size="10">• 变量副本</text><text x="80" y="320" font-size="10">• 本地缓存</text><text x="80" y="340" font-size="10">• CPU缓存/寄存器</text><rect x="300" y="200" width="200" height="180" fill="#fff3e0" stroke="#f57c00" stroke-width="2" rx="5"/><text x="400" y="230" text-anchor="middle" font-size="13" font-weight="bold">线程 B</text><rect x="320" y="250" width="160" height="110" fill="#fff" stroke="#f57c00" stroke-width="1" rx="3"/><text x="400" y="275" text-anchor="middle" font-size="12">工作内存</text><text x="330" y="300" font-size="10">• 变量副本</text><text x="330" y="320" font-size="10">• 本地缓存</text><text x="330" y="340" font-size="10">• CPU缓存/寄存器</text><rect x="550" y="200" width="200" height="180" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="2" rx="5"/><text x="650" y="230" text-anchor="middle" font-size="13" font-weight="bold">线程 C</text><rect x="570" y="250" width="160" height="110" fill="#fff" stroke="#7b1fa2" stroke-width="1" rx="3"/><text x="650" y="275" text-anchor="middle" font-size="12">工作内存</text><text x="580" y="300" font-size="10">• 变量副本</text><text x="580" y="320" font-size="10">• 本地缓存</text><text x="580" y="340" font-size="10">• CPU缓存/寄存器</text><defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#666"/></marker></defs><path d="M 145 200 L 300 140" stroke="#388e3c" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/><text x="225" y="155" text-anchor="middle" font-size="10" fill="#388e3c">read/write</text><path d="M 310 140 L 155 200" stroke="#1976d2" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/><path d="M 395 200 L 395 140" stroke="#f57c00" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/><text x="435" y="165" text-anchor="middle" font-size="10" fill="#f57c00">read/write</text><path d="M 405 140 L 405 200" stroke="#1976d2" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/><path d="M 645 200 L 490 140" stroke="#7b1fa2" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/><text x="570" y="155" text-anchor="middle" font-size="10" fill="#7b1fa2">read/write</text><path d="M 500 140 L 655 200" stroke="#1976d2" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/><text x="50" y="410" font-size="12" font-weight="bold">核心问题：</text><text x="50" y="430" font-size="11">线程间通过主内存通信，工作内存的变量副本可能不一致，需要 JMM 规范保证正确性</text></svg>
 
 **JMM 解决的核心问题**：
 
