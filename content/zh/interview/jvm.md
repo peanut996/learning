@@ -256,7 +256,7 @@ JVM 内存主要分为以下几个区域：
 
 ### 6. 什么是本地方法栈？
 
-**本地方法栈（Native Method Stack）**与虚拟机栈作用类似，区别在于：
+**本地方法栈（Native Method Stack）** 与虚拟机栈作用类似，区别在于：
 - **虚拟机栈**：为 Java 方法服务
 - **本地方法栈**：为 Native 方法（C/C++ 实现）服务
 
@@ -281,7 +281,7 @@ public class Object {
 
 ### 7. 直接内存是什么？
 
-**直接内存（Direct Memory）**不是 JVM 运行时数据区的一部分，也不是 JVM 规范定义的内存区域，但在 NIO 中被频繁使用。
+**直接内存（Direct Memory）** 不是 JVM 运行时数据区的一部分，也不是 JVM 规范定义的内存区域，但在 NIO 中被频繁使用。
 
 **核心特点：**
 
@@ -298,10 +298,10 @@ public class Object {
 <text x="260" y="135" text-anchor="middle" font-size="12">OS 内核</text>
 <text x="260" y="152" text-anchor="middle" font-size="11">缓冲区</text>
 <text x="190" y="195" text-anchor="middle" font-size="12" font-weight="bold">缺点：</text>
-<text x="190" y="220" font-size="11">• 数据需要复制两次</text>
-<text x="190" y="240" font-size="11">• 性能开销大</text>
-<text x="190" y="260" font-size="11">• 受 GC 影响</text>
-<text x="190" y="280" font-size="11">• 适合小数据量</text>
+<text x="70" y="220" font-size="11">• 数据需要复制两次</text>
+<text x="70" y="240" font-size="11">• 性能开销大</text>
+<text x="70" y="260" font-size="11">• 受 GC 影响</text>
+<text x="70" y="280" font-size="11">• 适合小数据量</text>
 <defs><marker id="arrow1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#666"/></marker></defs>
 <rect x="370" y="60" width="280" height="310" fill="#e8f5e9" stroke="#388e3c" stroke-width="2"/>
 <text x="510" y="90" text-anchor="middle" font-size="16" font-weight="bold">直接内存（NIO）</text>
@@ -309,12 +309,12 @@ public class Object {
 <text x="510" y="135" text-anchor="middle" font-size="12">OS 本地内存</text>
 <text x="510" y="152" text-anchor="middle" font-size="11">DirectByteBuffer</text>
 <text x="510" y="195" text-anchor="middle" font-size="12" font-weight="bold">优点：</text>
-<text x="510" y="220" font-size="11">• 零拷贝，无需复制</text>
-<text x="510" y="240" font-size="11">• 性能更高</text>
-<text x="510" y="260" font-size="11">• 不受 GC 影响</text>
-<text x="510" y="280" font-size="11">• 适合大数据量 I/O</text>
-<text x="510" y="310" font-size="10" fill="#d32f2f">注意：不受 -Xmx 限制</text>
-<text x="510" y="330" font-size="10" fill="#d32f2f">受 -XX:MaxDirectMemorySize 限制</text>
+<text x="390" y="220" font-size="11">• 零拷贝，无需复制</text>
+<text x="390" y="240" font-size="11">• 性能更高</text>
+<text x="390" y="260" font-size="11">• 不受 GC 影响</text>
+<text x="390" y="280" font-size="11">• 适合大数据量 I/O</text>
+<text x="390" y="310" font-size="10" fill="#d32f2f">注意：不受 -Xmx 限制</text>
+<text x="390" y="330" font-size="10" fill="#d32f2f">受 -XX:MaxDirectMemorySize 限制</text>
 </svg>
 
 **使用场景：**
@@ -344,7 +344,7 @@ channel.read(buffer);  // 直接读取到本地内存，避免复制
 
 ### 8. 什么是垃圾回收？
 
-**垃圾回收（Garbage Collection, GC）**是 Java 自动内存管理的核心机制，负责识别和回收不再使用的对象，释放内存空间。
+**垃圾回收（Garbage Collection, GC）** 是 Java 自动内存管理的核心机制，负责识别和回收不再使用的对象，释放内存空间。
 
 **为什么需要垃圾回收？**
 1. **自动内存管理**：开发者无需手动释放内存（不像 C/C++ 需要 free/delete）
@@ -431,32 +431,66 @@ B.ref = A;
 
 <svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
 <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold">可达性分析算法</text>
+
+<!-- GC Roots -->
 <rect x="350" y="50" width="100" height="40" fill="#4caf50" stroke="#2e7d32" stroke-width="2" rx="5"/>
 <text x="400" y="75" text-anchor="middle" font-size="13" font-weight="bold" fill="white">GC Roots</text>
+
+<!-- 可达对象 -->
 <circle cx="250" cy="160" r="40" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
 <text x="250" y="165" text-anchor="middle" font-size="12">对象 A</text>
+
 <circle cx="400" cy="160" r="40" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
 <text x="400" y="165" text-anchor="middle" font-size="12">对象 B</text>
+
 <circle cx="550" cy="160" r="40" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
 <text x="550" y="165" text-anchor="middle" font-size="12">对象 C</text>
+
+<!-- 不可达对象 -->
 <circle cx="200" cy="280" r="40" fill="#ffebee" stroke="#d32f2f" stroke-width="2"/>
 <text x="200" y="285" text-anchor="middle" font-size="12">对象 D</text>
+
 <circle cx="350" cy="280" r="40" fill="#ffebee" stroke="#d32f2f" stroke-width="2"/>
 <text x="350" y="285" text-anchor="middle" font-size="12">对象 E</text>
-<path d="M 380 90 L 250 140" stroke="#4caf50" stroke-width="2" marker-end="url(#arrowgreen3)"/>
+
+<!-- 箭头定义 -->
+<defs>
+  <marker id="arrowgreen3" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+    <path d="M0,0 L0,6 L9,3 z" fill="#4caf50"/>
+  </marker>
+  <marker id="arrowred2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+    <path d="M0,0 L0,6 L9,3 z" fill="#d32f2f"/>
+  </marker>
+</defs>
+
+<!-- GC Roots 到可达对象的箭头（修复后） -->
+<!-- GC Roots 到 A：从(380,90)到A的边缘(285,141) -->
+<path d="M 380 90 L 285 141" stroke="#4caf50" stroke-width="2" marker-end="url(#arrowgreen3)"/>
+
+<!-- GC Roots 到 B：从(400,90)到B的顶部边缘(400,120) -->
 <path d="M 400 90 L 400 120" stroke="#4caf50" stroke-width="2" marker-end="url(#arrowgreen3)"/>
-<path d="M 420 90 L 550 140" stroke="#4caf50" stroke-width="2" marker-end="url(#arrowgreen3)"/>
+
+<!-- GC Roots 到 C：从(420,90)到C的边缘(515,141) -->
+<path d="M 420 90 L 515 141" stroke="#4caf50" stroke-width="2" marker-end="url(#arrowgreen3)"/>
+
+<!-- 不可达对象之间的引用（循环引用） -->
 <path d="M 210 240 L 230 200" stroke="#d32f2f" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrowred2)"/>
 <path d="M 310 280 L 240 280" stroke="#d32f2f" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrowred2)"/>
-<defs><marker id="arrowgreen3" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#4caf50"/></marker></defs>
-<defs><marker id="arrowred2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#d32f2f"/></marker></defs>
+
+<!-- 标注 -->
 <text x="150" y="180" font-size="11" fill="#2e7d32">可达</text>
-<text x="450" y="180" font-size="11" fill="#2e7d32">可达</text>
+<text x="600" y="180" font-size="11" fill="#2e7d32">可达</text>
 <text x="150" y="300" font-size="11" fill="#d32f2f">不可达 → 垃圾</text>
 <text x="380" y="300" font-size="11" fill="#d32f2f">不可达 → 垃圾</text>
-<rect x="50" y="340" width="700" height="50" fill="#fff3e0" stroke="#f57c00" stroke-width="1"/>
-<text x="400" y="362" text-anchor="middle" font-size="12" font-weight="bold">核心思想：从 GC Roots 出发，能到达的对象是存活的，不能到达的是垃圾</text>
-<text x="400" y="380" text-anchor="middle" font-size="11">可以解决循环引用问题</text>
+
+<!-- 说明框 -->
+<rect x="50" y="340" width="700" height="50" fill="#fff3e0" stroke="#f57c00" stroke-width="1" rx="3"/>
+<text x="400" y="362" text-anchor="middle" font-size="12" font-weight="bold">
+  核心思想：从 GC Roots 出发，能到达的对象是存活的，不能到达的是垃圾
+</text>
+<text x="400" y="380" text-anchor="middle" font-size="11">
+  可以解决循环引用问题
+</text>
 </svg>
 
 **对比总结：**
