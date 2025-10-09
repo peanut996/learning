@@ -1236,29 +1236,7 @@ Java 有 7 款经典的垃圾回收器，按代际和并发性分类：
 
 **双亲委派模型**：当一个类加载器收到类加载请求时，首先委派给父类加载器加载，只有父类加载器无法加载时，子类加载器才尝试加载。
 
-<svg viewBox="0 0 600 350" xmlns="http://www.w3.org/2000/svg">
-<text x="300" y="25" text-anchor="middle" font-size="18" font-weight="bold">双亲委派模型</text>
-<rect x="200" y="50" width="200" height="50" fill="#ffebee" stroke="#d32f2f" stroke-width="2"/>
-<text x="300" y="80" text-anchor="middle" font-size="13">启动类加载器</text>
-<text x="300" y="95" text-anchor="middle" font-size="10">(Bootstrap)</text>
-<path d="M 300 100 L 300 130" stroke="#666" stroke-width="2" marker-end="url(#arrow4)"/>
-<rect x="200" y="130" width="200" height="50" fill="#fff3e0" stroke="#f57c00" stroke-width="2"/>
-<text x="300" y="160" text-anchor="middle" font-size="13">扩展类加载器</text>
-<text x="300" y="175" text-anchor="middle" font-size="10">(Extension)</text>
-<path d="M 300 180 L 300 210" stroke="#666" stroke-width="2" marker-end="url(#arrow4)"/>
-<rect x="200" y="210" width="200" height="50" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/>
-<text x="300" y="240" text-anchor="middle" font-size="13">应用类加载器</text>
-<text x="300" y="255" text-anchor="middle" font-size="10">(Application)</text>
-<path d="M 300 260 L 300 290" stroke="#666" stroke-width="2" marker-end="url(#arrow4)"/>
-<rect x="200" y="290" width="200" height="50" fill="#e8f5e9" stroke="#388e3c" stroke-width="2"/>
-<text x="300" y="320" text-anchor="middle" font-size="13">自定义类加载器</text>
-<defs><marker id="arrow4" markerWidth="10" markerHeight="10" refX="5" refY="9" orient="auto"><path d="M0,0 L10,0 L5,9 z" fill="#666"/></marker></defs>
-<text x="450" y="80" font-size="11">加载 JDK 核心类</text>
-<text x="450" y="160" font-size="11">加载扩展类</text>
-<text x="450" y="240" font-size="11">加载应用类</text>
-<text x="450" y="320" font-size="11">用户自定义</text>
-</svg>
-
+<svg viewBox="0 0 600 350" xmlns="http://www.w3.org/2000/svg"><defs><marker id="arrowup" markerWidth="10" markerHeight="10" refX="5" refY="1" orient="auto"><path d="M0,9 L10,9 L5,0 z" fill="#d32f2f"/></marker></defs><text x="300" y="25" text-anchor="middle" font-size="18" font-weight="bold">双亲委派模型</text><rect x="200" y="50" width="200" height="50" fill="#ffebee" stroke="#d32f2f" stroke-width="2"/><text x="300" y="80" text-anchor="middle" font-size="13">启动类加载器</text><text x="300" y="95" text-anchor="middle" font-size="10">(Bootstrap)</text><rect x="200" y="130" width="200" height="50" fill="#fff3e0" stroke="#f57c00" stroke-width="2"/><text x="300" y="160" text-anchor="middle" font-size="13">扩展类加载器</text><text x="300" y="175" text-anchor="middle" font-size="10">(Extension)</text><path d="M 300 130 L 300 105" stroke="#d32f2f" stroke-width="2" marker-end="url(#arrowup)"/><text x="320" y="120" font-size="10" fill="#d32f2f">委派 ↑</text><rect x="200" y="210" width="200" height="50" fill="#e3f2fd" stroke="#1976d2" stroke-width="2"/><text x="300" y="240" text-anchor="middle" font-size="13">应用类加载器</text><text x="300" y="255" text-anchor="middle" font-size="10">(Application)</text><path d="M 300 210 L 300 185" stroke="#d32f2f" stroke-width="2" marker-end="url(#arrowup)"/><text x="320" y="200" font-size="10" fill="#d32f2f">委派 ↑</text><rect x="200" y="290" width="200" height="50" fill="#e8f5e9" stroke="#388e3c" stroke-width="2"/><text x="300" y="320" text-anchor="middle" font-size="13">自定义类加载器</text><path d="M 300 290 L 300 265" stroke="#d32f2f" stroke-width="2" marker-end="url(#arrowup)"/><text x="320" y="280" font-size="10" fill="#d32f2f">委派 ↑</text><text x="450" y="75" font-size="11">加载 JDK 核心类</text><text x="450" y="90" font-size="9">(rt.jar)</text><text x="450" y="155" font-size="11">加载扩展类</text><text x="450" y="170" font-size="9">(lib/ext)</text><text x="450" y="235" font-size="11">加载应用类</text><text x="450" y="250" font-size="9">(ClassPath)</text><text x="450" y="315" font-size="11">用户自定义</text></svg>
 **为什么使用双亲委派？**
 1. **避免类重复加载**：确保一个类只被加载一次
 2. **保证核心 API 安全**：防止核心类被篡改
