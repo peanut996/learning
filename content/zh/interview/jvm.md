@@ -608,78 +608,104 @@ Java 中有 **4 种引用类型**，按强度从强到弱排序：
 
 <svg viewBox="0 0 850 550" xmlns="http://www.w3.org/2000/svg">
 <text x="425" y="25" text-anchor="middle" font-size="20" font-weight="bold">四种引用类型对比</text>
+
+<!-- 表头 -->
 <rect x="30" y="50" width="160" height="50" fill="#455a64" stroke="#263238" stroke-width="1"/>
 <text x="110" y="80" text-anchor="middle" font-size="13" font-weight="bold" fill="white">类型</text>
+
 <rect x="200" y="50" width="150" height="50" fill="#455a64" stroke="#263238" stroke-width="1"/>
 <text x="275" y="80" text-anchor="middle" font-size="13" font-weight="bold" fill="white">回收时机</text>
+
 <rect x="360" y="50" width="200" height="50" fill="#455a64" stroke="#263238" stroke-width="1"/>
 <text x="460" y="80" text-anchor="middle" font-size="13" font-weight="bold" fill="white">使用场景</text>
+
 <rect x="570" y="50" width="250" height="50" fill="#455a64" stroke="#263238" stroke-width="1"/>
 <text x="695" y="80" text-anchor="middle" font-size="13" font-weight="bold" fill="white">代码示例</text>
+
+<!-- 强引用 -->
 <rect x="30" y="100" width="160" height="100" fill="#c8e6c9" stroke="#2e7d32" stroke-width="1"/>
 <text x="110" y="125" text-anchor="middle" font-size="14" font-weight="bold">强引用</text>
 <text x="110" y="145" text-anchor="middle" font-size="11">Strong</text>
 <text x="110" y="162" text-anchor="middle" font-size="11">Reference</text>
+
 <rect x="200" y="100" width="150" height="100" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1"/>
-<text x="275" y="125" font-size="11">永不回收</text>
-<text x="275" y="142" font-size="10">（除非置 null</text>
-<text x="275" y="157" font-size="10">或离开作用域）</text>
+<text x="210" y="125" font-size="11">永不回收</text>
+<text x="210" y="142" font-size="10">（除非置 null</text>
+<text x="210" y="157" font-size="10">或离开作用域）</text>
+
 <rect x="360" y="100" width="200" height="100" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1"/>
-<text x="460" y="125" font-size="11">普通对象引用</text>
-<text x="460" y="142" font-size="10">99% 的场景</text>
+<text x="370" y="125" font-size="11">普通对象引用</text>
+<text x="370" y="142" font-size="10">99% 的场景</text>
+
 <rect x="570" y="100" width="250" height="100" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1"/>
-<text x="695" y="125" font-size="10" font-family="monospace">Object obj = new Object();</text>
-<text x="695" y="145" font-size="10" font-family="monospace">// 强引用</text>
-<text x="695" y="165" font-size="10" font-family="monospace">obj = null; // 解除引用</text>
+<text x="580" y="125" font-size="9" font-family="monospace">Object obj = </text>
+<text x="580" y="140" font-size="9" font-family="monospace">  new Object();</text>
+<text x="580" y="160" font-size="9" font-family="monospace">// 强引用</text>
+<text x="580" y="180" font-size="9" font-family="monospace">obj = null; // 解除</text>
+
+<!-- 软引用 -->
 <rect x="30" y="200" width="160" height="100" fill="#fff9c4" stroke="#f9a825" stroke-width="1"/>
 <text x="110" y="225" text-anchor="middle" font-size="14" font-weight="bold">软引用</text>
 <text x="110" y="245" text-anchor="middle" font-size="11">Soft</text>
 <text x="110" y="262" text-anchor="middle" font-size="11">Reference</text>
+
 <rect x="200" y="200" width="150" height="100" fill="#fffde7" stroke="#f9a825" stroke-width="1"/>
-<text x="275" y="225" font-size="11">内存不足时</text>
-<text x="275" y="242" font-size="11">才回收</text>
+<text x="210" y="225" font-size="11">内存不足时</text>
+<text x="210" y="242" font-size="11">才回收</text>
+
 <rect x="360" y="200" width="200" height="100" fill="#fffde7" stroke="#f9a825" stroke-width="1"/>
-<text x="460" y="225" font-size="11">缓存</text>
-<text x="460" y="242" font-size="10">内存敏感的缓存</text>
-<text x="460" y="257" font-size="10">图片缓存等</text>
+<text x="370" y="225" font-size="11">缓存</text>
+<text x="370" y="242" font-size="10">内存敏感的缓存</text>
+<text x="370" y="257" font-size="10">图片缓存等</text>
+
 <rect x="570" y="200" width="250" height="100" fill="#fffde7" stroke="#f9a825" stroke-width="1"/>
-<text x="695" y="220" font-size="9" font-family="monospace">SoftReference&lt;Object&gt; soft =</text>
-<text x="695" y="235" font-size="9" font-family="monospace">  new SoftReference&lt;&gt;(obj);</text>
-<text x="695" y="255" font-size="9" font-family="monospace">Object o = soft.get();</text>
-<text x="695" y="270" font-size="9" font-family="monospace">// OOM 前回收</text>
+<text x="580" y="220" font-size="9" font-family="monospace">SoftReference&lt;Obj&gt; s</text>
+<text x="580" y="235" font-size="9" font-family="monospace"> = new SoftRef...(o);</text>
+<text x="580" y="255" font-size="9" font-family="monospace">Object o = s.get();</text>
+<text x="580" y="275" font-size="9" font-family="monospace">// OOM 前回收</text>
+
+<!-- 弱引用 -->
 <rect x="30" y="300" width="160" height="100" fill="#e1bee7" stroke="#7b1fa2" stroke-width="1"/>
 <text x="110" y="325" text-anchor="middle" font-size="14" font-weight="bold">弱引用</text>
 <text x="110" y="345" text-anchor="middle" font-size="11">Weak</text>
 <text x="110" y="362" text-anchor="middle" font-size="11">Reference</text>
+
 <rect x="200" y="300" width="150" height="100" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1"/>
-<text x="275" y="325" font-size="11">下次 GC 时</text>
-<text x="275" y="342" font-size="11">一定回收</text>
+<text x="210" y="325" font-size="11">下次 GC 时</text>
+<text x="210" y="342" font-size="11">一定回收</text>
+
 <rect x="360" y="300" width="200" height="100" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1"/>
-<text x="460" y="325" font-size="11">短期缓存</text>
-<text x="460" y="342" font-size="10">ThreadLocalMap</text>
-<text x="460" y="357" font-size="10">WeakHashMap</text>
+<text x="370" y="325" font-size="11">短期缓存</text>
+<text x="370" y="342" font-size="10">ThreadLocalMap</text>
+<text x="370" y="357" font-size="10">WeakHashMap</text>
+
 <rect x="570" y="300" width="250" height="100" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1"/>
-<text x="695" y="320" font-size="9" font-family="monospace">WeakReference&lt;Object&gt; weak =</text>
-<text x="695" y="335" font-size="9" font-family="monospace">  new WeakReference&lt;&gt;(obj);</text>
-<text x="695" y="355" font-size="9" font-family="monospace">Object o = weak.get();</text>
-<text x="695" y="370" font-size="9" font-family="monospace">// 下次 GC 回收</text>
+<text x="580" y="320" font-size="9" font-family="monospace">WeakReference&lt;Obj&gt; w</text>
+<text x="580" y="335" font-size="9" font-family="monospace"> = new WeakRef...(o);</text>
+<text x="580" y="355" font-size="9" font-family="monospace">Object o = w.get();</text>
+<text x="580" y="375" font-size="9" font-family="monospace">// 下次 GC 回收</text>
+
+<!-- 虚引用 -->
 <rect x="30" y="400" width="160" height="100" fill="#ffccbc" stroke="#d84315" stroke-width="1"/>
 <text x="110" y="425" text-anchor="middle" font-size="14" font-weight="bold">虚引用</text>
 <text x="110" y="445" text-anchor="middle" font-size="11">Phantom</text>
 <text x="110" y="462" text-anchor="middle" font-size="11">Reference</text>
+
 <rect x="200" y="400" width="150" height="100" fill="#fbe9e7" stroke="#d84315" stroke-width="1"/>
-<text x="275" y="425" font-size="11">任何时候</text>
-<text x="275" y="442" font-size="11">都可能被回收</text>
-<text x="275" y="457" font-size="10">get() 永远返回 null</text>
+<text x="210" y="425" font-size="11">任何时候</text>
+<text x="210" y="442" font-size="11">都可能被回收</text>
+<text x="210" y="457" font-size="10">get() 返回 null</text>
+
 <rect x="360" y="400" width="200" height="100" fill="#fbe9e7" stroke="#d84315" stroke-width="1"/>
-<text x="460" y="425" font-size="11">跟踪对象回收</text>
-<text x="460" y="442" font-size="10">管理堆外内存</text>
-<text x="460" y="457" font-size="10">NIO DirectBuffer</text>
+<text x="370" y="425" font-size="11">跟踪对象回收</text>
+<text x="370" y="442" font-size="10">管理堆外内存</text>
+<text x="370" y="457" font-size="10">NIO DirectBuffer</text>
+
 <rect x="570" y="400" width="250" height="100" fill="#fbe9e7" stroke="#d84315" stroke-width="1"/>
-<text x="695" y="418" font-size="9" font-family="monospace">ReferenceQueue&lt;Object&gt; queue</text>
-<text x="695" y="433" font-size="9" font-family="monospace">  = new ReferenceQueue&lt;&gt;();</text>
-<text x="695" y="453" font-size="9" font-family="monospace">PhantomReference&lt;Object&gt; pr =</text>
-<text x="695" y="468" font-size="9" font-family="monospace">  new PhantomReference&lt;&gt;(obj, q);</text>
+<text x="580" y="418" font-size="8.5" font-family="monospace">ReferenceQueue&lt;Obj&gt; q</text>
+<text x="580" y="433" font-size="8.5" font-family="monospace"> = new RefQueue&lt;&gt;();</text>
+<text x="580" y="453" font-size="8.5" font-family="monospace">PhantomRef&lt;Obj&gt; p = </text>
+<text x="580" y="473" font-size="8.5" font-family="monospace"> new PhantomRef...(o,q);</text>
 </svg>
 
 **记忆技巧：强软弱虚**
