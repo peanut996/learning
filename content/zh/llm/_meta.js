@@ -11,5 +11,5 @@ export default {
   chapter10_future_trends: 'LLM的未来发展趋势',
   'llm-checkpoint': 'LLM检查点',
   'n8n-dify-research': 'n8n与Dify研究',
-  'effective-context-engineering-for-ai-agents': 'AI代理的有效上下文工程'
+  'effective-context-engineering-for-ai-agents': 'AI Agents 的 Context Engineering 实践指南'
 }
