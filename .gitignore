@@ -3,3 +3,4 @@ node_modules
 .next
 _pagefind/
 .vercel
+.DS_Store
