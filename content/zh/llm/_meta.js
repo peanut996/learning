@@ -10,5 +10,6 @@ export default {
   chapter09_evaluation: 'LLM的评估与基准测试',
   chapter10_future_trends: 'LLM的未来发展趋势',
   'llm-checkpoint': 'LLM检查点',
-  'n8n-dify-research': 'n8n与Dify研究'
+  'n8n-dify-research': 'n8n与Dify研究',
+  'effective-context-engineering-for-ai-agents': 'AI代理的有效上下文工程'
 }
