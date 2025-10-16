@@ -21,7 +21,8 @@
       "Bash(touch:*)",
       "Bash(mv:*)",
       "Bash(chmod:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []
